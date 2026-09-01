@@ -321,6 +321,37 @@ is hard because pollution control worked. Same 10 µg/L threshold, same
 recipe — the event became rare. Script: inline comparison of
 `data/hab_features_tidal.csv` (parent) and `data/narragansett_daily_features.csv`.
 
+
+## 16. Lift at LIS rarity, nine test years: dense sampling triples the lift
+
+Confirms §13's single-year lead with pooled rolling-origin CV (2015–2023),
+GB tier A, onset-only, t* per fold on val (POD ≥ 0.6), station-year clustered
+bootstrap. Thresholds chosen to bracket LIS's 0.046 base rate at h21:
+
+| threshold | h | base rate | precision | lift [95% CI] | top-decile lift | AUC | n_pos |
+|---|---|---|---|---|---|---|---|
+| 39 µg/L | 21 | 0.069 | 0.479 | **6.9 [5.3, 9.3]** | 6.5 | 0.909 | 1,541 |
+| 52.5 µg/L | 21 | 0.034 | 0.289 | **8.5 [6.0, 12.8]** | 7.9 | 0.956 | 768 |
+| LIS boat network | 21 | 0.046 | 0.136 | 2.7 | — | 0.875 | 48 |
+
+The single-year 16× (§13) was the high tail; the nine-year value is **~7–8×,
+lower CI bound 5.3–6.0, versus 2.7× for the LIS boat network**. The
+threshold-free top-decile lift agrees, so it is not a t* artefact. Precision
+at matched rarity is 0.29–0.48 here vs 0.14 in LIS (the single-year "0.139"
+match in §13 was 2023-specific); with pooled years, daily sampling does raise
+precision ~2–3× at LIS rarity as well.
+
+**What this changes in the thesis:** rarity still sets the *ceiling* on
+precision (no config at 3–7% base rate exceeds ~0.5), but dense sampling
+buys a large gain in *ranking* — roughly 3× the lift — at any rarity. The
+management translation: continuous sensors in LIS would not make alerts
+"mostly right," but would send the sampling boat to the right station about
+three times more efficiently than the current 21-day schedule.
+
+Caveats: base rate varies 0.009–0.064 across test years; per-fold POD swings
+because t* transfers poorly year to year; 768 positives at 52.5.
+`data/lift_at_rarity_cv.csv`, `src/models/experiments/lift_at_rarity_cv.py`.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).

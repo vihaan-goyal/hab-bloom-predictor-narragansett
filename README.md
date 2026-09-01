@@ -37,6 +37,11 @@ secondary:
   sampling — onset precision falls to **0.139, identical to LIS's 0.136**.
   Rarity alone reproduces the LIS ceiling (findings §13).
 
+**But dense sampling does buy ranking skill.** At LIS-level rarity, nine years
+of daily data give lift **7–8× [5.3–6.0 lower bound]** vs the boat network's
+2.7× (findings §16): sensors would not make LIS alerts mostly right, but
+would target sampling ~3× more efficiently.
+
 **Precision is a base-rate quantity.** On the fair axis, lift over
 climatology, the two bays are within ~1.5× of each other (2.0–2.5 vs
 2.7–3.0). The defensible conclusion: in a bloom-rare system like LIS no
