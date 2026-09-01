@@ -34,6 +34,8 @@ TIER_A = ['chl', 'chl_lag1', 'chl_lag2', 'chl_lag3', 'chl_lag4',
 TIER_B = TIER_A + ['chl_max', 'chl_std', 'chl_rate_1d', 'chl_accel',
                    'do_min', 'do_range', 'do_night_min', 'do_pct',
                    'ph', 'temp_range']
+TIER_C = TIER_B + ['strat_dens', 'strat_temp', 'strat_sal',
+                   'bot_do', 'bot_do_min']
 
 df = pd.read_csv("data/narragansett_daily_features.csv", parse_dates=["date"])
 df["year"] = df.date.dt.year
@@ -95,7 +97,8 @@ def fit_predict(features, model_name):
     return [r, ro]
 
 rows = []
-for tier, feats in (("A_LIS_analog", TIER_A), ("B_sonde_native", TIER_B)):
+for tier, feats in (("A_LIS_analog", TIER_A), ("B_sonde_native", TIER_B),
+                    ("C_stratification", [f for f in TIER_C if f in lab.columns])):
     for mn in ("LR", "GB"):
         for r in fit_predict(feats, mn):
             r["features"] = tier; rows.append(r)

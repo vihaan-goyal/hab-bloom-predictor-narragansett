@@ -103,3 +103,26 @@ Chapter 2 (Narragansett): same recipe, dense data → 0.72 onset precision;
 the ramp the model exploits is 3 days long — shorter than one LIS revisit
 gap. Replications (DO, no-PONR) show the biology transfers; the temperature
 divergence shows the two bays are genuinely different systems, not copies.
+
+
+## 6. Full-data update (2026-09-01, all 21 available years attempted)
+
+Ingested every RIDEM archive 2003-2023 (2003-04 remain unparsed -- third
+format, 34 files skipped): **4.52M readings, 18 stations, 2005-2023,
+42,315 station-days**, bottom-sonde coverage 22.8%. Train grew 14.6k -> 34.1k
+station-days; test 2023 unchanged. Results (GB, onset-only, clustered CIs):
+precision 0.696 [0.622, 0.778], POD 0.600 [0.452, 0.719], lift 2.00
+[1.50, 2.68], AUC 0.839 [0.780, 0.878] -- statistically identical to the
+9-year build. **Doubling the training data did not move the model.**
+
+Stratification (surface-minus-bottom density/temp/salinity + bottom DO,
+tier C) adds nothing: removing it costs 0.4pp precision; tier C == tier A
+within noise. pH removal actually *helps* (+1.3pp). The feature story is
+now tested against everything the network measures: chlorophyll history,
+salinity, and DO carry the signal; everything else is decoration.
+
+Group weights (GB onset, precision lost on removal): chl history -3.2pp,
+salinity -3.1pp, DO -2.3pp, month -1.7pp, current chl -1.4pp,
+climatology -1.0pp, chl rate/accel -1.0pp, temperature -0.7pp,
+stratification -0.4pp, pH +1.3pp (harmful). Full table:
+`data/narragansett_ablation.csv`.

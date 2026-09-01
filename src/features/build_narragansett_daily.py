@@ -34,6 +34,19 @@ day = df.groupby(["station", "date"]).agg(
     do_min=("do_mgl", "min"), do_range=("do_mgl", lambda s: s.max() - s.min()),
     do_pct=("do_pct", "mean"), ph=("ph", "mean"), n=("chl_ugl", "count"),
 ).reset_index()
+
+# bottom-sonde daily aggregates + stratification (present where a bottom
+# block was parsed; NaN elsewhere)
+if "bot_temp_c" in df.columns:
+    bot = df.groupby(["station", "date"]).agg(
+        bot_temp=("bot_temp_c", "mean"), bot_sal=("bot_salinity_psu", "mean"),
+        bot_do=("bot_do_mgl", "mean"), bot_do_min=("bot_do_mgl", "min"),
+        bot_dens=("bot_density_gcm3", "mean"), surf_dens=("density_gcm3", "mean"),
+    ).reset_index()
+    day = day.merge(bot, on=["station", "date"], how="left")
+    day["strat_dens"] = day["bot_dens"] - day["surf_dens"]
+    day["strat_temp"] = day["temp"] - day["bot_temp"]
+    day["strat_sal"] = day["bot_sal"] - day["sal"]
 ndo = night.groupby(["station", "date"])["do_mgl"].min().rename("do_night_min")
 day = day.merge(ndo, on=["station", "date"], how="left")
 day = day[day.n >= MIN_READINGS].sort_values(["station", "date"]).reset_index(drop=True)
