@@ -10,6 +10,8 @@ Two replicate, one diverges, one is newly possible.
 
 ## 1. DO conditioning replicates (cross-system result)
 
+*Figure: figures/nar_fig1_do_temp_conditioning.png*
+
 At elevated-but-subbloom chlorophyll (5–10 µg/L, n=7,047), the bloom
 probability by dissolved-oxygen tercile:
 
@@ -39,6 +41,8 @@ station-biased.
 
 ## 3. The bloom run-up is ~3 days (newly measurable)
 
+*Figure: figures/nar_fig2_epoch_composite.png*
+
 Superposed-epoch composite over 419 clean onsets (≥5 quiet days before
 first >10 day):
 
@@ -59,6 +63,8 @@ day −21 reflects prior bloom waves — blooms recur in trains.)
 
 ## 4. No point of no return (replicates)
 
+*Figure: figures/nar_fig3_escape_probability.png*
+
 P(reach >10 µg/L within 7 d) as a function of today's daily-mean chl:
 
 | chl bin | n | P |
@@ -76,6 +82,8 @@ threshold past which a bloom is committed. Even at chl 9–10, 29% of days do
 not proceed to bloom. Two systems, two sampling regimes, same shape.
 
 ## 5. Model results with clustered CIs (context)
+
+*Figure: figures/nar_fig4_precision_comparison.png*
 
 Station-clustered bootstrap (13 test clusters, n_boot=2000, seed=42),
 test 2023:
