@@ -59,6 +59,20 @@ The parent repo's honest LIS numbers for the same recipe: AUC 0.875, precision
 0.136 @ POD 0.875 (t*=0.35, h21). The fork exists to show the same recipe on
 dense data: the precision jump (0.14 → 0.72) is the monitoring-cadence effect.
 
+## Part II scripts (2026-09-01)
+
+| Script | Output |
+|---|---|
+| `src/models/rolling_origin_cv_nar.py` | `data/rolling_origin_cv_nar*.csv` — 9-fold CV, pooled CIs |
+| `src/models/experiments/onset_rule_baselines.py`, `_cv.py` | rule-vs-model paired bootstrap |
+| `src/models/experiments/horizon_sweep_nar.py` | `data/horizon_sweep_nar.csv`, fig5 |
+| `src/models/experiments/cadence_thinning.py` | `data/cadence_thinning.csv` (thesis test) |
+| `src/features/calibrate_sonde_chl.py` | `data/sonde_lab_calibration*.csv`, fig6 |
+| parent `src/models/experiments/lis_buoy_recipe.py` | parent `data/lis_buoy_recipe.csv` |
+
+Headline after Part II: pooled onset precision 0.656 [0.618, 0.692], lift 2.50.
+Cadence thesis: FAILED its pre-registered test; rarity dominates (findings §11–12).
+
 ## Experiment scripts
 
 One-off experiments that are not part of the main pipeline are archived in

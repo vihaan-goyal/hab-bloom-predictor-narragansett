@@ -11,21 +11,35 @@ the parent repo and in this repo's git history (branch point `8ae2e2a`).
 
 ---
 
-## The two-chapter thesis
+## The two-chapter thesis (revised 2026-09-01 after six pre-registered tests)
 
 **Chapter 1 (LIS, parent repo).** A regularized logistic regression forecasts
 chlorophyll exceedances (>10 µg/L within 21 d) in Long Island Sound with good
-ranking skill (AUC 0.875) but alert precision capped near 0.14, and cannot be
-tuned to clearly beat trivial baselines at basin level. Thirteen improvement
-attempts failed. The diagnosis: the median gap between samples (21 days)
-equals the forecast horizon — the monitoring cadence, not the model, is the
-binding constraint.
+ranking skill (AUC 0.875) but alert precision capped near 0.14. Thirteen
+improvement attempts failed.
 
-**Chapter 2 (this repo).** Test the diagnosis by moving the same recipe to a
-bay monitored 2,000× more frequently. Narragansett Bay's fixed-site network
-(RIDEM NBFSMN) samples every 15 minutes. If the LIS ceiling is really a
-cadence effect, the same model class on dense data should forecast bloom
-onsets with usable precision. It does.
+**Chapter 2 (this repo).** The same recipe on Narragansett Bay's 15-minute
+sonde network reaches **0.66 [0.62, 0.69] onset precision across nine test
+years** (rolling-origin CV) and beats every trivial rule with CIs excluding
+zero. It also measures what LIS could not: a ~3-day bloom run-up, and a
+smooth risk curve with no point of no return.
+
+**Why the gap — tested, not assumed.** The original hypothesis was that
+sampling cadence explains it. Three controlled tests say cadence is real but
+secondary:
+- Thinning Narragansett to one sample every 21 days cuts onset precision
+  0.86 → 0.52, not to 0.14 (pre-registered criterion failed).
+- LIS buoy fluorometers sampled every 15 minutes still give boat-level skill
+  (onset precision 0.16–0.18).
+- Sonde chlorophyll reads ~1.3–1.6× above lab chlorophyll (n=734 pairs), and
+  even at the calibrated threshold Narragansett blooms ~5× more often than LIS.
+
+**Precision is a base-rate quantity.** On the fair axis, lift over
+climatology, the two bays are within ~1.5× of each other (2.0–2.5 vs
+2.7–3.0). The defensible conclusion: in a bloom-rare system like LIS no
+cadence or model class produces high-precision alerts; the actionable
+quantity everywhere is a 2–3× lift over climatology. Full write-up with
+tables: [`notes/NARRAGANSETT_FINDINGS.md`](notes/NARRAGANSETT_FINDINGS.md).
 
 ## Data
 
@@ -56,7 +70,7 @@ Split: train ≤2020, val 2021–22, test 2023. Threshold chosen on val
 (max F1); exactly one test evaluation. Base rate and lift reported beside
 every precision.
 
-## Results (test 2023)
+## Results (single split, test 2023; pooled 9-year CV in the findings note §7)
 
 | Model | Features | AUC | POD | Precision | base rate | Lift |
 |---|---|---|---|---|---|---|
@@ -107,8 +121,8 @@ LIS precision ceiling.
 
 - Sonde chlorophyll is fluorescence-derived, not extracted chl-a (the LIS
   method); absolute values are not directly comparable across chapters.
-- No clustered-bootstrap CIs on the fork's numbers yet (LIS convention:
-  station-year clusters, n=2000) — run before quoting differences as findings.
+- Sonde chlorophyll ≈ 1.3–1.6× lab chlorophyll; the sonde-10 label is looser
+  than LIS's lab-10 (findings §10).
 - T-Wharf station unparsed; winter coverage limited to two stations.
 - Onset-only POD (0.58) means ~2 of 5 new blooms are still missed at the
   chosen threshold; the threshold sweep trades this against precision.
