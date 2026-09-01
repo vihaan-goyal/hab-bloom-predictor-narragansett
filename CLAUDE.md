@@ -26,8 +26,8 @@ python src/models/train_narragansett.py
 | File | Contents |
 |---|---|
 | `data/raw/narragansett/nbfsmnYY.zip` | RIDEM annual archives, 2015–2023 (downloaded from datadem.ri.gov) |
-| `data/narragansett_surface_15min.csv` | 2.35M readings, 15 stations, 2015–2023; station, datetime, temp_c, salinity_psu, do_pct, do_mgl, ph, chl_ugl |
-| `data/narragansett_daily_features.csv` | 22,851 station-days (≥48 chl readings/day), lags/rolls/climatology + sonde-native features + `bloom_fwd` |
+| `data/narragansett_surface_15min.csv` | 4.52M readings, 18 stations, 2005–2023; station, datetime, temp_c, salinity_psu, do_pct, do_mgl, ph, chl_ugl |
+| `data/narragansett_daily_features.csv` | 42,315 station-days (≥48 chl readings/day), lags/rolls/climatology + sonde-native features + `bloom_fwd` |
 | `data/narragansett_model_results.csv` | Final metrics table (test 2023) |
 | `data/narragansett_bloom_events.csv` | 380 bloom events 2021–23 with durations and ramp-up times (built in parent repo) |
 
@@ -56,8 +56,9 @@ All-days GB AUC 0.909. Tier B (sonde-native features) does not beat tier A.
 ## LIS cross-reference
 
 The parent repo's honest LIS numbers for the same recipe: AUC 0.875, precision
-0.136 @ POD 0.875 (t*=0.35, h21). The fork exists to show the same recipe on
-dense data: the precision jump (0.14 → 0.72) is the monitoring-cadence effect.
+0.136 @ POD 0.875 (t*=0.35, h21). The fork tests why the same recipe gives
+0.14 there and ~0.66 here. Answer (Part II): mostly event rarity, partly
+cadence, partly sonde calibration — NOT a pure cadence effect.
 
 ## Part II scripts (2026-09-01)
 

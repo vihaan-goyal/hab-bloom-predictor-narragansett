@@ -1,7 +1,7 @@
 # HAB Bloom Predictor — Narragansett Bay
 
-**What dense monitoring buys: the same bloom-forecasting recipe, moved from a
-21-day boat network to a 15-minute sonde network**
+**Same recipe, two bays: what actually limits bloom forecasting — sampling
+cadence, or how rare blooms are?**
 
 Vihaan Goyal, Westhill High School, Stamford, Connecticut
 
@@ -44,17 +44,18 @@ tables: [`notes/NARRAGANSETT_FINDINGS.md`](notes/NARRAGANSETT_FINDINGS.md).
 ## Data
 
 RIDEM Narragansett Bay Fixed-Site Monitoring Network, corrected (post-
-calibration) sonde files, 2015–2023: **2.35M readings, 15 stations**,
+calibration) sonde files, 2005–2023: **4.52M readings, 18 stations**,
 temp / salinity / DO / DO% / pH / chlorophyll fluorescence, aggregated to
-**22,851 station-days** (days with ≥48 chlorophyll readings). Most stations
+**42,315 station-days** (days with ≥48 chlorophyll readings; bottom-sonde
+coverage 23%). Most stations
 deploy May–November; two winter stations (B3w, B12w) cover the cold season.
 T-Wharf (F3) is not yet parsed (different NERRS export format).
 
 Measured bloom dynamics (2021–23 subset, 380 events, daily-mean chl >10 µg/L):
 
 - **Median bloom duration: 4 days (IQR 2–8).** The median bloom starts and
-  ends inside a single LIS revisit gap — the direct, measured justification
-  for Chapter 1's cadence claim.
+  ends inside a single LIS revisit gap. (Cadence matters — §11 shows it costs
+  ~0.3 precision — but it is not the main reason LIS precision is low.)
 - Ramp-up from <5 µg/L to >10 µg/L: median 14 d; 36% of blooms ramp in ≤7 d.
 - 31% of station-days exceed 10 µg/L (LIS test-era station-day rate: ~5%).
 
@@ -88,8 +89,9 @@ Three honest readings:
    from the LIS basin alert, reappearing on schedule.
 2. **The onset-only task is the real forecast** — days not currently blooming,
    where persistence cannot alert at all. There the model predicts new blooms
-   7 days ahead at **72% precision** (LIS: 14%). Same recipe, dense data:
-   the ~5× precision gain is the measured value of monitoring cadence.
+   7 days ahead at **72% precision** (LIS: 14%). The gap is mostly a base-rate
+   effect (blooms ~5× more frequent here), not a cadence effect — see the
+   thesis section and findings §10–12.
 3. **Sonde-native features add nothing** (tier B ≈ tier A everywhere). The
    LIS result that feature engineering doesn't move this system replicates in
    a second bay. The information is in the chlorophyll history; what varies
@@ -105,7 +107,7 @@ python src/models/train_narragansett.py            # models + baselines -> resul
 ```
 
 Raw zips: `https://datadem.ri.gov/documents/bart/nbfsmnYY.zip` (2003–2023
-available; 2015–2023 used here). `data/` is gitignored throughout.
+available; 2005–2023 parsed, 2003–04 format unsupported). `data/` is gitignored throughout.
 
 ## Findings
 
@@ -114,8 +116,7 @@ superposed-epoch composites, point-of-no-return, seasonality) is written up
 with tables in [`notes/NARRAGANSETT_FINDINGS.md`](notes/NARRAGANSETT_FINDINGS.md).
 Headlines: DO conditioning and "no point of no return" replicate across both
 bays; temperature dependence does not (LIS flat, Narragansett strong); and
-the measured bloom run-up is **~3 days** — the direct mechanism behind the
-LIS precision ceiling.
+the measured bloom run-up is **~3 days**, shorter than one LIS revisit gap.
 
 ## Known limitations / open items
 
