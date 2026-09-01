@@ -93,6 +93,16 @@ python src/models/train_narragansett.py            # models + baselines -> resul
 Raw zips: `https://datadem.ri.gov/documents/bart/nbfsmnYY.zip` (2003–2023
 available; 2015–2023 used here). `data/` is gitignored throughout.
 
+## Findings
+
+The full replication of the LIS analysis suite (DO/temp conditioning,
+superposed-epoch composites, point-of-no-return, seasonality) is written up
+with tables in [`notes/NARRAGANSETT_FINDINGS.md`](notes/NARRAGANSETT_FINDINGS.md).
+Headlines: DO conditioning and "no point of no return" replicate across both
+bays; temperature dependence does not (LIS flat, Narragansett strong); and
+the measured bloom run-up is **~3 days** — the direct mechanism behind the
+LIS precision ceiling.
+
 ## Known limitations / open items
 
 - Sonde chlorophyll is fluorescence-derived, not extracted chl-a (the LIS
