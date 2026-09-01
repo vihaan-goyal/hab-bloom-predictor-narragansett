@@ -234,6 +234,43 @@ it reproduces the boat network's (0.14 / 2.7×). Caveats are severe
 with §11. Parent repo: `data/lis_buoy_recipe.csv`. The parent note
 `PRECISION_PUSH_TRACKER.md` claimed "no buoy chlorophyll exists" — corrected.
 
+
+## 13. The decisive test: Narragansett at LIS rarity
+
+Re-threshold the Narragansett label so the train-period all-days positive
+rate at h21 matches LIS (5%): that requires **chl > 52.5 µg/L** (10% → 39.0).
+Same features, same models, daily (k=1) sampling, test 2023 onset-only:
+
+| threshold | base rate (2023) | GB precision | GB lift | AUC | n_pos |
+|---|---|---|---|---|---|
+| 10 µg/L (original) | 0.64 | 0.86 | 1.3 | 0.87 | ~1,000 |
+| 39.0 (10% rarity) | 0.073 | 0.48 | 6.6 | 0.85 | 177 |
+| **52.5 (LIS 5% rarity)** | 0.009 | **0.139** | 16.3 | 0.97 | 21 |
+| LIS boat network (reference) | 0.046 | 0.136 | 2.7 | 0.875 | 48 |
+
+**With daily data, at LIS-level rarity, precision is 0.139 — identical to
+LIS's 0.136.** Rarity alone moves precision 0.86 → 0.14. Thinning to 21 days
+at matched rarity is not estimable (the 2023 test has < 1 expected positive),
+so cadence cannot be isolated at that rarity; from §11, its effect at the
+original threshold is 0.86 → 0.52.
+
+Two honest notes. (1) Lift at matched rarity is far higher with daily data
+(16× vs 2.7×) — dense sampling may buy ranking skill even where precision
+stays flat — but with 21 positives that number is unstable and the 2023
+base rate (0.009) undershoots the 0.05 target because 2023 was a quiet year.
+(2) The threshold that reproduces LIS rarity in sonde units (52.5) is ~3–4×
+the calibrated lab-10 equivalent (§10): Narragansett is a genuinely bloomier
+system, not merely a miscalibrated one. `data/cadence_thinning_matched.csv`.
+
+### Revised thesis, final form
+
+**Precision is set by rarity.** The same recipe gives 0.14 precision in LIS
+and 0.14 in Narragansett once the label is made equally rare. Everything
+else — cadence (−0.3 at boat spacing), calibration (sonde ≈ 1.3–1.6× lab),
+model class, feature engineering — is second-order. The quantity that
+transfers between systems is lift over climatology, and a dense network
+appears to raise lift substantially even when precision cannot move.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).

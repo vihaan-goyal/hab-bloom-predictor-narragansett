@@ -33,6 +33,9 @@ secondary:
   (onset precision 0.16–0.18).
 - Sonde chlorophyll reads ~1.3–1.6× above lab chlorophyll (n=734 pairs), and
   even at the calibrated threshold Narragansett blooms ~5× more often than LIS.
+- **Decisive:** re-threshold Narragansett to LIS's 5% rarity and keep daily
+  sampling — onset precision falls to **0.139, identical to LIS's 0.136**.
+  Rarity alone reproduces the LIS ceiling (findings §13).
 
 **Precision is a base-rate quantity.** On the fair axis, lift over
 climatology, the two bays are within ~1.5× of each other (2.0–2.5 vs
