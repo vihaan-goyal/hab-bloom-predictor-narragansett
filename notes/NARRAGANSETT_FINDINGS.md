@@ -271,6 +271,33 @@ model class, feature engineering — is second-order. The quantity that
 transfers between systems is lift over climatology, and a dense network
 appears to raise lift substantially even when precision cannot move.
 
+
+## 14. Pre-registered tuning search: nothing beats the reference at a fixed bloom definition
+
+360 configurations (horizon 2–10 d × threshold 10/12.8/20 µg/L × tier A/B ×
+12 model settings), scored on validation only, one test evaluation, 30-shuffle
+permutation null. Fixed rule: maximise val onset lift subject to POD ≥ 0.6.
+
+- The rule selected the **rarest** label in the grid (h=2, T=20, base 3–5%):
+  val lift 9.8, test lift 7.8 [5.2, 14.3] but test **precision 0.405** and
+  POD 0.53 — 100 false alarms per 68 hits. Real, not chance (100th percentile
+  of the null) — and useless as an "improvement": lift = precision/base rate,
+  so a lift-maximising search simply hunts rarity. This is the base-rate trap
+  in its purest form and is the reason lift must always be quoted with its
+  base rate.
+- **At the fixed definition (h=7, T=10) the pre-registered grid's best is the
+  existing reference model** (GB depth 3 / leaf 50, tier A). Tier B and
+  hyperparameters change nothing material at any horizon.
+- The useful output is the landscape: at fixed POD≈0.6, lead time trades
+  against precision — h2 0.32 / h5 0.36 / h7 0.41 / h10 0.45 at T=20; at
+  T=10, h7 precision 0.70 is the best precision-per-lead-time cell.
+- A 2-day, >20 µg/L alert (AUC 0.93, precision ~0.40) is a legitimate
+  *different product* (imminent-dense-bloom warning), not a tuned version of
+  the 7-day one.
+
+Files: `data/tuning_search_nar_{grid,selected,null}.csv`,
+`src/models/experiments/tuning_search_nar.py`.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
