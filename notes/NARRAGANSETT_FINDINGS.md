@@ -298,6 +298,29 @@ permutation null. Fixed rule: maximise val onset lift subject to POD ≥ 0.6.
 Files: `data/tuning_search_nar_{grid,selected,null}.csv`,
 `src/models/experiments/tuning_search_nar.py`.
 
+
+## 15. Why LIS is bloom-rare: the 2014 cliff
+
+Share of station-days with chlorophyll > 10 µg/L (LIS: lab bottle samples;
+Narragansett: sonde daily mean, with the lab-calibrated 12.8 equivalent):
+
+| period | LIS | Narragansett (sonde >10) | Narragansett (>12.8) |
+|---|---|---|---|
+| 2005–2013 | 0.14–0.59 (mean ~0.38) | 0.27–0.43 | 0.18–0.31 |
+| **2014** | **0.09** | 0.36 | 0.26 |
+| 2015–2023 | **0.06** (0.03–0.11) | 0.34 | 0.23 |
+
+Before 2014 LIS was as bloomy as Narragansett — in 2009–2013 bloomier
+(0.42–0.59). It fell to 0.09 in 2014, the year the Clean Water Act nitrogen
+TMDL for the Sound was met, and has stayed at 0.03–0.11 since. Narragansett,
+with no comparable intervention, held flat throughout: it is effectively the
+control for LIS's cleanup. Today's gap is 5.6× (raw) / 3.8× (calibrated).
+
+This is the origin of the rarity that caps LIS precision (§13): the forecast
+is hard because pollution control worked. Same 10 µg/L threshold, same
+recipe — the event became rare. Script: inline comparison of
+`data/hab_features_tidal.csv` (parent) and `data/narragansett_daily_features.csv`.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
