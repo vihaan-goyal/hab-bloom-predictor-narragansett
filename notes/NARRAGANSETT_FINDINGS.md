@@ -402,6 +402,9 @@ Rolling-origin CV predictions, LIS, 2015–2025 (`parent data/cv_predictions.csv
 | 0.70 | 103 | 21% |
 | 0.60 | 208 | 14% |
 
+Plain answer to "did the 90%+ days actually bloom?": mostly no — 7 of 12
+did (58%); far above the ~5% background, far below the printed 90%.
+
 Ranking is monotonic (higher score → more blooms) but the model is
 **overconfident at the top**: a "0.9" is empirically ~0.6. Cause: balanced
 class weights inflate scores for a rare event; the isotonic/Platt fix was
