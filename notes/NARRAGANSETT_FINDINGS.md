@@ -352,6 +352,44 @@ Caveats: base rate varies 0.009–0.064 across test years; per-fold POD swings
 because t* transfers poorly year to year; 768 positives at 52.5.
 `data/lift_at_rarity_cv.csv`, `src/models/experiments/lift_at_rarity_cv.py`.
 
+
+## 17. Model probability 21 days before each bloom, both bays
+
+*Figure: figures/nar_fig8_prob_21d_before.png.* Out-of-sample: LIS locked LR
+(h21, train ≤2019, onsets 2020–25); Narragansett GB tier A trained on a
+21-day label (train ≤2020, onsets 2021–23). Null = non-bloom days at the
+same stations/years.
+
+| | LIS (nearest visit ~21 d before, n=91) | Narragansett (day −21, n=157) |
+|---|---|---|
+| median p before a bloom | **0.46** [0.30, 0.61] | **0.85** [0.53, 0.97] |
+| median p, all null days | 0.20 | 0.08 |
+| median p, station+month-matched null | 0.40 | 0.54 |
+| onsets above t* | 68% (0.35) | 76% (0.50) |
+| AUC onset-vs-null at −21 | 0.77 | 0.89 |
+
+Narragansett approach curve (median p21 at −21/−14/−7/−3/−1): 0.85 / 0.86 /
+0.83 / 0.81 / 0.89 for onsets, ~0.07 for null — **flat**. At a 21-day
+horizon the model reports a persistent high-risk *state*, not an approaching
+event; the approach signal is in the 7-day model (§ case study, fig 7).
+
+Why the pre-bloom probabilities are not in the 90s: (1) a calibrated
+probability equals the observed hit rate — in LIS a 21-day alert is right
+~1 time in 7 at its threshold, so a well-calibrated model *should* sit near
+0.3–0.6 before real blooms, not 0.95; a model saying 0.95 there would be
+overconfident. (2) Class-balanced training pushes outputs toward 0.5 in the
+ambiguous middle. (3) Most of the 21-day-ahead signal is seasonal: against
+station+month-matched nulls the gap narrows to 0.46 vs 0.40 (LIS) and
+0.85 vs 0.54 (Narragansett). (4) Irreducible weather: whether an elevated
+day tips into a bloom depends on wind, light and rain that have not happened
+yet. (5) Narragansett's 0.85 is inflated by 40% of onsets having a fading
+prior bloom on day −21; open-bay F7 onsets score ~0.1.
+
+Files: `data/prob_before_onset_nar.csv` (+ `_null`, `_trajectory`),
+`src/models/experiments/prob_before_onset.py`, `fig_prob_21d_before.py`;
+parent `src/models/experiments/prob_before_onset_lis.py`,
+`data/prob_before_onset_lis.csv`.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
