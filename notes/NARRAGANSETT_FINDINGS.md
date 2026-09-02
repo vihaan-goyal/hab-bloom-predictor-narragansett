@@ -390,6 +390,26 @@ Files: `data/prob_before_onset_nar.csv` (+ `_null`, `_trajectory`),
 parent `src/models/experiments/prob_before_onset_lis.py`,
 `data/prob_before_onset_lis.csv`.
 
+
+### 17b. Are the high-probability days real? (calibration check, LIS)
+
+Rolling-origin CV predictions, LIS, 2015–2025 (`parent data/cv_predictions.csv`):
+
+| model said ≥ | days | bloomed within 21 d |
+|---|---|---|
+| 0.90 | 12 | 58% |
+| 0.80 | 41 | 32% |
+| 0.70 | 103 | 21% |
+| 0.60 | 208 | 14% |
+
+Ranking is monotonic (higher score → more blooms) but the model is
+**overconfident at the top**: a "0.9" is empirically ~0.6. Cause: balanced
+class weights inflate scores for a rare event; the isotonic/Platt fix was
+tried and rejected (too few positives). The ten most confident LIS days are
+all western-Narrows stations (A4, B3, 15) in February — the winter diatom
+regime — and 7 of 10 bloomed. Report lift and ranking skill, not raw
+probabilities, and say so.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
