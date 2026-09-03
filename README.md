@@ -105,6 +105,28 @@ Three honest readings:
    a second bay. The information is in the chlorophyll history; what varies
    is how often you sample it.
 
+## Use the model on your own water body
+
+Two files, no training, no Narragansett data: `predict_anywhere.py` and
+`release/narragansett_bloom_model.joblib` (122 kB). Needs pandas, numpy,
+scikit-learn, joblib.
+
+```bash
+python predict_anywhere.py readings.csv                      # any cadence
+python predict_anywhere.py readings.csv --date 2018-08-15    # report one day
+python predict_anywhere.py daily_means.csv --min-readings 1  # daily data
+```
+
+`readings.csv` columns: `station, datetime, chl` (required), `temp, sal, do`
+(optional; lakes use sal = 0). Chlorophyll can be in any fluorometer units:
+the script quantile-rescales it onto the training scale, which is what makes
+transfer work (findings §19). Output: `bloom_predictions.csv` with a
+probability and alert per station-day, plus a table for the latest day.
+
+Tested on six other systems (Chesapeake, NERRS reserves, UK shelf, Australia,
+Lake Erie, SF Bay): the exported model matches a locally trained one at most
+sites, lift 1.3–2.5× over always-alert, AUC 0.60–0.86 (findings §19–20).
+
 ## Reproduce
 
 ```bash
