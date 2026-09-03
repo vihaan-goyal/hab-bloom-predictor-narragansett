@@ -322,6 +322,16 @@ recipe — the event became rare. Script: inline comparison of
 `data/hab_features_tidal.csv` (parent) and `data/narragansett_daily_features.csv`.
 
 
+**Caveat added 2026-09-03 (nitrogen).** Narragansett Bay's own nitrogen load
+fell by more than half after 2006 as Rhode Island treatment plants added
+nitrogen removal (Wikipedia, citing Oviatt et al.), yet the sonde exceedance
+rate in this dataset is flat at 0.27–0.43 from 2005 to 2023. A comparable
+nitrogen cut next door produced no cliff in the same kind of data. That does
+not disprove the TMDL reading of the LIS 2014 step, but it means the step is
+either a much sharper ecological response or partly a measurement change. The
+question is in the draft email to CT DEEP / UConn (parent
+`notes/EMAIL_DRAFT_2014_CLIFF.md`).
+
 ## 16. Lift at LIS rarity, nine test years: dense sampling triples the lift
 
 Confirms §13's single-year lead with pooled rolling-origin CV (2015–2023),
@@ -456,6 +466,49 @@ alerts; four bloomed (F5, F4, B12, B3), two false alarms (B14, B2), one miss
 line with the 2.0× [1.5, 2.7] test-year estimate (§3). F4 alerting at chl 1.7
 and blooming is the "history is everything" result in one row: the 21-day
 history and station climatology carry the signal, not today's value.
+
+## 19. Cross-site transfer: does the Narragansett model work elsewhere? (2026-09-03, running)
+
+Harness: `src/transfer/transfer_eval.py`. For each new site: build the same
+tier-A station-day features from that site's sub-daily sondes; label = bloom
+within 7 d, two definitions (p75 = the station's own 75th percentile of daily
+chl, the fair one because fluorometers are not inter-comparable; abs10 = 10
+µg/L where units allow); onset-only rows (today ≤ threshold). Three tests:
+**zero-shot raw** (Narragansett GB applied as-is), **zero-shot rescaled**
+(target chl columns quantile-mapped onto the Narragansett chl distribution
+first), **refit** (GB/LR retrained on the target, rolling-origin CV). Baselines:
+always-alert, station-DOY climatology, chl>c rule with c chosen on the val
+year. Station-year clustered bootstrap CIs. Fetch scripts:
+`src/transfer/fetch_<site>.py`; data under `data/transfer/` (gitignored).
+
+**Onset-only, p75 label. Lift = precision / base rate.**
+
+| Site | Data | Zero-shot rescaled: prec / lift [CI] / AUC | chl>c rule: lift [CI] / AUC | Refit GB: lift [CI] / AUC |
+|---|---|---|---|---|
+| Western Lake Erie (NOAA GLERL, freshwater cyanobacteria) | 4 buoys, 2014–18, May–Oct, 15-min, 1,605 onset rows | 0.70 / **1.96 [1.56, 2.42]** / 0.67 | 1.45 [1.23, 1.70] / 0.63 | 1.07 [1.00, 1.22] / 0.55 (2018 fold only) |
+| Celtic Sea shelf (Cefas SmartBuoy, UK) | 2 moorings, 2014–15, 30-min, 663 onset rows (below harness floor; pilot) | 0.45 / 2.8 [1.6, 5.9] / **0.88** | 6.4 [4.3, 9.8] / 0.73 (2015 only, 4 clusters) | not testable (2 years) |
+
+Readings so far:
+
+1. **Raw zero-shot fails everywhere; rescaled zero-shot works.** Applied to
+   raw values the Narragansett model never alerts (Lake Erie median chl 3,
+   Celtic Sea ~1 a.u., vs Narragansett ~8 µg/L). After quantile-mapping the
+   chlorophyll scale it ranks bloom risk at AUC 0.67 (lake) and 0.88 (shelf
+   sea) with no retraining. What transfers is the *shape* of the chlorophyll
+   trajectory before a bloom, not the units.
+2. **Lake Erie: the transferred model beats the best simple rule** with
+   non-overlapping CIs (1.96 vs 1.45). The refit is weaker because only 2018
+   qualifies as a test year.
+3. **Celtic Sea: the transferred model ranks well but a threshold rule is more
+   precise** (0.86 vs 0.45), because that regime has one large spring bloom a
+   year and persistence is strong. Two stations, two years, so a pilot only;
+   the multi-year Liverpool Bay / Gabbard archive needs a free WaveNet login.
+4. Caveats: Lake Erie salinity is a constant 0 (five dead features), buoys are
+   summer-only, and fluorescence is total phytoplankton, not the toxin-forming
+   cyanobacteria. Cefas chlorophyll is bead-standardised fluorescence, never
+   calibrated to extracted chl-a, so abs10 is void there.
+
+(Chesapeake Bay, NERRS reserves, IMOS Australia, San Francisco Bay: pending.)
 
 ## Revised thesis (supersedes the "Presentation framing" above)
 
