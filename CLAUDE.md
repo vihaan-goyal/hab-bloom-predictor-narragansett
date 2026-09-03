@@ -70,6 +70,8 @@ cadence, partly sonde calibration — NOT a pure cadence effect.
 | `src/models/experiments/cadence_thinning.py` | `data/cadence_thinning.csv` (thesis test) |
 | `src/features/calibrate_sonde_chl.py` | `data/sonde_lab_calibration*.csv`, fig6 |
 | parent `src/models/experiments/lis_buoy_recipe.py` | parent `data/lis_buoy_recipe.csv` |
+| `src/transfer/transfer_eval.py`, `fetch_<site>.py`, `pooled_model_test.py`, `regime_models.py` | `data/transfer/*` — cross-site transfer (findings §19–22) |
+| `predict_anywhere.py` + `release/narragansett_bloom_model.joblib` | frozen model for any site (findings §21) |
 | `src/deploy/daily_inference_nar.py --date YYYY-MM-DD` | `data/narragansett_daily_predictions.csv` — per-date station probabilities (findings §18) |
 
 Headline after Part II: pooled onset precision 0.656 [0.618, 0.692], lift 2.50.

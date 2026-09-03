@@ -597,6 +597,63 @@ weeks apart lands at AUC 0.77 vs 0.875 for the model trained on LIS. Same
 asymmetry as §20. Guidance in the README: use it where you have daily sondes;
 if you have years of local data, refit.
 
+## 22. Pre-registered test: do water-type ("regime") models beat the single Narragansett model? No. (2026-09-03)
+
+Hypothesis (user's): the two transfer failures (Chesapeake, SF Delta) are
+tidal-fresh, so a library of models trained per water regime, with a new site
+self-routed by its own salinity, should close the gap. `src/transfer/regime_models.py`,
+fig 9 `figures/nar_fig9_regime_loso.png`.
+
+**Design, fixed before running.** Regime per station from its median salinity:
+fresh < 0.5 PSU (Chesapeake 9, NERRS 4, SF Delta 6 stations; 46k station-days),
+estuarine 0.5–30 (Chesapeake 15, Narragansett 17, NERRS 12, SF 2; 94k), marine
+≥ 30 (Cefas 7, IMOS 7, NERRS 5, Narragansett 1; 45k), lake = Lake Erie (report
+only). Label own-station p75 within 7 d, onset rows, chl quantile-mapped to the
+Narragansett scale. Leave-one-site-out (site = source × regime, 12 sites):
+each held-out site scored by (1) a GB trained on the other sites of its regime,
+(2) the frozen Narragansett model, (3) a GB trained on every other site
+regardless of regime (controls for data volume), (4) a local rolling-origin
+refit (upper bound). Threshold per model chosen on the site's first year.
+Criterion: regime wins if pooled regime lift beats Narragansett with disjoint
+95% CIs **and** beats all-sites pooled.
+
+**Pooled over held-out sites (Narragansett's own in-sample rows excluded):**
+
+| Model | Sites | Onset rows | Precision | POD | Lift [CI] | AUC |
+|---|---|---|---|---|---|---|
+| Regime model | 11 | 131,694 | 0.37 | 0.67 | 1.36 [1.32, 1.40] | 0.68 |
+| All sites pooled | 12 | 133,079 | 0.37 | 0.71 | 1.37 [1.33, 1.42] | 0.67 |
+| **Narragansett zero-shot** | 10 | 102,146 | 0.38 | 0.43 | **1.45 [1.37, 1.54]** | 0.66 |
+| Local refit | 12 | 116,321 | 0.48 | 0.66 | 1.73 [1.67, 1.80] | 0.76 |
+
+**Verdict: pre-registered criterion not met.** The regime model is *below* the
+single Narragansett model, and indistinguishable from the all-sites model, so
+whatever it has comes from data volume, not water type.
+
+By regime (lift, regime / Narragansett / all-sites / local refit):
+fresh 1.11 / 1.48 / 1.43 / 1.87; estuarine 1.40 / 1.23 / 1.23 / 1.64;
+marine 1.62 / 1.78 / 1.81 / 1.83. Per site the pattern is the same: the regime
+model ties Narragansett at Chesapeake-fresh (1.29 vs 1.24) and NERRS-fresh
+(1.24 vs 1.13), collapses at SF Delta (1.05 vs 2.38: Chesapeake creeks teach
+nothing about the Delta), and loses on both shelf seas (UK 1.85 vs 2.31,
+Australia 1.72 vs 2.12) despite being trained on shelf seas. The only regime
+where it edges ahead is estuarine, and there the local refit is far better.
+
+**Reading.** What the Narragansett model learned is the *shape* of a bloom's
+run-up, and that shape does not sort by salinity. Sites differ in how strong
+the signal is (base rate, event size), not in what it looks like. A library of
+water-type models is not worth building; the useful hierarchy is two-level:
+the exported Narragansett model everywhere, replaced by a local refit where
+≥3 years of local sondes exist (fresh/estuarine gain 0.3–0.5 lift; marine
+gains nothing). Per the plan, nothing was wired into `predict_anywhere.py`.
+
+Caveats: regimes defined by salinity alone; Chesapeake, NERRS, SF and
+Narragansett each contribute to two regimes, so "leave-one-site-out" still
+shares a data provider across the split; lake untested (one site); threshold
+calibration on the first year gives the Narragansett model an unusually low
+POD (0.43) at the pooled level, so its lift is a precision-heavy operating
+point rather than a different ranking (AUCs are within 0.02).
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
