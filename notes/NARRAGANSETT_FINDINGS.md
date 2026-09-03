@@ -490,7 +490,7 @@ year. Station-year clustered bootstrap CIs. Fetch scripts:
 | UK shelf seas (Cefas SmartBuoy, 7 moorings) | 2002–26, 30-min, 11,908 onset rows | 2.54 [2.33, 2.80] / **0.86** | 2.85 [2.57, 3.18] / 0.73 | 2.90 [2.59, 3.25] / 0.86 | 1.87 |
 | Australian coast (IMOS NRS, 7 moorings) | 2008–26, hourly, 13,104 onset rows | 1.39 [1.31, 1.49] / 0.68 | 1.35 [1.23, 1.50] / 0.61 | 1.48 [1.37, 1.61] / 0.69 | 1.27 |
 | Western Lake Erie (NOAA GLERL, freshwater) | 4 buoys, 2014–18, May–Oct, 1,605 onset rows | **1.96 [1.56, 2.42]** / 0.67 | 1.45 [1.23, 1.70] / 0.63 | 1.07 [1.00, 1.22] / 0.55 (2018 only) | 0.92 |
-| San Francisco Bay (USGS) | pending | | | | |
+| San Francisco Bay / Suisun–Delta (USGS NWIS) | 8 sondes, 2013–25, 15-min, 15,481 onset rows | 1.51 [1.15, 2.12] / 0.66 | 1.90 [1.51, 2.45] / 0.63 | **2.36 [2.00, 2.87]** / 0.73 | 1.36 |
 
 **Precision and AUC, onset-only, p75 label** (precision tracks base rate,
 which is why lift is the fair axis; AUC is where the model separates from the
@@ -504,6 +504,7 @@ rule):
 | UK shelf (Cefas) | 0.17 | 0.43 / 0.86 | 0.49 / 0.73 | 0.49 / 0.86 |
 | Australia (IMOS) | 0.31 | 0.43 / 0.68 | 0.42 / 0.61 | 0.47 / 0.69 |
 | Lake Erie | 0.36 | 0.70 / 0.67 | 0.47 / 0.63 | 0.63 / 0.55 |
+| SF Bay / Suisun–Delta | 0.17 | 0.25 / 0.66 | 0.32 / 0.63 | 0.39 / 0.73 |
 
 **Which is "best":** UK shelf for ranking (AUC 0.86 with no retraining, other
 continent, other instrument); Lake Erie for the only clean beat-the-baseline
@@ -521,9 +522,10 @@ Readings:
    the shape of the chlorophyll trajectory before a bloom, not the units.
 2. **Rescaled zero-shot ≈ local refit almost everywhere.** In the NERRS
    reserves, Australia and the UK the transferred model is within CI of a
-   model trained on that site's own data. Only Chesapeake shows a clear refit
-   gain (1.55 vs 1.34), and Chesapeake is 24 very different sites (tidal-fresh
-   to 29 PSU, medians 3–58 µg/L) pooled together.
+   model trained on that site's own data. Chesapeake (1.55 vs 1.34) and the SF Bay Suisun–Delta reach (2.36 vs 1.51)
+   show a clear refit gain; both pool tidal-fresh sites (6 of 8 SF stations are
+   ~0.1 PSU) where the salinity features carry nothing and the low-chl regime
+   (SF median 2.3 µg/L) sits at the bottom of the Narragansett scale.
 3. **But nobody beats the simple rule by much.** The chl>c rule sits within CI
    of the models at every estuarine and open-coast site. Lake Erie is the one
    place the transferred model clearly beats it (1.96 vs 1.45, CIs disjoint).
@@ -540,14 +542,15 @@ summer-only; UK and Australian chlorophyll are bead-standardised fluorescence
 never calibrated to extracted chl-a (abs10 is void there); five Australian
 sites measure at 20 m, not the surface; NERRS chlorophyll from the open bulk
 archive exists only 2008–2011 except Kachemak Bay AK; Chesapeake pools
-tidal-fresh and brackish sites. UK data via the SmartBuoy portal export
+tidal-fresh and brackish sites; "SF Bay" is the Suisun Bay / tidal Delta arm
+(bay-proper bridge sites have chl only from 2023-09), mostly freshwater. UK data via the SmartBuoy portal export
 (free login) rather than the Data Hub API used for the §19 pilot.
 
 ## 20. Reverse transfer: a model trained on five other systems, tested blind on Narragansett (2026-09-03)
 
 `src/transfer/pooled_model_test.py`. One GB model trained on the pooled
 station-days of Chesapeake, the NERRS reserves, the UK shelf, Australia and
-Lake Erie (123,820 rows; each site's chl quantile-mapped to the Narragansett
+Lake Erie and SF Bay (144,475 rows; each site's chl quantile-mapped to the Narragansett
 scale; label = own-station p75 within 7 d). It never sees a Narragansett row.
 Scored on Narragansett test 2023 exactly like the reference model (onset-only,
 chl > 10 within 7 d; t* chosen on the 2021–22 val years, threshold only).
@@ -555,12 +558,12 @@ chl > 10 within 7 d; t* chosen on the 2021–22 val years, threshold only).
 | Model | Precision [CI] | POD | Lift [CI] | AUC |
 |---|---|---|---|---|
 | Narragansett-trained GB (reference) | 0.70 | 0.60 | 2.00 | 0.84 |
-| Pooled foreign model, blind | 0.55 [0.47, 0.63] | 0.66 | 1.60 [1.29, 2.00] | 0.76 |
-| Pooled foreign minus Chesapeake | 0.57 [0.48, 0.67] | 0.62 | 1.65 [1.35, 2.05] | 0.76 |
+| Pooled foreign model, blind | 0.57 [0.49, 0.65] | 0.65 | 1.64 [1.31, 2.10] | 0.76 |
+| Pooled foreign minus Chesapeake | 0.60 [0.52, 0.68] | 0.57 | 1.73 [1.37, 2.20] | 0.77 |
 | Always alert | 0.35 | 1.00 | 1.00 | 0.50 |
 
 **Reading.** The universal-model claim does not hold. A model that has seen
-124k station-days from two continents and a lake, but never Narragansett,
+144k station-days from six systems on two continents, but never Narragansett,
 gets about 80% of the way there (AUC 0.76 vs 0.84, lift 1.6 vs 2.0) and its
 lift CI just touches the reference. Dropping Chesapeake, the worst-transferring
 site, changes nothing. So the transfer is asymmetric: Narragansett → elsewhere
@@ -571,6 +574,28 @@ base rate, real 3-day run-ups) while the foreign "blooms" are mostly
 precursor signature. The honest one-liner: **the precursor signature is
 general enough to export, not general enough to replace local data where
 blooms are strong.**
+
+## 21. Packaged model: `predict_anywhere.py` (2026-09-03)
+
+`predict_anywhere.py` + `release/narragansett_bloom_model.joblib` (122 kB;
+GB tier A trained on all 42,207 Narragansett station-days) let anyone score
+their own sondes: input `station, datetime, chl[, temp, sal, do]` at any
+cadence, output a 7-day bloom probability and alert per station-day, with the
+chlorophyll quantile-rescaled to the training scale (`src/deploy/export_model.py`
+builds the release file). Verification:
+
+| Test | CLI | Reference |
+|---|---|---|
+| Lake Erie, all seasons, onset p75 | prec 0.693, lift 1.96, AUC 0.666 | harness §19: 0.695, 1.96, 0.667 |
+| SF Bay, end-to-end, onset p75 | prec 0.251, lift 1.51, AUC 0.655 | harness §19: 0.251, 1.51, 0.655 |
+| Narragansett 2023, no rescale | prec 0.81, lift 2.31, AUC 0.875 | held-out reference 0.70, 2.00, 0.84 (CLI model saw 2023: in-sample, expected higher) |
+| LIS 2023–25 boat visits, 21-d label | prec 0.08, lift 1.6–1.9, AUC 0.77 | LIS locked model 0.14, 2.7, 0.875 |
+
+The packaged pipeline reproduces the harness to three decimals. It does not
+reproduce LIS: a 7-day daily-sonde model asked a 21-day question on visits 2–4
+weeks apart lands at AUC 0.77 vs 0.875 for the model trained on LIS. Same
+asymmetry as §20. Guidance in the README: use it where you have daily sondes;
+if you have years of local data, refit.
 
 ## Revised thesis (supersedes the "Presentation framing" above)
 

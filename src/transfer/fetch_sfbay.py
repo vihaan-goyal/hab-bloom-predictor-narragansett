@@ -1,28 +1,29 @@
 """
-fetch_sfbay.py -- USGS 15-min water quality for San Francisco Bay / Delta
+fetch_sfbay.py -- USGS NWIS 15-min water quality for San Francisco Bay / Delta
 -------------------------------------------------------------------------------
 Builds data/transfer/sfbay_15min.csv for src/transfer/transfer_eval.py.
 
-SOURCE   USGS Water Data for the Nation OGC API (the legacy NWIS "iv" service
-         at waterservices.usgs.gov returned HTTP 503 "service temporarily
-         unavailable" on 2026-09-03, so it is not used):
-           series list per site:
-             https://api.waterdata.usgs.gov/ogcapi/v0/collections/
-               time-series-metadata/items?f=json&monitoring_location_id=USGS-<site>
-           values, one series x one calendar year per request (<= 35,136 rows,
-           under the 50,000 page limit; `offset` paging is still handled):
-             https://api.waterdata.usgs.gov/ogcapi/v0/collections/continuous/
-               items?f=csv&time_series_id=<id>&datetime=<y>-01-01T00:00:00Z/
-               <y+1>-01-01T00:00:00Z&limit=50000
-         Site discovery / period of record came from the NWIS site service
-         series catalog (still up):
+SOURCE   USGS NWIS Instantaneous Values web service, RDB format, one site and
+         one calendar quarter per request (5 windows/year: Q1 is split at the
+         spring DST-start day, see windows(); a 6-parameter request longer
+         than ~3 months also returns HTTP 503 from this service):
+           https://waterservices.usgs.gov/nwis/iv/?format=rdb&sites=<id>
+             &parameterCd=00010,00300,00480,00095,32316,32318
+             &startDT=<yyyy-mm-dd>&endDT=<yyyy-mm-dd>
+         (301 -> https://nwis.waterservices.usgs.gov/nwis/iv/ ; followed.)
+         Site discovery / period of record from the NWIS site service:
            https://waterservices.usgs.gov/nwis/site/?format=rdb&stateCd=ca
              &parameterCd=32316,32318,32295&siteStatus=all&hasDataTypeCd=iv
              &seriesCatalogOutput=true&outputDataTypeCd=iv
-         Raw CSVs cached under data/transfer/raw/sfbay/<site>_<parm>_<ts>_<year>.csv
-         (gitignored); existing files are not re-downloaded (0-byte = no data).
+         Raw RDB cached under data/transfer/raw/sfbay/<site>_<year>Q<q>.rdb
+         (gitignored); existing files are not re-downloaded.
+         Note: on 2026-09-03 the IV service was down (HTTP 503) for ~1 h; the
+         OGC API (api.waterdata.usgs.gov/ogcapi/v0/collections/continuous)
+         was tried meanwhile but rate-limits at ~10 requests per 20-30 min,
+         far too slow for ~300 series-years.  Its partial cache is left under
+         raw/sfbay/ogc_partial/ and is not used.
 
-PARAMETER CODES (statistic 00011 = instantaneous)
+PARAMETER CODES
   00010 temperature (deg C)                -> temp_c
   00300 dissolved oxygen (mg/L)            -> do_mgl
   00480 salinity (ppt, ~PSU)               -> salinity_psu (preferred)
@@ -30,8 +31,8 @@ PARAMETER CODES (statistic 00011 = instantaneous)
   32316 chlorophyll fluorescence (ug/L)    -> chl_ugl    (all selected sites)
   32318 chlorophyll relative fluor. (RFU)  -> chl_rfu    (fallback only; none
                                               of the selected sites needs it)
-  (00301 DO %sat and 00400 pH are optional for the harness and are skipped to
-   keep the download to ~5 series per site.)
+  Where a site has two series for one parameter (two sensors / redeployment)
+  the values are averaged per timestamp.
 
 SITES  (all have 32316 chl in ug/L for >= 4 years; chosen from the catalog
         above; the Bay-proper bridge sites -- Alcatraz 374938122251801,
@@ -47,10 +48,9 @@ SITES  (all have 32316 chl in ug/L for >= 4 years; chosen from the catalog
   11447890         Sacramento R above Delta Cross Channel           2014-03..2025
   11336790         Little Potato Slough at Terminous                2019-07..2025
 
-YEARS  2012-01-01 .. 2025-12-31 requested (the catalog shows no chlorophyll
-       before 2013 at any of these sites).  API timestamps are UTC; they are
-       shifted to Pacific Standard Time (UTC-8, no DST, the NWIS convention)
-       before the harness groups readings into station-days.
+YEARS  2013-01-01 .. 2025-12-31 requested (the catalog shows no chlorophyll
+       before 2013 at any of these sites).  Timestamps are NWIS local clock
+       time (tz_cd PST/PDT) and are used as-is for the station-day grouping.
 
 CONDUCTANCE -> SALINITY
   00095 is specific conductance already normalised to 25 C, so PSS-78
@@ -64,12 +64,12 @@ CONDUCTANCE -> SALINITY
   the conversion fills gaps and Ryer Island (no 00480 series).
 
 Usage (fork root, BASE env):
-    python -m src.transfer.fetch_sfbay            # download + parse
+    python -m src.transfer.fetch_sfbay                 # download + parse
     python -m src.transfer.fetch_sfbay --parse-only
+    python -m src.transfer.fetch_sfbay --fetch-only --sites 11455508 11337190
 """
 import argparse
 import io
-import json
 import os
 import sys
 import time
@@ -80,13 +80,25 @@ import pandas as pd
 
 RAW_DIR = "data/transfer/raw/sfbay"
 OUT = "data/transfer/sfbay_15min.csv"
-API = "https://api.waterdata.usgs.gov/ogcapi/v0/collections"
-META_URL = API + "/time-series-metadata/items?f=json&monitoring_location_id=USGS-{site}&limit=200"
-VAL_URL = (API + "/continuous/items?f=csv&time_series_id={ts}"
-           "&datetime={y}-01-01T00:00:00Z/{y1}-01-01T00:00:00Z&limit={limit}&offset={offset}"
-           "&properties=time,value")
-LIMIT = 50000
-YEARS = range(2012, 2026)
+IV_URL = ("https://waterservices.usgs.gov/nwis/iv/?format=rdb&sites={site}"
+          "&parameterCd=00010,00300,00480,00095,32316,32318"
+          "&startDT={d0}&endDT={d1}")
+YEARS = range(2013, 2026)
+
+
+def windows(y):
+    """Request windows for year y: 5 chunks.  The IV service returns HTTP 503
+    for any window that contains the spring DST-start day (2nd Sunday of
+    March, local 02:00 does not exist), so Q1 is split there and the request
+    resumes at 03:00 local on that day (the first 2 h of that day are lost)."""
+    d = 8
+    while pd.Timestamp(y, 3, d).weekday() != 6:
+        d += 1
+    return [("Q1a", f"{y}-01-01", f"{y}-03-{d-1:02d}"),
+            ("Q1b", f"{y}-03-{d:02d}T03:00", f"{y}-03-31"),
+            ("Q2", f"{y}-04-01", f"{y}-06-30"),
+            ("Q3", f"{y}-07-01", f"{y}-09-30"),
+            ("Q4", f"{y}-10-01", f"{y}-12-31")]
 SITES = {
     "11455508": "VanSickle",
     "381142122015801": "FirstMallard",
@@ -99,7 +111,7 @@ SITES = {
 }
 PARM = {"00010": "temp_c", "00300": "do_mgl", "00480": "salinity_psu",
         "00095": "spc_uscm", "32316": "chl_ugl", "32318": "chl_rfu"}
-UTC_OFFSET_H = -8  # Pacific Standard Time
+NA = ["", "Ice", "Eqp", "Ssn", "Dis", "***", "Bkw", "Mnt", "Rat", "Fld", "Zfl", "Tst"]
 
 
 def sc_to_psu(sc):
@@ -110,85 +122,55 @@ def sc_to_psu(sc):
     return np.clip(s, 0, None)
 
 
-def get(url, retries=8, timeout=600):
-    """GET with backoff; the API rate-limits (HTTP 429) so requests are paced
-    ~1/s and 429s wait Retry-After (or 30 s x attempt)."""
+def fetch(site, y, tag, d0, d1, retries=4):
+    path = os.path.join(RAW_DIR, f"{site}_{y}{tag}.rdb")
+    if os.path.exists(path) and os.path.getsize(path) > 0:
+        return path
+    url = IV_URL.format(site=site, d0=d0, d1=d1)
     for k in range(retries):
         try:
-            with urllib.request.urlopen(url, timeout=timeout) as r:
+            with urllib.request.urlopen(url, timeout=300) as r:
                 data = r.read()
-            time.sleep(1.0)
-            return data
+            with open(path, "wb") as f:
+                f.write(data)
+            print(f"  {site} {y}{tag}: {len(data)/1e6:.2f} MB", flush=True)
+            time.sleep(0.5)
+            return path
         except Exception as e:  # noqa: BLE001
             code = getattr(e, "code", None)
-            ra = None
-            if code == 429:
-                try:
-                    ra = float(e.headers.get("Retry-After", ""))
-                except (ValueError, AttributeError):
-                    ra = None
-            wait = ra if ra else (30 * (k + 1) if code == 429 else 10 * (k + 1))
-            print(f"    attempt {k+1} failed: {e}; sleeping {wait:.0f}s", flush=True)
+            if code == 404:  # no data for this site/window
+                with open(path, "wb") as f:
+                    f.write(b"# no data (HTTP 404)\n")
+                print(f"  {site} {y}{tag}: no data", flush=True)
+                return path
+            wait = 10 * (k + 1)
+            print(f"  {site} {y}{tag}: attempt {k+1} failed: {e}; sleeping {wait}s", flush=True)
             time.sleep(wait)
     return None
 
 
-def list_series(site):
-    """Instantaneous series at a site for the wanted parameter codes."""
-    path = os.path.join(RAW_DIR, f"{site}_meta.json")
-    if os.path.exists(path) and os.path.getsize(path) > 0:
-        d = json.load(open(path, encoding="utf-8"))
-    else:
-        raw = get(META_URL.format(site=site))
-        if raw is None:
-            return []
-        open(path, "wb").write(raw)
-        d = json.loads(raw)
-    keep = {}
-    for f in d.get("features", []):
-        p = f["properties"]
-        if p.get("parameter_code") in PARM and p.get("statistic_id") == "00011" and p.get("begin"):
-            s = dict(ts=f["id"], parm=p["parameter_code"],
-                     begin=int(p["begin"][:4]), end=int(p["end"][:4]) if p.get("end") else 2026)
-            # keep only the longest series per parameter (the API rate-limits;
-            # duplicate sensors add requests, not years)
-            k = keep.get(s["parm"])
-            if k is None or s["end"] - s["begin"] > k["end"] - k["begin"]:
-                keep[s["parm"]] = s
-    if "00480" in keep and "00095" in keep:
-        del keep["00095"]
-    order = ["32316", "32318", "00010", "00480", "00095", "00300"]
-    return [keep[p] for p in order if p in keep]
-
-
-def fetch_series_year(site, s, y):
-    path = os.path.join(RAW_DIR, f"{site}_{s['parm']}_{s['ts'][:8]}_{y}.csv")
-    if os.path.exists(path):
-        return path
-    chunks, offset = [], 0
-    while True:
-        raw = get(VAL_URL.format(ts=s["ts"], y=y, y1=y + 1, limit=LIMIT, offset=offset))
-        if raw is None:
-            print(f"  {site} {s['parm']} {y}: giving up", file=sys.stderr, flush=True)
-            return None
-        n = raw.count(b"\n") - 1 if raw else 0
-        chunks.append(raw if offset == 0 else raw.split(b"\n", 1)[1] if b"\n" in raw else b"")
-        if n < LIMIT:
-            break
-        offset += LIMIT
-    data = b"".join(chunks)
-    open(path, "wb").write(data)
-    print(f"  {site} {s['parm']} {y}: {len(data)/1e6:.1f} MB", flush=True)
-    return path
-
-
-def read_csv(path, parm):
-    if os.path.getsize(path) == 0:
+def parse_rdb(path):
+    """NWIS IV RDB -> wide frame (datetime + one column per parameter)."""
+    with open(path, "r", encoding="utf-8", errors="replace") as f:
+        lines = [l for l in f if not l.startswith("#")]
+    if len(lines) < 3:
         return None
-    d = pd.read_csv(path, usecols=["time", "value"])
-    d["value"] = pd.to_numeric(d["value"], errors="coerce")
-    d["parameter_code"] = parm
-    return d.dropna(subset=["value"])
+    hdr = lines[0].rstrip("\n").split("\t")
+    body = "".join(lines[2:])  # skip the RDB format line (5s 15s 20d ...)
+    df = pd.read_csv(io.StringIO(body), sep="\t", names=hdr, dtype=str,
+                     na_values=NA, keep_default_na=True)
+    if "datetime" not in df:
+        return None
+    out = {"datetime": df["datetime"]}
+    # value columns are <ts_id>_<parm> or <ts_id>_<parm>_<suffix>; QC flags end in _cd
+    for parm, name in PARM.items():
+        cols = [c for c in hdr if not c.endswith("_cd")
+                and (c.endswith(f"_{parm}") or f"_{parm}_" in c)]
+        if not cols:
+            continue
+        vals = df[cols].apply(pd.to_numeric, errors="coerce")
+        out[name] = vals.mean(axis=1)  # average duplicate sensors / ts_ids
+    return pd.DataFrame(out)
 
 
 def main(parse_only=False, fetch_only=False, sites=None):
@@ -197,57 +179,54 @@ def main(parse_only=False, fetch_only=False, sites=None):
     for site, short in SITES.items():
         if sites and site not in sites:
             continue
-        series = list_series(site)
-        print(f"[{site} {short}] {len(series)} series: "
-              + ", ".join(f"{s['parm']}:{s['begin']}-{s['end']}" for s in series), flush=True)
-        for s in series:
-            for y in YEARS:
-                if y < s["begin"] or y > s["end"]:
-                    continue
-                path = os.path.join(RAW_DIR, f"{site}_{s['parm']}_{s['ts'][:8]}_{y}.csv")
+        print(f"[{site} {short}]", flush=True)
+        for y in YEARS:
+            for tag, d0, d1 in windows(y):
+                path = os.path.join(RAW_DIR, f"{site}_{y}{tag}.rdb")
                 if not parse_only:
-                    path = fetch_series_year(site, s, y)
-                if path is None or not os.path.exists(path) or fetch_only:
+                    path = fetch(site, y, tag, d0, d1)
+                    if path is None:
+                        print(f"  {site} {y}{tag}: giving up", file=sys.stderr, flush=True)
+                        continue
+                if fetch_only or not os.path.exists(path):
                     continue
-                d = read_csv(path, s["parm"])
-                if d is not None and len(d):
-                    d["station"] = short
-                    frames.append(d)
+                d = parse_rdb(path)
+                if d is None or ("chl_ugl" not in d and "chl_rfu" not in d):
+                    continue
+                d.insert(0, "station", short)
+                frames.append(d)
     if fetch_only:
         print("fetch done", flush=True)
         return
-    lng = pd.concat(frames, ignore_index=True)
-    lng["datetime"] = (pd.to_datetime(lng["time"], utc=True, errors="coerce")
-                       + pd.Timedelta(hours=UTC_OFFSET_H)).dt.tz_localize(None)
-    lng = lng.dropna(subset=["datetime"])
-    lng["var"] = lng["parameter_code"].map(PARM)
-    # average duplicate series (two sensors / redeployments) at the same time
-    wide = (lng.groupby(["station", "datetime", "var"])["value"].mean()
-            .unstack("var").reset_index())
+    df = pd.concat(frames, ignore_index=True)
+    df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")  # local clock time
+    df = df.dropna(subset=["datetime"])
     for c in PARM.values():
-        if c not in wide:
-            wide[c] = np.nan
-    from_sc = sc_to_psu(wide["spc_uscm"])
-    wide["sal_source"] = np.where(wide["salinity_psu"].notna(), "00480",
-                                  np.where(wide["spc_uscm"].notna(), "00095->PSS78", "none"))
-    wide["salinity_psu"] = wide["salinity_psu"].where(wide["salinity_psu"].notna(), from_sc)
-    wide = wide.dropna(subset=["chl_ugl"]).sort_values(["station", "datetime"])
+        if c not in df:
+            df[c] = np.nan
+    # salinity: 00480 where present, else PSS-78 (Schemel 2001) from 00095
+    from_sc = sc_to_psu(df["spc_uscm"])
+    df["sal_source"] = np.where(df["salinity_psu"].notna(), "00480",
+                                np.where(df["spc_uscm"].notna(), "00095->PSS78", "none"))
+    df["salinity_psu"] = df["salinity_psu"].where(df["salinity_psu"].notna(), from_sc)
+    df = df.dropna(subset=["chl_ugl"])
+    df = df.sort_values(["station", "datetime"]).drop_duplicates(["station", "datetime"])
     cols = ["station", "datetime", "chl_ugl", "temp_c", "salinity_psu", "do_mgl", "sal_source"]
-    wide[cols].to_csv(OUT, index=False, date_format="%Y-%m-%dT%H:%M:%S")
-    print(f"wrote {OUT}: {len(wide):,} rows, {wide.station.nunique()} stations, "
-          f"{wide.datetime.min()} .. {wide.datetime.max()}")
-    print(wide.groupby("station").agg(
+    df[cols].to_csv(OUT, index=False, date_format="%Y-%m-%dT%H:%M:%S")
+    print(f"wrote {OUT}: {len(df):,} rows, {df.station.nunique()} stations, "
+          f"{df.datetime.min()} .. {df.datetime.max()}")
+    print(df.groupby("station").agg(
         n=("chl_ugl", "size"), start=("datetime", "min"), end=("datetime", "max"),
         chl_med=("chl_ugl", "median"), sal_med=("salinity_psu", "median"),
         temp_ok=("temp_c", lambda s: s.notna().mean()),
         do_ok=("do_mgl", lambda s: s.notna().mean())).round(3).to_string())
-    print(wide.sal_source.value_counts().to_string())
+    print(df.sal_source.value_counts().to_string())
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--parse-only", action="store_true")
     ap.add_argument("--fetch-only", action="store_true")
-    ap.add_argument("--sites", nargs="*", help="subset of site numbers (for parallel fetch)")
+    ap.add_argument("--sites", nargs="*", help="subset of site numbers")
     a = ap.parse_args()
     main(a.parse_only, a.fetch_only, a.sites)
