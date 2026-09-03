@@ -543,6 +543,35 @@ archive exists only 2008–2011 except Kachemak Bay AK; Chesapeake pools
 tidal-fresh and brackish sites. UK data via the SmartBuoy portal export
 (free login) rather than the Data Hub API used for the §19 pilot.
 
+## 20. Reverse transfer: a model trained on five other systems, tested blind on Narragansett (2026-09-03)
+
+`src/transfer/pooled_model_test.py`. One GB model trained on the pooled
+station-days of Chesapeake, the NERRS reserves, the UK shelf, Australia and
+Lake Erie (123,820 rows; each site's chl quantile-mapped to the Narragansett
+scale; label = own-station p75 within 7 d). It never sees a Narragansett row.
+Scored on Narragansett test 2023 exactly like the reference model (onset-only,
+chl > 10 within 7 d; t* chosen on the 2021–22 val years, threshold only).
+
+| Model | Precision [CI] | POD | Lift [CI] | AUC |
+|---|---|---|---|---|
+| Narragansett-trained GB (reference) | 0.70 | 0.60 | 2.00 | 0.84 |
+| Pooled foreign model, blind | 0.55 [0.47, 0.63] | 0.66 | 1.60 [1.29, 2.00] | 0.76 |
+| Pooled foreign minus Chesapeake | 0.57 [0.48, 0.67] | 0.62 | 1.65 [1.35, 2.05] | 0.76 |
+| Always alert | 0.35 | 1.00 | 1.00 | 0.50 |
+
+**Reading.** The universal-model claim does not hold. A model that has seen
+124k station-days from two continents and a lake, but never Narragansett,
+gets about 80% of the way there (AUC 0.76 vs 0.84, lift 1.6 vs 2.0) and its
+lift CI just touches the reference. Dropping Chesapeake, the worst-transferring
+site, changes nothing. So the transfer is asymmetric: Narragansett → elsewhere
+matches a local refit (§19), elsewhere → Narragansett does not. The likely
+reason is that Narragansett is the richest bloom system in the set (highest
+base rate, real 3-day run-ups) while the foreign "blooms" are mostly
+75th-percentile wiggles; a model trained on weak events learns a weaker
+precursor signature. The honest one-liner: **the precursor signature is
+general enough to export, not general enough to replace local data where
+blooms are strong.**
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
