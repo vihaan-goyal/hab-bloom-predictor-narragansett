@@ -492,6 +492,25 @@ year. Station-year clustered bootstrap CIs. Fetch scripts:
 | Western Lake Erie (NOAA GLERL, freshwater) | 4 buoys, 2014–18, May–Oct, 1,605 onset rows | **1.96 [1.56, 2.42]** / 0.67 | 1.45 [1.23, 1.70] / 0.63 | 1.07 [1.00, 1.22] / 0.55 (2018 only) | 0.92 |
 | San Francisco Bay (USGS) | pending | | | | |
 
+**Precision and AUC, onset-only, p75 label** (precision tracks base rate,
+which is why lift is the fair axis; AUC is where the model separates from the
+rule):
+
+| Site | Base rate | Transferred model: prec / AUC | chl>c rule: prec / AUC | Refit GB: prec / AUC |
+|---|---|---|---|---|
+| Narragansett (reference, test 2023) | 0.35 | 0.70 / 0.84 | | |
+| Chesapeake Bay | 0.28 | 0.38 / 0.60 | 0.37 / 0.60 | 0.46 / 0.72 |
+| NERRS reserves | 0.30 | 0.44 / 0.70 | 0.43 / 0.64 | 0.48 / 0.71 |
+| UK shelf (Cefas) | 0.17 | 0.43 / 0.86 | 0.49 / 0.73 | 0.49 / 0.86 |
+| Australia (IMOS) | 0.31 | 0.43 / 0.68 | 0.42 / 0.61 | 0.47 / 0.69 |
+| Lake Erie | 0.36 | 0.70 / 0.67 | 0.47 / 0.63 | 0.63 / 0.55 |
+
+**Which is "best":** UK shelf for ranking (AUC 0.86 with no retraining, other
+continent, other instrument); Lake Erie for the only clean beat-the-baseline
+win (lift 1.96 vs 1.45, CIs disjoint) on a freshwater lake with five dead
+inputs; Narragansett and Lake Erie for absolute precision (0.70); Chesapeake
+worst (AUC 0.60, refit clearly needed, tidal-fresh and brackish sites pooled).
+
 Readings:
 
 1. **Raw zero-shot never alerts anywhere.** Every other fluorometer reads on a
