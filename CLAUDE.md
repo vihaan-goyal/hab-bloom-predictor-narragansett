@@ -70,6 +70,7 @@ cadence, partly sonde calibration — NOT a pure cadence effect.
 | `src/models/experiments/cadence_thinning.py` | `data/cadence_thinning.csv` (thesis test) |
 | `src/features/calibrate_sonde_chl.py` | `data/sonde_lab_calibration*.csv`, fig6 |
 | parent `src/models/experiments/lis_buoy_recipe.py` | parent `data/lis_buoy_recipe.csv` |
+| `src/deploy/daily_inference_nar.py --date YYYY-MM-DD` | `data/narragansett_daily_predictions.csv` — per-date station probabilities (findings §18) |
 
 Headline after Part II: pooled onset precision 0.656 [0.618, 0.692], lift 2.50.
 Cadence thesis: FAILED its pre-registered test; rarity dominates (findings §11–12).

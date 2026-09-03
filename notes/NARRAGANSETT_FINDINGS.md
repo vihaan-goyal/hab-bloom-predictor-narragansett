@@ -413,6 +413,50 @@ all western-Narrows stations (A4, B3, 15) in February — the winter diatom
 regime — and 7 of 10 bloomed. Report lift and ranking skill, not raw
 probabilities, and say so.
 
+## 18. Per-date scorer and two worked examples (2026-09-03)
+
+`src/deploy/daily_inference_nar.py --date D` is the Narragansett analogue of
+the LIS `daily_inference.py`: it trains HistGB tier A on every station-day whose
+7-day label window closed on or before D (walk-forward, no leakage), scores each
+station's latest day, alerts at the val-chosen t* = 0.50, and writes
+`data/narragansett_daily_predictions.csv` with a `status` column
+("blooming" = chl > 10 today, a persistence question; "onset risk" = the real
+forecast). Six stations (B12w, B3W, B3a, B5, F3, UB2015) are winter or one-off
+deployments and show as stale on summer dates.
+
+**Pick the demo date carefully.** 2023-07-19 is a bay-wide bloom: 9 of 11 live
+stations are already above 10 µg/L (B13 39.9, B4 38.6, B3 30.7) and the model
+returns 0.99 for all of them, which is persistence, not forecasting.
+
+**Best case, 2023-09-08: every alert was followed by a bloom.** Nine stations
+were onset-risk (chl ≤ 10); the model alerted on six; all six exceeded 10 µg/L
+within 7 days. Of the three cleared stations, B14 (p = 0.49, just under t*)
+bloomed; B7 and F7 did not.
+
+| Station | chl today | P(bloom ≤7 d) | Alert | Bloomed |
+|---|---|---|---|---|
+| B4 | 9.7 | 0.879 | yes | yes |
+| B3 | 8.4 | 0.717 | yes | yes |
+| B2 | 8.9 | 0.628 | yes | yes |
+| B13 | 7.1 | 0.605 | yes | yes |
+| B6 | 9.8 | 0.579 | yes | yes |
+| B12 | 5.8 | 0.550 | yes | yes |
+| B14 | 7.2 | 0.493 | no | yes (miss) |
+| B7 | 4.5 | 0.174 | no | no |
+| F7 | 3.6 | 0.028 | no | no |
+
+Precision 6/6, POD 6/7. Caveat for the talk: the base rate that day was 7/9,
+so the lift is only 1.3×; the model's real contribution is the ranking, which
+put the two non-bloomers at the bottom. 2023-06-24 is similar (5 of 5 onset
+alerts bloomed, B6 missed at 0.48).
+
+**Representative case, 2023-06-05.** All 12 live stations below 10; six
+alerts; four bloomed (F5, F4, B12, B3), two false alarms (B14, B2), one miss
+(B4 at 0.30). Precision 0.67 against a base rate of 5/11 = 0.45, lift 1.5×, in
+line with the 2.0× [1.5, 2.7] test-year estimate (§3). F4 alerting at chl 1.7
+and blooming is the "history is everything" result in one row: the 21-day
+history and station climatology carry the signal, not today's value.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
