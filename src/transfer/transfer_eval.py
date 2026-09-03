@@ -193,7 +193,7 @@ def rolling_refit(day, model_name):
         if len(tr) < 500 or len(va) < 100 or te.bloom_fwd.nunique() < 2 or tr.bloom_fwd.nunique() < 2:
             continue
         med = tr[TIER_A].median(numeric_only=True)
-        prep = lambda d: d[TIER_A].fillna(med).values
+        prep = lambda d: d[TIER_A].fillna(med).fillna(0.0).values   # all-NaN column in fold -> 0
         if model_name == "GB":
             m = HistGradientBoostingClassifier(**GB_KW).fit(prep(tr), tr.bloom_fwd.astype(int))
             pv, pt = m.predict_proba(prep(va))[:, 1], m.predict_proba(prep(te))[:, 1]

@@ -467,7 +467,7 @@ line with the 2.0× [1.5, 2.7] test-year estimate (§3). F4 alerting at chl 1.7
 and blooming is the "history is everything" result in one row: the 21-day
 history and station climatology carry the signal, not today's value.
 
-## 19. Cross-site transfer: does the Narragansett model work elsewhere? (2026-09-03, running)
+## 19. Cross-site transfer: does the Narragansett model work elsewhere? (2026-09-03)
 
 Harness: `src/transfer/transfer_eval.py`. For each new site: build the same
 tier-A station-day features from that site's sub-daily sondes; label = bloom
@@ -481,34 +481,48 @@ always-alert, station-DOY climatology, chl>c rule with c chosen on the val
 year. Station-year clustered bootstrap CIs. Fetch scripts:
 `src/transfer/fetch_<site>.py`; data under `data/transfer/` (gitignored).
 
-**Onset-only, p75 label. Lift = precision / base rate.**
+**Onset-only, p75 label. Lift = precision / base rate; [95% CI].**
 
-| Site | Data | Zero-shot rescaled: prec / lift [CI] / AUC | chl>c rule: lift [CI] / AUC | Refit GB: lift [CI] / AUC |
-|---|---|---|---|---|
-| Western Lake Erie (NOAA GLERL, freshwater cyanobacteria) | 4 buoys, 2014–18, May–Oct, 15-min, 1,605 onset rows | 0.70 / **1.96 [1.56, 2.42]** / 0.67 | 1.45 [1.23, 1.70] / 0.63 | 1.07 [1.00, 1.22] / 0.55 (2018 fold only) |
-| Celtic Sea shelf (Cefas SmartBuoy, UK) | 2 moorings, 2014–15, 30-min, 663 onset rows (below harness floor; pilot) | 0.45 / 2.8 [1.6, 5.9] / **0.88** | 6.4 [4.3, 9.8] / 0.73 (2015 only, 4 clusters) | not testable (2 years) |
+| Site | Data | Zero-shot rescaled: lift / AUC | chl>c rule: lift / AUC | Refit GB: lift / AUC | Climatology lift |
+|---|---|---|---|---|---|
+| Chesapeake Bay, MD (Eyes on the Bay) | 24 sondes, 2010–25, 15-min, 48,519 onset rows | 1.34 [1.25, 1.44] / 0.60 | 1.30 [1.21, 1.39] / 0.60 | **1.55 [1.47, 1.63]** / 0.72 | 1.45 |
+| 6 NERRS reserves (MD, TX, OR, MA, ME, AK) | 21 sondes, 2007–26, 15-min, 17,686 onset rows | 1.47 [1.33, 1.66] / 0.70 | 1.42 [1.29, 1.59] / 0.64 | 1.51 [1.34, 1.71] / 0.71 | 1.18 |
+| UK shelf seas (Cefas SmartBuoy, 7 moorings) | 2002–26, 30-min, 11,908 onset rows | 2.54 [2.33, 2.80] / **0.86** | 2.85 [2.57, 3.18] / 0.73 | 2.90 [2.59, 3.25] / 0.86 | 1.87 |
+| Australian coast (IMOS NRS, 7 moorings) | 2008–26, hourly, 13,104 onset rows | 1.39 [1.31, 1.49] / 0.68 | 1.35 [1.23, 1.50] / 0.61 | 1.48 [1.37, 1.61] / 0.69 | 1.27 |
+| Western Lake Erie (NOAA GLERL, freshwater) | 4 buoys, 2014–18, May–Oct, 1,605 onset rows | **1.96 [1.56, 2.42]** / 0.67 | 1.45 [1.23, 1.70] / 0.63 | 1.07 [1.00, 1.22] / 0.55 (2018 only) | 0.92 |
+| San Francisco Bay (USGS) | pending | | | | |
 
-Readings so far:
+Readings:
 
-1. **Raw zero-shot fails everywhere; rescaled zero-shot works.** Applied to
-   raw values the Narragansett model never alerts (Lake Erie median chl 3,
-   Celtic Sea ~1 a.u., vs Narragansett ~8 µg/L). After quantile-mapping the
-   chlorophyll scale it ranks bloom risk at AUC 0.67 (lake) and 0.88 (shelf
-   sea) with no retraining. What transfers is the *shape* of the chlorophyll
-   trajectory before a bloom, not the units.
-2. **Lake Erie: the transferred model beats the best simple rule** with
-   non-overlapping CIs (1.96 vs 1.45). The refit is weaker because only 2018
-   qualifies as a test year.
-3. **Celtic Sea: the transferred model ranks well but a threshold rule is more
-   precise** (0.86 vs 0.45), because that regime has one large spring bloom a
-   year and persistence is strong. Two stations, two years, so a pilot only;
-   the multi-year Liverpool Bay / Gabbard archive needs a free WaveNet login.
-4. Caveats: Lake Erie salinity is a constant 0 (five dead features), buoys are
-   summer-only, and fluorescence is total phytoplankton, not the toxin-forming
-   cyanobacteria. Cefas chlorophyll is bead-standardised fluorescence, never
-   calibrated to extracted chl-a, so abs10 is void there.
+1. **Raw zero-shot never alerts anywhere.** Every other fluorometer reads on a
+   different scale (Lake Erie median 3, UK ~0.7 a.u., Australia 0.5 vs
+   Narragansett ~7 µg/L), so the raw model sees "no bloom" forever. After
+   quantile-mapping the chlorophyll scale the same model ranks bloom risk at
+   AUC 0.60–0.86 on five other systems with no retraining. What transfers is
+   the shape of the chlorophyll trajectory before a bloom, not the units.
+2. **Rescaled zero-shot ≈ local refit almost everywhere.** In the NERRS
+   reserves, Australia and the UK the transferred model is within CI of a
+   model trained on that site's own data. Only Chesapeake shows a clear refit
+   gain (1.55 vs 1.34), and Chesapeake is 24 very different sites (tidal-fresh
+   to 29 PSU, medians 3–58 µg/L) pooled together.
+3. **But nobody beats the simple rule by much.** The chl>c rule sits within CI
+   of the models at every estuarine and open-coast site. Lake Erie is the one
+   place the transferred model clearly beats it (1.96 vs 1.45, CIs disjoint).
+   The UK is the one place the model's *ranking* is far better (AUC 0.86 vs
+   0.73) while the rule matches it on lift, because one big spring bloom a
+   year makes persistence a strong rule there.
+4. **This is the LIS/Narragansett conclusion again, at six more sites.** The
+   information is in the chlorophyll history. Any method that uses it (rule,
+   LR, GB, transferred GB) lands at lift 1.3–1.5 in eutrophic estuaries and
+   2.5–2.9 on the UK shelf; nothing else in the tier-A set moves it.
 
-(Chesapeake Bay, NERRS reserves, IMOS Australia, San Francisco Bay: pending.)
+Caveats: Lake Erie salinity is a constant 0 (five dead features) and buoys are
+summer-only; UK and Australian chlorophyll are bead-standardised fluorescence
+never calibrated to extracted chl-a (abs10 is void there); five Australian
+sites measure at 20 m, not the surface; NERRS chlorophyll from the open bulk
+archive exists only 2008–2011 except Kachemak Bay AK; Chesapeake pools
+tidal-fresh and brackish sites. UK data via the SmartBuoy portal export
+(free login) rather than the Data Hub API used for the §19 pilot.
 
 ## Revised thesis (supersedes the "Presentation framing" above)
 
