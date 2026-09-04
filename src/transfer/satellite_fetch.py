@@ -143,20 +143,21 @@ def main():
     products = [p for p in a.products.split(",") if p in PRODUCTS]
 
     if a.stage == "viability":
-        rows = []
+        # incremental + resumable: one row appended per station-product as it completes
+        done = pd.read_csv(VIAB) if os.path.exists(VIAB) else pd.DataFrame(columns=["source", "station", "product", "valid_days"])
+        done = done[done.valid_days >= 0]
+        finished = set(zip(done.source, done.station, done["product"]))
         for _, st in stations.iterrows():
             for p in products:
-                if p == "sst":
+                if p == "sst" or (st.source, st.station, p) in finished:
                     continue
                 d = fetch(p, st, "2021-07-01", "2021-07-31", a.box, a.max_wait)
-                if d is None:
-                    rows.append(dict(source=st.source, station=st.station, product=p,
-                                     valid_days=-1, max_pixels=-1, days_checked=31)); continue
-                rows.append(dict(source=st.source, station=st.station, product=p, valid_days=len(d),
-                                 max_pixels=int(d.n_pixels.max()) if len(d) else 0, days_checked=31))
-                print(f"{st.source:12s} {st.station:14s} {p:9s} valid_days={len(d):2d} pixels={rows[-1]['max_pixels']}", flush=True)
-        pd.DataFrame(rows).to_csv(VIAB, index=False)
-        print(f"wrote {VIAB}  (-1 = server unreachable, retry later)")
+                row = dict(source=st.source, station=st.station, product=p, days_checked=31,
+                           valid_days=-1 if d is None else len(d),
+                           max_pixels=-1 if d is None else (int(d.n_pixels.max()) if len(d) else 0))
+                pd.DataFrame([row]).to_csv(VIAB, mode="a", header=not os.path.exists(VIAB), index=False)
+                print(f"{st.source:12s} {st.station:14s} {p:9s} valid_days={row['valid_days']:2d} pixels={row['max_pixels']}", flush=True)
+        print(f"viability rows now in {VIAB}  (-1 = server unreachable, rerun to retry)")
         return
 
     viab = pd.read_csv(VIAB) if os.path.exists(VIAB) else None
