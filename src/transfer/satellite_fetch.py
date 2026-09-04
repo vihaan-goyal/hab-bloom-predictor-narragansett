@@ -132,6 +132,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--stage", choices=["viability", "pull"], required=True)
     ap.add_argument("--sources", default="all")
+    ap.add_argument("--stations", default="all", help="comma list of station ids to restrict to")
     ap.add_argument("--products", default="viirs4k,dineof2k,olci4k,olci750,olci300,sst")
     ap.add_argument("--start", default="2016-01-01"); ap.add_argument("--end", default="2023-12-31")
     ap.add_argument("--box", type=int, default=1, help="half-width in pixels (1 -> 3x3)")
@@ -140,6 +141,8 @@ def main():
     stations = pd.read_csv(STATIONS).dropna(subset=["lat", "lon"])
     if a.sources != "all":
         stations = stations[stations.source.isin(a.sources.split(","))]
+    if a.stations != "all":
+        stations = stations[stations.station.isin(a.stations.split(","))]
     products = [p for p in a.products.split(",") if p in PRODUCTS]
 
     if a.stage == "viability":
