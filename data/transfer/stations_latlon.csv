@@ -1,0 +1,90 @@
+source,station,lat,lon,name,coord_source
+narragansett,B12,41.67995,-71.21515,Mount Hope Bay,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,B12w,41.678967,-71.210067,Mount Hope Bay Winter Station,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,B13,41.647967,-71.3195,Poppasquash Point,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,B14,41.675867,-71.42455,Sally Rock,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,B2,41.670233,-71.355933,North Prudence,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,B3,41.714017,-71.343633,Conimicut Point,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,B3w,41.7115,-71.3378,Upper Bay Winter Station,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,B3W,41.7115,-71.3378,Upper Bay Winter Station (alt id of B3w),"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table); id variant of B3w, same site"
+narragansett,B3a,41.7115,-71.3378,"Upper Bay Winter Station (alt id of B3w, 2009/2012 files)","data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table); id variant of B3w, same site"
+narragansett,UB2015,41.7115,-71.3378,"Upper Bay Winter Station (alt id of B3w, 2016 file)","data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table); id variant of B3w, same site"
+narragansett,B4,41.73205,-71.369283,Bullock Reach,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,B5,41.639367,-71.393967,Mount View (2006 code for the B6 site),"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table); B5 = ""B5.GSO. Mt.View"" folder in NBFSMN 2006, same site as B6"
+narragansett,B6,41.639367,-71.393967,Mount View,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,B7,41.58865,-71.380017,Quonset Point,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,F3,41.57885,-71.32145,T-Wharf (South Prudence),"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,F4,41.84175,-71.3722,Phillipsdale Landing,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,F5,41.686067,-71.445917,Greenwich Bay,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,F7,41.658683,-71.419083,GSO Dock,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+chesapeake,AES,39.2855,-76.608,Aquarium East Surface,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,AWS,39.2854,-76.6088,Aquarium West,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,BUD,39.3723,-75.8399,Budds Landing,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,COR,39.0628,-76.0816,Sycamore Pt,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,FLT,39.5053,-76.0414,Susquehanna Flats,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,GOO,38.5563,-76.4147,Gooses - Surface,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,GYK,38.449,-75.1325,Greys Creek,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,HAD,38.7125,-76.3168,Harris Creek Downstream,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,HAU,38.7732,-76.2823,Harris Creek Upstream,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,IPL,38.796,-76.7208,Iron Pot Landing,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,JUG,38.7813,-76.7137,Jug Bay,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,LMN,38.2086,-75.8046,Little Monie Creek,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,MAB,38.4703,-77.2728,Mallows Bay Buoy,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,MAT,38.5593,-77.1887,Mattawoman,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,MSC,39.2447,-76.5972,Masonville Cove Pier,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,MTI,38.7433,-76.7074,Mataponi,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,NPC,38.2674,-75.1981,Newport Creek,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,OPC,39.4508,-76.2746,Otter Point Creek,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,PPT,39.0812,-76.1149,Possum Point - Surface,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,PUB,38.1483,-75.2862,Public Landing,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,RIV,39.2981,-76.4703,Riverside,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,SGC,38.1311,-76.4934,St Georges Creek,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,SPS,39.0075,-76.4003,Sandy Pt - South Beach,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+chesapeake,SUS,39.5478,-76.0848,Havre de Grace,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
+nerrs,cbm_ip,38.796,-76.7208,Chesapeake Bay MD - Iron Pot Landing,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/cbmwq01-12.06m.doc
+nerrs,cbm_mc,38.743317,-76.707433,Chesapeake Bay MD - Mataponi Creek,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/cbmwq01-12.06m.doc
+nerrs,cbm_oc,39.450783,-76.274567,Chesapeake Bay MD - Otter Point Creek,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/cbmwq01-12.06m.doc
+nerrs,cbm_rr,38.781283,-76.7137,Chesapeake Bay MD - Railroad Bridge,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/cbmwq01-12.06m.doc
+nerrs,kac_h3,59.60205,-151.40942,Kachemak Bay - Homer Deep,"https://erddap.sensors.ioos.us/erddap/tabledap/nerrs_kach3wq.csv?latitude,longitude&distinct()"
+nerrs,kac_sd,59.44099,-151.72096,Kachemak Bay - Seldovia Deep,"https://erddap.sensors.ioos.us/erddap/tabledap/nerrs_kacsdwq.csv?latitude,longitude&distinct()"
+nerrs,kac_ss,59.44099,-151.72096,Kachemak Bay - Seldovia Surface,"https://erddap.sensors.ioos.us/erddap/tabledap/nerrs_kacsswq.csv?latitude,longitude&distinct()"
+nerrs,mar_ab,27.97985,-97.028783,Mission-Aransas - Aransas Bay,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/marwq04-12.07m.doc
+nerrs,mar_ce,28.13235,-97.03445,Mission-Aransas - Copano East,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/marwq04-12.07m.doc
+nerrs,mar_cw,28.08405,-97.200933,Mission-Aransas - Copano West,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/marwq04-12.07m.doc
+nerrs,mar_sc,27.838267,-97.050283,Mission-Aransas - Ship Channel,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/marwq04-12.07m.doc
+nerrs,mar_mb,28.138,-96.829,Mission-Aransas - Mesquite Bay,https://www.ndbc.noaa.gov/station_page.php?station=mqmt2 (NERRS-owned NDBC station MQMT2; site postdates the 2007 metadata doc)
+nerrs,sos_ch,43.3377,-124.320533,South Slough - Charleston Bridge,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/soswq01-12.06m.doc
+nerrs,sos_se,43.289567,-124.3026,South Slough - Sengstacken Arm,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/soswq01-12.06m.doc
+nerrs,sos_va,43.317233,-124.321633,South Slough - Valino Island,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/soswq01-12.06m.doc
+nerrs,sos_wi,43.282417,-124.320267,South Slough - Winchester Arm,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/soswq01-12.06m.doc
+nerrs,wel_in,43.320124,-70.553841,Wells - Inlet (Webhannet Harbor),https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/welwq01-12.06m.doc
+nerrs,wqb_cr,41.579883,-70.5309,Waquoit Bay - Child's River,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/wqbwq01-12.02m.txt
+nerrs,wqb_mh,41.5526,-70.548533,Waquoit Bay - Menauhant,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/wqbwq01-12.02m.txt
+nerrs,wqb_mp,41.56885,-70.521567,Waquoit Bay - Metoxit Point,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/wqbwq01-12.02m.txt
+nerrs,wqb_sl,41.554233,-70.5102,Waquoit Bay - Sage Lot,https://www.ncei.noaa.gov/data/oceans/archive/arc0023/0052765/2.2/data/0-data/NERRS_CDMO_Archive_8.3.11/wqbwq01-12.02m.txt
+cefas_full,wgab,51.981944,2.084167,West Gabbard SmartBuoy,Cefas SmartBuoy portal platform table (https://data.cefas.co.uk; DMS as recorded in project brief); bbox-consistent with https://www.data.gov.uk/dataset/8265be6e-cc15-45f7-9702-34079cf49406/smartbuoy-observational-network-west-gabbard1
+cefas_full,wgab2,51.953889,2.111111,West Gabbard 2 SmartBuoy,Cefas SmartBuoy portal platform table (https://data.cefas.co.uk; DMS as recorded in project brief); bbox-consistent with https://www.data.gov.uk/dataset/8265be6e-cc15-45f7-9702-34079cf49406/smartbuoy-observational-network-west-gabbard1
+cefas_full,lbay,53.534167,-3.361667,Liverpool Bay Coastal Observatory SmartBuoy,Cefas SmartBuoy portal platform table (https://data.cefas.co.uk; DMS as recorded in project brief); bbox-consistent with https://www.data.gov.uk/dataset/648975b6-ee1e-4ee3-8fb0-37cd42e1f1e9/smartbuoy-observational-network-liverpool-bay24
+cefas_full,dows,53.530556,1.054722,Dowsing SmartBuoy,Cefas SmartBuoy portal platform table (https://data.cefas.co.uk; DMS as recorded in project brief); bbox-consistent with https://www.data.gov.uk/dataset/c3dec721-6437-4340-bf84-dfe7fae70d73/smartbuoy-observational-network-dowsing
+cefas_full,oyst,54.413889,4.039444,Oyster Ground SmartBuoy,Cefas SmartBuoy portal platform table (https://data.cefas.co.uk; DMS as recorded in project brief); bbox-consistent with https://www.data.gov.uk/dataset/a4a162cf-a365-4c77-a641-fef28edb6402/smartbuoy-observational-network-oyster-grounds1
+cefas_full,cdeep,51.249167,-6.081389,Celtic Deep SmartBuoy,Cefas SmartBuoy portal platform table (https://data.cefas.co.uk; DMS as recorded in project brief); bbox-consistent with https://www.data.gov.uk/dataset/613c5333-821d-4aa8-8b72-03449aa6da3f/smartbuoy-observational-network-celtic-deep24
+cefas_full,cdeep2,51.137778,-6.561944,Celtic Deep 2 SmartBuoy,Cefas SmartBuoy portal platform table (https://data.cefas.co.uk; DMS as recorded in project brief); bbox-consistent with https://www.data.gov.uk/dataset/dc3fafac-16a4-4638-b029-b7f0249d716f/smartbuoy-observational-network-celtic-deep-23
+imos,NRSDAR,-12.343267,130.714867,Darwin NRS,data/transfer/raw/imos/NRSDAR_hourly.nc (median of LATITUDE/LONGITUDE variables across deployments; see global attrs geospatial_lat/lon_min/max)
+imos,NRSESP,-33.933333,121.85,Esperance NRS,data/transfer/raw/imos/NRSESP_hourly.nc (median of LATITUDE/LONGITUDE variables across deployments; see global attrs geospatial_lat/lon_min/max)
+imos,NRSMAI,-42.596483,148.23345,Maria Island NRS,data/transfer/raw/imos/NRSMAI_hourly.nc (median of LATITUDE/LONGITUDE variables across deployments; see global attrs geospatial_lat/lon_min/max)
+imos,NRSNSI,-27.343467,153.561933,North Stradbroke Island NRS,data/transfer/raw/imos/NRSNSI_hourly.nc (median of LATITUDE/LONGITUDE variables across deployments; see global attrs geospatial_lat/lon_min/max)
+imos,NRSROT,-31.989583,115.385483,Rottnest Island NRS,data/transfer/raw/imos/NRSROT_hourly.nc (median of LATITUDE/LONGITUDE variables across deployments; see global attrs geospatial_lat/lon_min/max)
+imos,NRSYON,-19.301683,147.620567,Yongala NRS,data/transfer/raw/imos/NRSYON_hourly.nc (median of LATITUDE/LONGITUDE variables across deployments; see global attrs geospatial_lat/lon_min/max)
+imos,PH100,-34.119717,151.224517,Port Hacking 100 m,data/transfer/raw/imos/PH100_hourly.nc (median of LATITUDE/LONGITUDE variables across deployments; see global attrs geospatial_lat/lon_min/max)
+lake_erie,WE02,41.762,-83.33,GLERL Western Erie buoy/station WE2,"https://essd.copernicus.org/articles/15/3853/2023/ Table 1 (target station coordinates); matches GLOS ERDDAP obs_80 (41.762,-83.331)"
+lake_erie,WE04,41.827,-83.193,GLERL Western Erie buoy/station WE4,https://essd.copernicus.org/articles/15/3853/2023/ Table 1 (target station coordinates)
+lake_erie,WE08,41.834,-83.364,GLERL Western Erie buoy/station WE8,https://essd.copernicus.org/articles/15/3853/2023/ Table 1 (target station coordinates)
+lake_erie,WE13,41.741,-83.136,GLERL Western Erie buoy/station WE13,https://essd.copernicus.org/articles/15/3853/2023/ Table 1 (target station coordinates)
+sfbay,LittlePotato,38.096389,-121.496111,USGS 11336790 LITTLE POTATO SLOUGH A TERMINOUS CA,"https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=11336790&siteOutput=expanded (dec_lat_va/dec_long_va, datum NAD83)"
+sfbay,JerseyPoint,38.052142,-121.688843,USGS 11337190 SAN JOAQUIN R A JERSEY POINT CA,"https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=11337190&siteOutput=expanded (dec_lat_va/dec_long_va, datum NAD27)"
+sfbay,SacAbDCC,38.257692,-121.518287,USGS 11447890 SACRAMENTO R AB DELTA CROSS CHANNEL CA,"https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=11447890&siteOutput=expanded (dec_lat_va/dec_long_va, datum NAD27)"
+sfbay,CacheSloughLiberty,38.243011,-121.684286,USGS 11455315 CACHE SLOUGH A S LIBERTY ISLAND NR RIO VISTA CA,"https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=11455315&siteOutput=expanded (dec_lat_va/dec_long_va, datum NAD83)"
+sfbay,CacheSloughRyer,38.212778,-121.669167,USGS 11455350 CACHE SLOUGH A RYER ISLAND,"https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=11455350&siteOutput=expanded (dec_lat_va/dec_long_va, datum NAD83)"
+sfbay,DeckerIsland,38.093252,-121.737177,USGS 11455478 SACRAMENTO R A DECKER ISLAND NR RIO VISTA CA,"https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=11455478&siteOutput=expanded (dec_lat_va/dec_long_va, datum NAD27)"
+sfbay,VanSickle,38.049531,-121.88755,USGS 11455508 SUISUN BAY A VAN SICKLE ISLAND NR PITTSBURG CA,"https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=11455508&siteOutput=expanded (dec_lat_va/dec_long_va, datum NAD83)"
+sfbay,FirstMallard,38.194894,-122.032814,USGS 381142122015801 FIRST MALLARD BRANCH NR FAIRFIELD CA,"https://waterservices.usgs.gov/nwis/site/?format=rdb&sites=381142122015801&siteOutput=expanded (dec_lat_va/dec_long_va, datum NAD83)"
