@@ -52,7 +52,7 @@ SECTORS = "data/transfer/satellite/coastwatch_olci_datasets.csv"
 PRODUCTS = {
     "viirs4k":  (ERD, "erdVH2018chla1day", "chla", False, 0.0417, 2012),   # NASA VIIRS SMI, 2012-2022-07; lat axis DESCENDING
     "dineof2k": (ERD, "noaacwNPPN20S3ASCIDINEOF2kmDaily", "chlor_a", True, 0.02, 2018),
-    "olci4k":   (CW, "noaacwS3AOLCIchlaDaily", "chlor_a", True, 0.0375, 2019),
+    "olci4k":   (CW, "noaacwS3AOLCIchlaDaily", "chlor_a", True, 0.0375, 2019),   # data begin 2019-06-06
     "olci750":  (CW, None, "chlor_a", True, 0.0075, 2020),      # sector resolved per station
     "olci300":  (None, "cmems_obs-oc_glo_bgc-plankton_my_l3-olci-300m_P1D", "CHL", False, 0.003, 2016),
     "sst":      (ERD, "jplMURSST41", "analysed_sst", False, 0.01, 2002),
@@ -83,7 +83,7 @@ def erddap_box(base, ds, var, has_alt, lat, lon, half, t0, t1, max_wait):
             d = pd.read_csv(io.StringIO(r.text), skiprows=[1])
             d["date"] = pd.to_datetime(d["time"]).dt.normalize()
             return d.rename(columns={var: "value"})[["date", "latitude", "longitude", "value"]]
-        if r is not None and code == 404 and "no data" in r.text.lower():
+        if r is not None and code == 404:          # outside the dataset's time/space range: nothing to fetch
             return pd.DataFrame(columns=["date", "latitude", "longitude", "value"])
         if waited >= max_wait:
             print(f"    giving up ({code}) {ds} {t0}..{t1}", file=sys.stderr); return None
@@ -180,6 +180,8 @@ def main():
                 if y in done_years or y < PRODUCTS[p][5]:
                     continue
                 t0, t1 = max(a.start, f"{y}-01-01"), min(a.end, f"{y}-12-31")
+                if p == "olci4k" and y == 2019: t0 = max(t0, "2019-06-06")
+                if p == "viirs4k" and y == 2022: t1 = min(t1, "2022-07-25")
                 d = fetch(p, st, t0, t1, a.box, a.max_wait)
                 if d is None:
                     continue
