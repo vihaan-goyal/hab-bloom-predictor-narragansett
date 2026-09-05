@@ -192,6 +192,8 @@ def rescore_all():
             continue
         day = pd.read_csv(f"{PRED}/{f}", parse_dates=["date"])
         server = cat.server.get(did, "?")
+        if server == "UAF":            # UAF mirrors the PacIOOS datasets
+            continue
         r = score(did, server, day)
         if r is None:
             r = dict(server=server, dataset_id=did, n_stations=day.station.nunique(),
