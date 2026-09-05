@@ -469,6 +469,13 @@ history and station climatology carry the signal, not today's value.
 
 ## 19. Cross-site transfer: does the Narragansett model work elsewhere? (2026-09-03)
 
+> **Coverage status (2026-09-04).** Sections 19-23 answer "where can this model
+> run?": anywhere with a sub-daily chlorophyll sonde (exported model, 19-21),
+> better with a local refit where 3+ years exist (22), and not from satellites
+> (23). Section 24 catalogs every public sub-daily sonde site found on the
+> ERDDAP federation and scores the model on them.
+
+
 Harness: `src/transfer/transfer_eval.py`. For each new site: build the same
 tier-A station-day features from that site's sub-daily sondes; label = bloom
 within 7 d, two definitions (p75 = the station's own 75th percentile of daily

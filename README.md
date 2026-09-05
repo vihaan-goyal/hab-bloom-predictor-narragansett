@@ -127,6 +127,25 @@ Tested on six other systems (Chesapeake, NERRS reserves, UK shelf, Australia,
 Lake Erie, SF Bay): the exported model matches a locally trained one at most
 sites, lift 1.3–2.5× over always-alert, AUC 0.60–0.86 (findings §19–20).
 
+### Where it works (coverage conclusion, 2026-09-04)
+
+Tested across seven sonde networks on three continents plus a freshwater
+lake, and against four satellite chlorophyll products (findings 19-23):
+
+| Input available at a site | What to run | Expected skill |
+|---|---|---|
+| Sub-daily chlorophyll sonde (any units), any coast or lake | `predict_anywhere.py` with the exported model | onset lift 1.3-2.5x over always-alert, AUC 0.6-0.86; matches a locally trained model at most sites |
+| Same, plus 3+ years of local history | refit locally (`src/transfer/transfer_eval.py` recipe) | +0.3-0.5 lift in fresh/estuarine water; no gain on open shelf |
+| Satellite chlorophyll only (300 m to 4 km) | nowcast / screening only | 7-day onset lift 1.07-1.26, below climatology: **not a forecast** (findings 23) |
+
+Satellites failed the pre-registered test because the run-up is visible only
+20-40% of days, satellite and sonde chlorophyll agree weakly inside estuaries
+(Spearman 0.1-0.2), and a satellite-only model mostly predicts its own next
+value (lift 1.75 against itself, 1.18 against the water). A water-type
+("regime") model library was also tested and rejected (findings 22). The
+catalog of every public sub-daily chlorophyll sonde the model can run on is
+being built in `data/registry/` (findings 24).
+
 ## Reproduce
 
 ```bash
