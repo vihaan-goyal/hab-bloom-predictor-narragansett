@@ -103,7 +103,13 @@ def pick(var, rx):
 
 
 def cadence_probe(base, ds, station_var, max_time):
-    t1 = pd.Timestamp(max_time)
+    if pd.isna(max_time):   # blank maxTime: ask the server for the real last timestamp
+        r0 = get(f'{base}tabledap/{ds}.csv?time&orderByMax("time")', timeout=120)
+        try:
+            max_time = pd.read_csv(io.StringIO(r0.text), skiprows=[1])["time"].iloc[-1]
+        except Exception:
+            max_time = None
+    t1 = pd.Timestamp(max_time) if pd.notna(max_time) else pd.Timestamp.utcnow()
     t1 = t1.tz_convert(None) if t1.tzinfo else t1
     t0 = t1 - pd.Timedelta(days=7)
     cols = "time" + (f",{station_var}" if station_var else "")
@@ -162,6 +168,7 @@ def main():
         cand = cand.head(a.max_datasets)
         kept = 0
         for _, row in cand.iterrows():
+          try:
             var = variables(base, row.datasetID)
             time.sleep(1)
             if not var or "time" not in var or "latitude" not in var or "longitude" not in var:
@@ -172,12 +179,19 @@ def main():
             station_var = next((v for v, at in var.items() if at.get("cf_role") == "timeseries_id"), None) or pick(var, STATION)
             cad, n_st = cadence_probe(base, row.datasetID, station_var, row.maxTime)
             time.sleep(1)
+            if pd.isna(row.maxTime) and cad is not None:
+                r0 = get(f'{base}tabledap/{row.datasetID}.csv?time&orderByMax("time")', timeout=60)
+                try: row.maxTime = pd.read_csv(io.StringIO(r0.text), skiprows=[1])["time"].iloc[-1]
+                except Exception: pass
             if cad is None or cad > 60:
                 print(f"   skip {row.datasetID}: cadence={cad}", flush=True)
                 continue
-            years = (pd.Timestamp(row.maxTime) - pd.Timestamp(row.minTime)).days / 365.25
+            tmax = pd.Timestamp(row.maxTime) if pd.notna(row.maxTime) else pd.Timestamp.utcnow().tz_localize(None)
+            tmin = pd.Timestamp(row.minTime)
+            tmax = tmax.tz_convert(None) if tmax.tzinfo else tmax; tmin = tmin.tz_convert(None) if tmin.tzinfo else tmin
+            years = (tmax - tmin).days / 365.25
             rec = dict(server=name, dataset_id=row.datasetID, title=str(row.title)[:120], n_stations=n_st,
-                       cadence_min=round(cad, 1), start=str(row.minTime)[:10], end=str(row.maxTime)[:10],
+                       cadence_min=round(cad, 1), start=str(tmin)[:10], end=str(tmax)[:10],
                        years=round(years, 1), chl_var=chl, temp_var=pick(var, TEMP), sal_var=pick(var, SAL),
                        do_var=pick(var, DO), station_var=station_var, lat_min=row.minLatitude, lat_max=row.maxLatitude,
                        lon_min=row.minLongitude, lon_max=row.maxLongitude, url=f"{base}tabledap/{row.datasetID}",
@@ -185,6 +199,8 @@ def main():
             pd.DataFrame([rec]).to_csv(CAT, mode="a", header=not os.path.exists(CAT), index=False)
             kept += 1
             print(f"   KEEP {row.datasetID}: {n_st} st, {cad:.0f} min, {years:.1f} y, chl={chl}", flush=True)
+          except Exception as e:
+            print(f"   error {row.datasetID}: {str(e)[:80]}", flush=True)
         pd.DataFrame([dict(server=name, url=base, status="ok", n_datasets=len(cat), n_candidates=len(cand),
                            n_kept=kept, seconds=round(time.time() - t_start))]).to_csv(
             LOG, mode="a", header=not os.path.exists(LOG), index=False)
