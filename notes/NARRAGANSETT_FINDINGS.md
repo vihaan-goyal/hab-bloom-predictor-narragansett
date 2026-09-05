@@ -810,6 +810,17 @@ p75 label is a per-site definition of "bloom", not a harmful-species event;
 blank start dates on some servers were excluded by the years >= 1 rule. Fig 11
 `figures/nar_fig11_coverage_map.png` maps every site by onset lift.
 
+**Addendum: does training on the best sites' own data beat the exported model? No.**
+`src/registry/refit_top_sites.py` refit HistGB on each of the 11 best new sites
+(top by AUC and by precision with >= 300 onset rows and enough years) with
+rolling-origin CV and compared it with the exported model on identical onset
+test rows. Median change: lift -0.06, AUC -0.014; the exported
+model was better on lift at 8 of 11 sites, the refit at 3
+(Scripps Pier +0.69 the only clear win). A refit sees a few years
+of one pier; the exported model saw 42,207 station-days of run-ups. Same
+conclusion as findings 19 for marine sites: local training buys nothing where
+the exported model already reads the site. `data/registry/refit_top_sites.csv`.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
