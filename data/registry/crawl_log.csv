@@ -1,0 +1,44 @@
+server,url,status,n_datasets,n_candidates,n_kept,seconds
+SLGO-OGSL,https://erddap.ogsl.ca/erddap/,ok,33,33,0,47
+CSWC,https://coastwatch.pfeg.noaa.gov/erddap/,ok,215,215,0,5011
+APDRC,https://apdrc.soest.hawaii.edu/erddap/,ok,35,35,2,122
+NCEI,https://www.ncei.noaa.gov/erddap/,ok,76,76,0,89
+SmartAtlantic,https://www.smartatlantic.ca/erddap/,ok,58,58,0,108
+GRIIDC,https://erddap.griidc.org/erddap/,ok,420,17,0,34
+GLERL,https://apps.glerl.noaa.gov/erddap/,ok,235,235,0,303
+UCSD,https://spraydata.ucsd.edu/erddap/,ok,4,4,0,6
+UBC,https://salishsea.eos.ubc.ca/erddap/,ok,7,7,0,14
+GCOOS,https://erddap.gcoos.org/erddap/,ok,190,190,0,400
+CEOE,https://basin.ceoe.udel.edu/erddap/,ok,3,3,0,4
+CIOOS Atlantic,https://cioosatlantic.ca/erddap/,ok,90,90,0,111
+CIOOS Pacific,https://data.cioospacific.ca/erddap/,ok,17,17,0,29
+CeNCOOS ERDDAP,http://erddap.cencoos.org/erddap/,ok,968,272,0,730
+EMSO ERIC,http://erddap.emso.eu/erddap/,ok,11,11,3,55
+NCCO,https://coastwatch.noaa.gov/erddap/,ok,9,9,0,11
+CanWIN,https://canwinerddap.ad.umanitoba.ca/erddap/,ok,39,39,0,50
+UAF,https://upwell.pfeg.noaa.gov/erddap/,ok,273,273,3,512
+IFREMER,https://www.ifremer.fr/erddap/,ok,14,14,0,29
+NOAA Oceanview,https://oceanview.pfeg.noaa.gov/erddap/,ok,161,161,0,256
+NERACOOS,https://data.neracoos.org/erddap/,ok,276,276,15,341
+PMEL,https://data.pmel.noaa.gov/pmel/erddap/,ok,168,168,4,294
+NOC-BODC Linked Systems,https://linkedsystems.uk/erddap/,ok,109,109,1,160
+CFRF,https://erddap.ondeckdata.com/erddap/,ok,9,9,0,10
+PacIOOS,https://pae-paha.pacioos.hawaii.edu/erddap/,ok,70,70,27,164
+SCCOOS,https://sccoos.org/erddap/,ok,33,33,0,76
+Hakai,https://catalogue.hakai.org/erddap/,ok,60,60,1,387
+POLARWATCH,https://polarwatch.noaa.gov/erddap/,ok,9,9,0,10
+BCODMO,https://erddap.bco-dmo.org/erddap/,ok,2626,852,6,1847
+EMODnet,https://erddap.emodnet.eu/erddap/,ok,7,7,0,10
+SECOORA,http://erddap.secoora.org/erddap/,ok,1941,227,0,609
+USGS,https://geoport.usgs.esipfed.org/erddap/,ok,1516,95,0,1415
+EMODnet Physics,https://erddap.emodnet-physics.eu/erddap/,ok,670,388,2,3835
+ONC,http://dap.onc.uvic.ca/erddap/,ok,1753,201,12,4304
+OOI,https://erddap.dataexplorer.oceanobservatories.org/erddap/,ok,767,75,0,214
+RUTGERS,http://tds.marine.rutgers.edu/erddap/,ok,46,46,0,53
+COOPS-NOS,https://opendap.co-ops.nos.noaa.gov/erddap/,ok,18,18,0,20
+MII,https://erddap.marine.ie/erddap/,ok,69,69,5,1428
+CSCGOM,https://cwcgom.aoml.noaa.gov/erddap/,unreachable,0,0,0,47
+IOOS-Sensors,https://erddap.sensors.ioos.us/erddap/,ok,24815,1506,243,4375
+OOI Goldcopy,https://erddap-goldcopy.dataexplorer.oceanobservatories.org/erddap/,unreachable,0,0,0,6
+BMLSC,http://bmlsc.ucdavis.edu:8080/erddap/,unreachable,0,0,0,10
+INCOIS,https://erddap.incois.gov.in/erddap/,unreachable,0,0,0,8
