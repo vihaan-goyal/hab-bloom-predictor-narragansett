@@ -135,7 +135,7 @@ lake, and against four satellite chlorophyll products (findings 19-23):
 | Input available at a site | What to run | Expected skill |
 |---|---|---|
 | Sub-daily chlorophyll sonde (any units), any coast or lake | `predict_anywhere.py` with the exported model | onset lift 1.3-2.5x over always-alert, AUC 0.6-0.86; matches a locally trained model at most sites |
-| Same, plus 3+ years of local history | refit locally (`src/transfer/transfer_eval.py` recipe) | +0.3-0.5 lift in fresh/estuarine water; no gain on open shelf |
+| Same, plus 3+ years of local history | refit locally (`src/transfer/transfer_eval.py` recipe) | +0.3-0.5 lift in fresh/estuarine water; no gain on open shelf, and none at the 11 best ERDDAP sites (findings 24 addendum: median delta lift -0.06) |
 | Satellite chlorophyll only (300 m to 4 km) | nowcast / screening only | 7-day onset lift 1.07-1.26, below climatology: **not a forecast** (findings 23) |
 
 Satellites failed the pre-registered test because the run-up is visible only
