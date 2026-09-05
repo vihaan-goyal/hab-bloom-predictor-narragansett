@@ -63,7 +63,9 @@ def sat_series(product, source, station):
     p = f"{CACHE}/{product}/{source}__{station}.csv"
     if not os.path.exists(p):
         return None
-    d = pd.read_csv(p, parse_dates=["date"]).dropna(subset=["value"])
+    d = pd.read_csv(p).dropna(subset=["value"])
+    d["date"] = pd.to_datetime(d["date"], utc=True).dt.tz_localize(None).dt.normalize()   # mixed tz in caches
+    d = d.groupby("date", as_index=False).agg(value=("value", "median"), n_pixels=("n_pixels", "max"))
     return d if len(d) else None
 
 
