@@ -95,7 +95,7 @@ def pull(row):
 
 
 def score(site_id, server, day, min_year_rows=100):
-    day = day.copy()
+    day = day.copy().sort_values(["station", "date"]).reset_index(drop=True)   # add_label needs a RangeIndex
     day["year"] = day.date.dt.year
     day["thr"] = day.groupby("station")["chl"].transform(lambda s: s.quantile(0.75))
     lab = add_label(day, "thr").dropna(subset=["bloom_fwd"])
