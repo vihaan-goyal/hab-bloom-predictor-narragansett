@@ -72,6 +72,7 @@ cadence, partly sonde calibration — NOT a pure cadence effect.
 | parent `src/models/experiments/lis_buoy_recipe.py` | parent `data/lis_buoy_recipe.csv` |
 | `src/transfer/transfer_eval.py`, `fetch_<site>.py`, `pooled_model_test.py`, `regime_models.py` | `data/transfer/*` — cross-site transfer (findings §19–22) |
 | `src/transfer/satellite_fetch.py`, `satellite_eval.py`, `run_satellite_pipeline.ps1` | `data/transfer/satellite_*.csv` - satellite feasibility (findings 23, fig 10) |
+| `src/registry/erddap_crawl.py`, `run_catalog.py`, `src/viz/registry_map.py` | `data/registry/*` - ERDDAP catalog + per-site skill (findings 24, fig 11) |
 | `predict_anywhere.py` + `release/narragansett_bloom_model.joblib` | frozen model for any site (findings §21) |
 | `src/deploy/daily_inference_nar.py --date YYYY-MM-DD` | `data/narragansett_daily_predictions.csv` — per-date station probabilities (findings §18) |
 

@@ -29,6 +29,8 @@ for i, row in cat.iterrows():
             cat.at[i, "lat"] = d.latitude.median(); cat.at[i, "lon"] = d.longitude.median()
     except Exception:
         pass
+# known metadata sign error: UNH Great Bay (NERACOOS) is published at +70.87 E; it is 70.87 W
+cat.loc[(cat.server == "NERACOOS") & (cat.lon > 0), "lon"] *= -1
 new = cat.merge(sk, on=["server", "dataset_id"], how="inner") if len(sk) else pd.DataFrame(columns=["lat", "lon", "lift"])
 
 st = pd.read_csv("data/transfer/stations_latlon.csv")

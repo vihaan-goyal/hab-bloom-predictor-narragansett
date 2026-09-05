@@ -142,9 +142,11 @@ Satellites failed the pre-registered test because the run-up is visible only
 20-40% of days, satellite and sonde chlorophyll agree weakly inside estuaries
 (Spearman 0.1-0.2), and a satellite-only model mostly predicts its own next
 value (lift 1.75 against itself, 1.18 against the water). A water-type
-("regime") model library was also tested and rejected (findings 22). The
-catalog of every public sub-daily chlorophyll sonde the model can run on is
-being built in `data/registry/` (findings 24).
+("regime") model library was also tested and rejected (findings 22). The exported
+model has since been run on 87 further public sonde sites found by crawling
+48 ERDDAP servers: median onset lift 1.58, 67 of 74 scored sites with a
+confidence interval above 1.0, none below (findings 24, fig 11;
+`data/registry/site_skill.csv`).
 
 ## Reproduce
 

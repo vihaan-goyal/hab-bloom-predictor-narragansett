@@ -733,6 +733,83 @@ in open water would need offshore truth we do not have); SST for the SF Delta
 was land-masked and imputed; the Lake Erie sonde record (2014-18) overlaps
 only VIIRS and the gap-filled product; window 2016-2023.
 
+## 24. Every public sub-daily chlorophyll sonde the model can run on: the ERDDAP catalog (2026-09-05)
+
+**Crawl.** `src/registry/erddap_crawl.py` visited the 48 public ERDDAP servers in
+the awesome-erddap registry that serve fixed platforms (10 glider / animal-tag /
+bottle-only servers skipped a priori; 4 unreachable, logged in
+`data/registry/crawl_log.csv`). Each table dataset with a chlorophyll variable was
+probed for its real cadence (median spacing of the last week of timestamps).
+325 datasets have sub-daily chlorophyll (`data/registry/insitu_catalog.csv`);
+after removing cruise/underway/discrete-sample records, gliders, mirrors and
+the networks already ingested (NERRS, URI Narragansett sondes), **172 fixed
+sonde records (~1,400 station-years)** were eligible. The 100 longest were run.
+
+**Run.** `src/registry/run_catalog.py` pulled each record, built the
+`predict_anywhere.py` contract, applied the frozen Narragansett model with
+quantile-rescaled chlorophyll, and scored it with the section-19 protocol
+(own-station p75 label within 7 d, onset rows, threshold chosen on the first
+100 calibration rows, station-year bootstrap). No local training anywhere.
+
+**Result: 87 new sites with predictions, 74 with enough history to score
+(598 station-years).**
+
+| | |
+|---|---|
+| Median onset lift (IQR) | **1.58** (1.31-2.05) |
+| Sites with lift CI entirely above 1.0 | **67 of 74** |
+| CI includes 1.0 | 7 |
+| CI entirely below 1.0 | 0 |
+| Median AUC | 0.74 |
+| Median precision / base rate | 0.48 / 0.28 |
+
+By network:
+
+| Server | Sites scored | Median lift | Median AUC |
+|---|---|---|---|
+| IOOS-Sensors | 54 | 1.51 | 0.74 |
+| NERACOOS | 2 | 3.00 | 0.77 |
+| ONC | 6 | 1.76 | 0.82 |
+| PacIOOS | 12 | 1.77 | 0.72 |
+
+Largest records (>= 1,000 onset test rows), best and worst:
+
+| Dataset | Years | Onset rows | Base rate | Precision | Lift [CI] | AUC |
+|---|---|---|---|---|---|---|
+| `edu_ucsc_scwharf1` | 12.6 | 1,557 | 0.09 | 0.58 | 6.73 [3.16, 17.16] | 0.91 |
+| `fort-point` | 12.7 | 3,379 | 0.06 | 0.27 | 4.52 [2.41, 12.70] | 0.76 |
+| `scripps-pier-automated-shore-sta-1` | 12.6 | 3,264 | 0.15 | 0.63 | 4.13 [3.30, 5.45] | 0.84 |
+| `oa2-mbari-buoy` | 10.7 | 1,881 | 0.08 | 0.30 | 3.84 [1.54, 17.30] | 0.84 |
+| `newport-pier-automated-shore-sta` | 12.6 | 3,063 | 0.13 | 0.51 | 3.77 [3.06, 4.75] | 0.85 |
+| `mlml_mlml_sea` | 14.7 | 3,612 | 0.19 | 0.47 | 2.55 [1.91, 3.61] | 0.85 |
+| `tiburon-water-tibc1` | 17.7 | 3,491 | 0.16 | 0.39 | 2.43 [1.97, 3.21] | 0.83 |
+| `edu_calpoly_marine_morro` | 9.6 | 2,224 | 0.27 | 0.62 | 2.27 [2.03, 2.60] | 0.86 |
+| `cherry-grove-pier` | 9.7 | 2,203 | 0.41 | 0.41 | 1.00 [1.00, 1.00] | 0.67 |
+| `nss_002` | 17.7 | 4,128 | 0.30 | 0.30 | 1.02 [1.00, 1.04] | 0.70 |
+| `ism-gcoos-sccf_11` | 14.4 | 2,437 | 0.31 | 0.32 | 1.03 [1.01, 1.08] | 0.70 |
+| `ism-gcoos-sccf_56` | 11.7 | 1,545 | 0.26 | 0.29 | 1.13 [1.03, 1.22] | 0.64 |
+
+**Reading.** The exported model, never trained on any of these sites, beats
+always-alert with a confidence interval clear of 1.0 at 67 of 74 sites
+across the Gulf of Mexico (LUMCON, Dauphin Island, Sanibel), Florida (Indian
+River Lagoon), the Carolinas (piers), California (Scripps, Newport, Santa
+Monica, Bodega, Tiburon, Morro Bay, Monterey), the Great Lakes (GLOS),
+Alaska, British Columbia (Ocean Networks Canada), New Hampshire (UNH), and the
+Pacific islands (Hawaii, Guam, Samoa, Palau, Marshall Islands, Pohnpei, Saipan,
+Fiji). No site scores below chance. The skill band is the same one seen in
+findings 19: lift 1.3-2.1 at most sites, 3-7x at low-base-rate California
+piers where blooms are rare and episodic, ~1.0 at a handful of Hawaiian and
+Gulf sites where chlorophyll barely varies. This is the three-continent test
+of the coverage claim in section 21, now at 74 sites instead of six networks.
+
+**Caveats.** Fluorometer units differ across networks (rescaling handles
+scale, not sensor drift); thresholds were set on one calibration slice per
+site, which is why a few long records land at lift ~1.0 despite AUC ~0.7; the
+p75 label is a per-site definition of "bloom", not a harmful-species event;
+13 sites had predictions but too little history to score; datasets with
+blank start dates on some servers were excluded by the years >= 1 rule. Fig 11
+`figures/nar_fig11_coverage_map.png` maps every site by onset lift.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
