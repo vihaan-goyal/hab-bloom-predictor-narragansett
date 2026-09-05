@@ -38,7 +38,7 @@ REG_URL = "https://raw.githubusercontent.com/IrishMarineInstitute/awesome-erddap
 REG = "data/registry/erddaps.json"
 CAT = "data/registry/insitu_catalog.csv"
 LOG = "data/registry/crawl_log.csv"
-CHL = re.compile(r"chl|chlor|chlorophyll|fluorescence", re.I)
+CHL = re.compile(r"chl|chlor|chlorophyll|cphl|fluorescence|fluo", re.I)
 TEMP = re.compile(r"^(sea_water_temperature|water_temp|temp|temperature|wtemp|sea_surface_temperature)$", re.I)
 SAL = re.compile(r"salin|sea_water_practical_salinity|psal", re.I)
 DO = re.compile(r"dissolved_oxygen|^do$|do_mgl|oxygen", re.I)
@@ -164,9 +164,11 @@ def main():
                                n_kept=0, seconds=round(time.time() - t_start))]).to_csv(
                 LOG, mode="a", header=not os.path.exists(LOG), index=False)
             continue
-        cand = cat[cat.title.str.contains("chl|chlor|fluor|water quality|sonde|buoy|mooring|station|sensor",
-                                          case=False, na=False)]
-        if len(cand) == 0:
+        # title pre-filter only on very large servers (code-style titles hide chlorophyll otherwise)
+        if len(cat) > 3000:
+            cand = cat[cat.title.str.contains("chl|chlor|fluor|water quality|sonde|buoy|mooring|station|sensor|wq",
+                                              case=False, na=False)]
+        else:
             cand = cat
         cand = cand.head(a.max_datasets)
         kept = 0
