@@ -119,7 +119,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--top", type=int, default=40)
     ap.add_argument("--datasets", default="all")
+    ap.add_argument("--rescore", action="store_true", help="rebuild site_skill.csv from saved predictions and exit")
     a = ap.parse_args()
+    if a.rescore:
+        rescore_all(); return
     for d in (SITES, PRED):
         os.makedirs(d, exist_ok=True)
     cat = pd.read_csv(CAT)
@@ -164,8 +167,29 @@ def main():
         else:
             print(f"   lift={r['lift']:.2f} [{r['lift_lo']:.2f},{r['lift_hi']:.2f}] prec={r['precision']:.3f} "
                   f"base={r['base_rate']:.3f} auc={r['auc']:.3f} n={r['n_onset']}", flush=True)
-        pd.DataFrame([r]).to_csv(SKILL, mode="a", header=not os.path.exists(SKILL), index=False)
+        pd.DataFrame([r]).reindex(columns=COLS).to_csv(SKILL, mode="a", header=not os.path.exists(SKILL), index=False)
     print("catalog run complete", flush=True)
+
+
+COLS = ["server", "dataset_id", "n_stations", "years", "n_onset", "n_test", "tp", "fp", "fn", "base_rate",
+        "precision", "pod", "lift", "lift_lo", "lift_hi", "auc", "auc_lo", "auc_hi", "precision_lo", "precision_hi", "t_star"]
+
+
+def rescore_all():
+    """Rebuild site_skill.csv from the saved prediction files (dedupes, fixes column order)."""
+    cat = pd.read_csv(CAT).drop_duplicates(subset=["dataset_id"]).set_index("dataset_id")
+    rows = []
+    for f in sorted(os.listdir(PRED)):
+        did = f[:-4]
+        day = pd.read_csv(f"{PRED}/{f}", parse_dates=["date"])
+        server = cat.server.get(did, "?")
+        r = score(did, server, day)
+        if r is None:
+            r = dict(server=server, dataset_id=did, n_stations=day.station.nunique(),
+                     years=round((day.date.max() - day.date.min()).days / 365.25, 1))
+        rows.append(r)
+    pd.DataFrame(rows).reindex(columns=COLS).to_csv(SKILL, index=False)
+    print(f"rescored {len(rows)} sites -> {SKILL}")
 
 
 if __name__ == "__main__":
