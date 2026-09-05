@@ -83,7 +83,8 @@ def pull(row):
     if not parts:
         return None
     x = pd.concat(parts, ignore_index=True)
-    st = x[row.station_var].astype(str) if isinstance(row.station_var, str) and row.station_var in x else pd.Series(row.dataset_id, index=x.index)
+    st = (x[row.station_var].astype(str) if isinstance(row.station_var, str) and row.station_var in x
+          and x[row.station_var].notna().any() else pd.Series(row.dataset_id, index=x.index))
     site = pd.DataFrame({"station": st, "datetime": pd.to_datetime(x["time"], utc=True, errors="coerce").dt.tz_localize(None),
                          "chl": pd.to_numeric(x[row.chl_var], errors="coerce")})
     for name, c in (("temp", row.temp_var), ("sal", row.sal_var), ("do", row.do_var)):

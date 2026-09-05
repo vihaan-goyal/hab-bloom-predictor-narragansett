@@ -128,7 +128,7 @@ def cadence_probe(base, ds, station_var, max_time):
         return None, 0
     d["time"] = pd.to_datetime(d["time"], utc=True, errors="coerce")
     d = d.dropna(subset=["time"])
-    if station_var and station_var in d:
+    if station_var and station_var in d and d[station_var].notna().any():   # IOOS returns NaN station ids
         n_st = d[station_var].nunique()
         gaps = d.sort_values("time").groupby(station_var)["time"].diff().dt.total_seconds().dropna()
     else:
