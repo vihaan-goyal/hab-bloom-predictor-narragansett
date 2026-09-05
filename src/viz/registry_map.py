@@ -46,23 +46,34 @@ for src in st.source.unique():
 known = pd.concat(known)
 
 fig, ax = plt.subplots(figsize=(14, 6.5))
-ax.set_xlim(-180, 180); ax.set_ylim(-70, 80); ax.set_aspect("equal")
-ax.axhline(0, color="0.85", lw=0.8); ax.axvline(0, color="0.85", lw=0.8); ax.grid(alpha=0.25)
+ax.set_xlim(-180, 180); ax.set_ylim(-62, 82); ax.set_aspect("equal")
+# minimalist basemap: Natural Earth 110 m land polygons (figures/data/ne_110m_land.geojson), plain matplotlib
+import json
+from matplotlib.patches import Polygon as MplPolygon
+land = "figures/data/ne_110m_land.geojson"
+if os.path.exists(land):
+    for feat in json.load(open(land, encoding="utf-8"))["features"]:
+        geom = feat["geometry"]
+        polys = geom["coordinates"] if geom["type"] == "Polygon" else [p for mp in geom["coordinates"] for p in mp]
+        for ring in polys:
+            ax.add_patch(MplPolygon(ring, closed=True, facecolor="0.88", edgecolor="0.7", linewidth=0.4, zorder=0))
+ax.set_facecolor("white")
+for sp in ax.spines.values(): sp.set_visible(False)
+ax.set_xticks([]); ax.set_yticks([])
 vmin, vmax = 0.8, 2.6
-sc = ax.scatter(known.lon, known.lat, c=known.lift, cmap="viridis", vmin=vmin, vmax=vmax, s=28, marker="s",
-                edgecolor="k", linewidth=0.3, label="seven networks tested in findings 19 (squares)")
+sc = ax.scatter(known.lon, known.lat, c=known.lift, cmap="viridis", vmin=vmin, vmax=vmax, s=34, marker="s",
+                edgecolor="k", linewidth=0.4, zorder=3, label="seven networks tested in findings 19 (squares)")
 n_sc = 0
 if len(new):
     scored = new.dropna(subset=["lift"]); unscored = new[new.lift.isna()]; n_sc = len(scored)
     if len(scored):
-        ax.scatter(scored.lon, scored.lat, c=scored.lift, cmap="viridis", vmin=vmin, vmax=vmax, s=60, marker="o",
-                   edgecolor="k", linewidth=0.5, label="new ERDDAP sites, scored (circles)")
+        ax.scatter(scored.lon, scored.lat, c=scored.lift, cmap="viridis", vmin=vmin, vmax=vmax, s=70, marker="o",
+                   edgecolor="k", linewidth=0.5, zorder=4, label="new ERDDAP sites, scored (circles)")
     if len(unscored):
-        ax.scatter(unscored.lon, unscored.lat, color="0.6", s=40, marker="o", edgecolor="k", linewidth=0.4,
+        ax.scatter(unscored.lon, unscored.lat, color="0.6", s=45, marker="o", edgecolor="k", linewidth=0.4, zorder=3,
                    label="new ERDDAP sites, predictions only (<2 years)")
 cb = fig.colorbar(sc, ax=ax, fraction=0.025, pad=0.01)
 cb.set_label("onset lift of the exported model (precision / base rate)")
-ax.set_xlabel("longitude"); ax.set_ylabel("latitude")
 ax.set_title(f"Fig 11. Every site the exported Narragansett model has been run on: "
              f"{st.station.nunique()} known-network stations + {len(new)} new ERDDAP datasets ({n_sc} scored)")
 ax.legend(loc="lower left", fontsize=8)
