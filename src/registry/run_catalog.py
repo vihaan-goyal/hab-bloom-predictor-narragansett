@@ -185,15 +185,23 @@ def rescore_all():
     cat = pd.read_csv(CAT).drop_duplicates(subset=["dataset_id"]).set_index("dataset_id")
     rows = []
     import re
-    skip = re.compile(r"^URI_|NERRS|dms_database|ARICE|wod\d*|Amundsen", re.I)
+    skip = re.compile(r"^URI_|NERRS|dms_database|ARICE|wod\d*|Amundsen|^ism-pacioos-", re.I)   # ism-pacioos = IOOS mirror of PacIOOS
+    have = {f[:-4] for f in os.listdir(PRED)}
+    seen_sig = set()
     for f in sorted(os.listdir(PRED)):
         did = f[:-4]
         if skip.search(did):
             continue
+        if did.startswith("ism-") and any(did.split("-", 2)[-1].replace("-", "_") in h.replace("-", "_") for h in have if h != did):
+            continue                                   # IOOS 'ism-<network>-<id>' alias of a dataset we already have
         day = pd.read_csv(f"{PRED}/{f}", parse_dates=["date"])
         server = cat.server.get(did, "?")
         if server == "UAF":            # UAF mirrors the PacIOOS datasets
             continue
+        sig = (round(float(day.chl.mean()), 4), len(day), str(day.date.min())[:10])   # identical data under two ids
+        if sig in seen_sig:
+            continue
+        seen_sig.add(sig)
         r = score(did, server, day)
         if r is None:
             r = dict(server=server, dataset_id=did, n_stations=day.station.nunique(),
