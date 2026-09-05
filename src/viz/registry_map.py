@@ -17,6 +17,18 @@ import pandas as pd
 sk = pd.read_csv("data/registry/site_skill.csv") if os.path.exists("data/registry/site_skill.csv") else pd.DataFrame()
 cat = pd.read_csv("data/registry/insitu_catalog.csv").drop_duplicates(subset=["server", "dataset_id"])
 cat["lat"] = (cat.lat_min + cat.lat_max) / 2; cat["lon"] = (cat.lon_min + cat.lon_max) / 2
+# prefer the median of the pulled coordinates (bounding-box midpoints mislocate datasets that span hemispheres)
+import glob
+for i, row in cat.iterrows():
+    files = glob.glob(f"data/registry/raw/{row.server}/{row.dataset_id}_*.csv")
+    if not files:
+        continue
+    try:
+        d = pd.concat([pd.read_csv(f, usecols=["latitude", "longitude"]).dropna() for f in files[:3]])
+        if len(d):
+            cat.at[i, "lat"] = d.latitude.median(); cat.at[i, "lon"] = d.longitude.median()
+    except Exception:
+        pass
 new = cat.merge(sk, on=["server", "dataset_id"], how="inner") if len(sk) else pd.DataFrame(columns=["lat", "lon", "lift"])
 
 st = pd.read_csv("data/transfer/stations_latlon.csv")
