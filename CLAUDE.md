@@ -6,9 +6,10 @@ git history and in the parent repo `../hab-bloom-predictor`.
 
 ## Run instructions
 
-Use the BASE conda env (`~/anaconda3/python.exe`), NOT the `hab` env — `hab`
-has a broken LAPACK that crashes sklearn/np.linalg (exit 127). Run from repo
-root.
+Use the BASE conda env (`~/anaconda3/python.exe`). The local `hab` env is broken (LAPACK
+conflict); `environment.yml` was re-pinned to the base env's real versions on 2026-09-05 and a
+fresh `conda env create -f environment.yml` builds and runs the pipeline, so recreate rather
+than repair.
 
 ```bash
 # 1. Consolidate raw RIDEM corrected sonde files -> 15-min tidy CSV
@@ -75,9 +76,15 @@ cadence, partly sonde calibration — NOT a pure cadence effect.
 | `src/registry/erddap_crawl.py`, `run_catalog.py`, `src/viz/registry_map.py` | `data/registry/*` - ERDDAP catalog + per-site skill (findings 24, fig 11) |
 | `predict_anywhere.py` + `release/narragansett_bloom_model.joblib` | frozen model for any site (findings §21) |
 | `src/deploy/daily_inference_nar.py --date YYYY-MM-DD` | `data/narragansett_daily_predictions.csv` — per-date station probabilities (findings §18) |
+| `src/models/experiments/bloom_rate_by_period.py` | `data/bloom_rate_by_period.csv` — the 2014-cliff table (findings §15); needs parent repo at `../hab-bloom-predictor` |
 
 Headline after Part II: pooled onset precision 0.656 [0.618, 0.692], lift 2.50.
 Cadence thesis: FAILED its pre-registered test; rarity dominates (findings §11–12).
+
+## Reproducibility
+
+Every findings section maps to a script in the **Reproducibility map** at the top of
+`notes/NARRAGANSETT_FINDINGS.md`. Keep it current when adding a section.
 
 ## Experiment scripts
 

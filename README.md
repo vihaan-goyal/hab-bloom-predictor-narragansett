@@ -160,6 +160,25 @@ python src/models/train_narragansett.py            # models + baselines -> resul
 Raw zips: `https://datadem.ri.gov/documents/bart/nbfsmnYY.zip` (2003–2023
 available; 2005–2023 parsed, 2003–04 format unsupported). `data/` is gitignored throughout.
 
+Every numbered section of the findings note names the script, inputs and
+output that produced it: see the **Reproducibility map** at the top of
+[`notes/NARRAGANSETT_FINDINGS.md`](notes/NARRAGANSETT_FINDINGS.md). Two
+sections (§12, §17) also need the parent LIS repo checked out beside this one
+as `../hab-bloom-predictor`. One data source (Cefas SmartBuoy) requires a
+manual portal export; §19 says exactly what to request.
+
+**Clean-machine check (2026-09-05).** The committed `environment.yml` had never
+been tested and did not describe the environment that produced the results
+(it pinned Python 3.11, pandas 3.0 and scikit-learn 1.8; every number here was
+run under Python 3.13, pandas 2.3.3, scikit-learn 1.7.2, and the released
+`.joblib` unpickles with version warnings under 1.8). It now pins the versions
+actually used. `conda env create -f environment.yml` was then run from scratch
+into a fresh env on Windows 11 / conda 26.1: it built in a few minutes, and in
+it `np.linalg.lstsq`, a HistGradientBoosting fit, `daily_inference_nar.py`,
+`bloom_rate_by_period.py` and a warning-free load of
+`release/narragansett_bloom_model.joblib` all ran. The old "`hab` env is
+broken" note described one damaged local env, not the recipe.
+
 ## Findings
 
 The full replication of the LIS analysis suite (DO/temp conditioning,

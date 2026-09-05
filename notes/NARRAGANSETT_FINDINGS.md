@@ -8,6 +8,40 @@ Data: 22,851 station-days (2015–2023, 15 stations, daily aggregates of
 Every analysis from the LIS chapter now has a Narragansett counterpart.
 Two replicate, one diverges, one is newly possible.
 
+## Reproducibility map (added 2026-09-05)
+
+Every section below names its script here. Run from the fork root with the
+BASE conda env (`~/anaconda3/python.exe`), after the three build steps in the
+README "Reproduce" block. `data/` is gitignored everywhere; each fetch script's
+docstring says where its raw input comes from. Rows marked *parent* live in
+`../hab-bloom-predictor`, the LIS repo this fork was cut from.
+
+| § | Script(s) | Inputs | Output / figure |
+|---|---|---|---|
+| 1–5 | `src/models/narragansett_lis_analyses.py`, `src/models/bootstrap_narragansett.py`, `src/models/train_narragansett.py`, `src/viz/narragansett_figures.py` | `data/narragansett_daily_features.csv` | `data/narragansett_epoch_composite.csv`, `data/narragansett_bootstrap_cis.csv`, `data/narragansett_model_results.csv`, `figures/nar_fig1–4` |
+| 6 | `src/features/build_narragansett.py`, `src/features/build_narragansett_daily.py`, `src/models/ablation_narragansett.py` | raw NBFSMN zips (README) | `data/narragansett_daily_features.csv`, `data/narragansett_ablation.csv` |
+| 7 | `src/models/rolling_origin_cv_nar.py` | daily features | `data/rolling_origin_cv_nar.csv`, `_pooled.csv` |
+| 8 | `src/models/experiments/onset_rule_baselines.py` (2023), `onset_rule_baselines_cv.py` (9 folds) | daily features | `data/onset_rule_baselines.csv`, `_cv.csv` |
+| 9 | `src/models/experiments/horizon_sweep_nar.py` | daily features | `data/horizon_sweep_nar.csv`, `figures/nar_fig5` |
+| 10 | `src/features/calibrate_sonde_chl.py` | NBFSMN lab chlorophyll sheets (docstring lists them) | `data/sonde_lab_calibration*.csv`, `figures/nar_fig6` |
+| 11 | `src/models/experiments/cadence_thinning.py` | daily features | `data/cadence_thinning.csv` |
+| 12 | *parent* `src/models/experiments/lis_buoy_recipe.py`; buoy pull `src/data/lisicos_buoy_pull.py` | UConn LISICOS ERDDAP | *parent* `data/lis_buoy_recipe.csv` |
+| 13 | `src/models/experiments/cadence_thinning_matched.py` | daily features | `data/cadence_thinning_matched.csv` |
+| 14 | `src/models/experiments/tuning_search_nar.py` | daily features | `data/tuning_search_nar_{grid,null,selected}.csv` |
+| 15 | `src/models/experiments/bloom_rate_by_period.py` | daily features + *parent* `data/hab_features_tidal.csv` | `data/bloom_rate_by_period.csv` |
+| 16 | `src/models/experiments/lift_at_rarity_cv.py` | daily features | `data/lift_at_rarity_cv.csv` |
+| 17 | `src/models/experiments/prob_before_onset.py`, `fig_prob_21d_before.py`; *parent* `src/models/experiments/prob_before_onset_lis.py` | daily features; *parent* `data/cv_predictions.csv` | `data/prob_before_onset_nar*.csv`, `figures/nar_fig8` |
+| 18 | `src/deploy/daily_inference_nar.py --date YYYY-MM-DD` | daily features | `data/narragansett_daily_predictions.csv` |
+| 19 | `src/transfer/fetch_{chesapeake,nerrs,cefas_portal,imos,lake_erie,sfbay}.py` then `python -m src.transfer.transfer_eval --source <name>` | public feeds (each docstring); **Cefas is a manual portal export**, see §19 | `data/transfer/<name>_{15min,daily,results}.csv` |
+| 20 | `src/transfer/pooled_model_test.py` | §19 daily files | `data/transfer/pooled_to_narragansett.csv` |
+| 21 | `src/deploy/export_model.py`, `predict_anywhere.py` | daily features | `release/narragansett_bloom_model.joblib` (committed) |
+| 22 | `src/transfer/regime_models.py`, `src/viz/regime_figure.py` | §19 daily files | `data/transfer/regime_loso*.csv`, `figures/nar_fig9` |
+| 23 | `src/transfer/satellite_fetch.py`, `satellite_eval.py`, `src/viz/satellite_figure.py` | NOAA CoastWatch ERDDAP (docstring) | `data/transfer/satellite_*.csv`, `figures/nar_fig10` |
+| 24 | `src/registry/erddap_crawl.py`, `run_catalog.py`, `refit_top_sites.py`, `src/viz/registry_map.py` | 60 public ERDDAP servers (`data/registry/erddaps.json`) | `data/registry/*.csv` (committed), `figures/nar_fig11` |
+
+Seeds: model `random_state=42`; bootstrap `seed=42`, n=2000. Environment:
+`environment.yml` (see README "Reproduce" for the clean-machine check).
+
 ## 1. DO conditioning replicates (cross-system result)
 
 *Figure: figures/nar_fig1_do_temp_conditioning.png*
@@ -134,8 +168,8 @@ stratification -0.4pp, pH +1.3pp (harmful). Full table:
 
 Pre-registered in the plan file before any run. Scripts under
 `src/models/experiments/`, `src/models/rolling_origin_cv_nar.py`,
-`src/features/calibrate_sonde_chl.py`; parent repo:
-`src/models/experiments/lis_buoy_recipe.py`.
+`src/features/calibrate_sonde_chl.py`; **parent repo** (`../hab-bloom-predictor`, not this
+fork): `src/models/experiments/lis_buoy_recipe.py`.
 
 ## 7. Multi-year rolling-origin CV: the single-year number holds
 
@@ -318,8 +352,9 @@ control for LIS's cleanup. Today's gap is 5.6× (raw) / 3.8× (calibrated).
 
 This is the origin of the rarity that caps LIS precision (§13): the forecast
 is hard because pollution control worked. Same 10 µg/L threshold, same
-recipe — the event became rare. Script: inline comparison of
-`data/hab_features_tidal.csv` (parent) and `data/narragansett_daily_features.csv`.
+recipe — the event became rare. Script: `src/models/experiments/bloom_rate_by_period.py`
+(reads parent `data/hab_features_tidal.csv` and `data/narragansett_daily_features.csv`;
+re-run 2026-09-05, reproduces every number in the table; writes `data/bloom_rate_by_period.csv`).
 
 
 **Caveat added 2026-09-03 (nitrogen).** Narragansett Bay's own nitrogen load
@@ -397,7 +432,7 @@ prior bloom on day −21; open-bay F7 onsets score ~0.1.
 
 Files: `data/prob_before_onset_nar.csv` (+ `_null`, `_trajectory`),
 `src/models/experiments/prob_before_onset.py`, `fig_prob_21d_before.py`;
-parent `src/models/experiments/prob_before_onset_lis.py`,
+**parent repo** (`../hab-bloom-predictor`): `src/models/experiments/prob_before_onset_lis.py`,
 `data/prob_before_onset_lis.csv`.
 
 
@@ -486,7 +521,15 @@ chl, the fair one because fluorometers are not inter-comparable; abs10 = 10
 first), **refit** (GB/LR retrained on the target, rolling-origin CV). Baselines:
 always-alert, station-DOY climatology, chl>c rule with c chosen on the val
 year. Station-year clustered bootstrap CIs. Fetch scripts:
-`src/transfer/fetch_<site>.py`; data under `data/transfer/` (gitignored).
+`src/transfer/fetch_<site>.py`; data under `data/transfer/` (gitignored). Five
+of the six sources download unattended. **Cefas is the exception**: the SmartBuoy
+archive is served only through https://smartbuoy.cefas.co.uk/download behind a
+free login, so the export was requested by hand (2026-09-03: 7 platforms,
+post-recovery data, CSV, 2002-08-28 to 2026-09-03, temperature / salinity /
+fluorescence MT+SP / oxygen % saturation), the zip saved to
+`data/transfer/raw/cefas/portal/` and parsed by `fetch_cefas_portal.py`. Anyone
+repeating this needs their own portal account and ~10 minutes of clicking; the
+docstring lists the exact parameters.
 
 **Onset-only, p75 label. Lift = precision / base rate; [95% CI].**
 

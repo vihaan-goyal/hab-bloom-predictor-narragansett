@@ -1,21 +1,34 @@
+# Environment that produced every number in notes/NARRAGANSETT_FINDINGS.md.
+# Pins are the versions installed in the conda BASE env used for all runs
+# (verified 2026-09-05: a fresh `conda env create -f environment.yml` builds
+# and runs the pipeline; see README "Reproduce").
+#
+#   conda env create -f environment.yml && conda activate hab
+#
+# The LIS deep-learning and XGBoost experiments in the parent repo
+# (src/models/lstm_*.py, convlstm_model.py, tune_xgboost.py, shap_*.py) need
+# the OPTIONAL extras at the bottom; nothing in this fork imports them.
 name: hab
 channels:
   - defaults
 dependencies:
-  - python=3.11
-  - jupyter
+  - python=3.13
   - pip
   - pip:
-    - numpy==2.4.6
-    - pandas==3.0.3
-    - scipy==1.17.1
-    - scikit-learn==1.8.0
-    - matplotlib==3.10.9
-    - xarray==2026.4.0
+    - numpy==2.3.5
+    - scipy==1.16.3
+    - pandas==2.3.3
+    - scikit-learn==1.7.2     # release/narragansett_bloom_model.joblib was pickled with this
+    - joblib==1.5.2
+    - matplotlib==3.10.6
+    - xarray==2025.10.1
     - netCDF4==1.7.4
-    - torch==2.12.0
-    - torchvision==0.27.0
-    - xgboost==3.2.0
-    - shap==0.51.0
-    - earthaccess==0.17.0
-    - requests==2.34.2
+    - requests==2.32.5
+    - python-calamine==0.8.2   # NBFSMN .xls/.xlsx parsing (build_narragansett.py uses engine="calamine")
+    - openpyxl==3.1.5
+    # --- optional, parent-repo LIS experiments only ---
+    # - torch==2.12.0
+    # - torchvision==0.27.0
+    # - xgboost==3.2.0
+    # - shap==0.51.0
+    # - earthaccess==0.17.0
