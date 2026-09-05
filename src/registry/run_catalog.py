@@ -123,7 +123,11 @@ def main():
     for d in (SITES, PRED):
         os.makedirs(d, exist_ok=True)
     cat = pd.read_csv(CAT)
-    cat = cat[(cat.years >= 1) & (cat.cadence_min <= 60) & (~cat.already_covered.astype(bool))].copy()
+    junk = cat.title.str.contains(r"wod\d*|ctd|dms|moving vessel|tsg|discrete|water sample|cast|profil|cruise|underway|shipboard|glider|drifter",
+                                  case=False, na=False, regex=True)
+    covered = cat.already_covered.astype(bool) | cat.dataset_id.str.contains(r"^URI_|NERRS", case=False, regex=True)
+    cat = cat[(cat.years >= 1) & (cat.years <= 40) & (cat.cadence_min <= 60) & ~covered & ~junk].copy()
+    cat = cat.drop_duplicates(subset=["title"])            # UAF mirrors PacIOOS etc.
     cat["rank"] = cat.years * cat.n_stations.clip(lower=1)
     cat = cat.sort_values("rank", ascending=False).head(a.top)
     if a.datasets != "all":
