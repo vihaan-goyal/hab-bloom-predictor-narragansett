@@ -44,7 +44,10 @@ SAL = re.compile(r"salin|sea_water_practical_salinity|psal", re.I)
 DO = re.compile(r"dissolved_oxygen|^do$|do_mgl|oxygen", re.I)
 STATION = re.compile(r"^(station|station_id|platform|platform_id|site|site_id|buoy|mooring|wmo_platform_code)$", re.I)
 COVERED = re.compile(r"nerrs_|nwis|usgs|ridem|narragansett|eyesonthebay|maryland|cefas|smartbuoy|imos|anmn|nrs|glerl|cwq_", re.I)
-EXCLUDE_TYPES = {"Trajectory", "TrajectoryProfile", "Grid", "Swath"}
+EXCLUDE_TYPES = {"Trajectory", "TrajectoryProfile", "Profile", "Grid", "Swath"}
+# servers that serve only moving platforms, animal tags, cruise bottles or model output
+SKIP_SERVERS = {"VOTO", "NGDAC", "OTN", "ATN-IOOS", "ALAMO", "SOCAT", "IOC-IODE-OA", "Bio-Oracle", "DIVER", "OSMC"}
+MIN_YEARS, MIN_CADENCE_MIN = 0.5, 1.0
 
 
 def get(url, tries=2, timeout=120):
@@ -151,7 +154,7 @@ def main():
     done_servers = set(pd.read_csv(LOG).server) if os.path.exists(LOG) else set()
     for s in servers:
         name, base = s["short_name"], s["url"].rstrip("/") + "/"
-        if name in done_servers:
+        if name in done_servers or name in SKIP_SERVERS:
             continue
         t_start = time.time()
         print(f"== {name} {base}", flush=True)
@@ -183,13 +186,16 @@ def main():
                 r0 = get(f'{base}tabledap/{row.datasetID}.csv?time&orderByMax("time")', timeout=60)
                 try: row.maxTime = pd.read_csv(io.StringIO(r0.text), skiprows=[1])["time"].iloc[-1]
                 except Exception: pass
-            if cad is None or cad > 60:
+            if cad is None or cad > 60 or cad < MIN_CADENCE_MIN:
                 print(f"   skip {row.datasetID}: cadence={cad}", flush=True)
                 continue
             tmax = pd.Timestamp(row.maxTime) if pd.notna(row.maxTime) else pd.Timestamp.utcnow().tz_localize(None)
             tmin = pd.Timestamp(row.minTime)
             tmax = tmax.tz_convert(None) if tmax.tzinfo else tmax; tmin = tmin.tz_convert(None) if tmin.tzinfo else tmin
             years = (tmax - tmin).days / 365.25
+            if years < MIN_YEARS:
+                print(f"   skip {row.datasetID}: span {years:.2f} y", flush=True)
+                continue
             rec = dict(server=name, dataset_id=row.datasetID, title=str(row.title)[:120], n_stations=n_st,
                        cadence_min=round(cad, 1), start=str(tmin)[:10], end=str(tmax)[:10],
                        years=round(years, 1), chl_var=chl, temp_var=pick(var, TEMP), sal_var=pick(var, SAL),
