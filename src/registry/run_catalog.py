@@ -103,8 +103,13 @@ def score(site_id, server, day, min_year_rows=100):
     years = sorted(on.year.unique())
     if len(years) < 2 or len(on) < 200:
         return None
-    cal = on[on.year == years[0]]; test = on[on.year > years[0]]
-    if len(cal) < min_year_rows or cal.bloom_fwd.nunique() < 2 or test.bloom_fwd.nunique() < 2:
+    # calibration = earliest years accumulated until >= min_year_rows onset rows; test = the rest
+    cum = on.groupby("year").size().reindex(years).cumsum()
+    ycal = next((y for y in years if cum[y] >= min_year_rows), None)
+    if ycal is None or ycal == years[-1]:
+        return None
+    cal = on[on.year <= ycal]; test = on[on.year > ycal]
+    if cal.bloom_fwd.nunique() < 2 or test.bloom_fwd.nunique() < 2 or len(test) < 100:
         return None
     t = pick_t(cal.bloom_fwd.values, cal.bloom_prob.values)
     r = metrics(test.bloom_fwd, test.bloom_prob >= t)
@@ -179,8 +184,12 @@ def rescore_all():
     """Rebuild site_skill.csv from the saved prediction files (dedupes, fixes column order)."""
     cat = pd.read_csv(CAT).drop_duplicates(subset=["dataset_id"]).set_index("dataset_id")
     rows = []
+    import re
+    skip = re.compile(r"^URI_|NERRS|dms_database|ARICE|wod\d*|Amundsen", re.I)
     for f in sorted(os.listdir(PRED)):
         did = f[:-4]
+        if skip.search(did):
+            continue
         day = pd.read_csv(f"{PRED}/{f}", parse_dates=["date"])
         server = cat.server.get(did, "?")
         r = score(did, server, day)
