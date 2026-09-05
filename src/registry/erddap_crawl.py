@@ -150,7 +150,8 @@ def main():
         open(REG, "w", encoding="utf-8").write(get(REG_URL).text)
     servers = [s for s in json.load(open(REG, encoding="utf-8")) if s.get("public", True)]
     if a.servers != "all":
-        servers = [s for s in servers if s["short_name"] in a.servers.split(",")]
+        want = {x.strip().replace("_", " ") for x in a.servers.split(",")}
+        servers = [s for s in servers if s["short_name"] in want]
     done_servers = set(pd.read_csv(LOG).server) if os.path.exists(LOG) else set()
     for s in servers:
         name, base = s["short_name"], s["url"].rstrip("/") + "/"
@@ -164,10 +165,18 @@ def main():
                                n_kept=0, seconds=round(time.time() - t_start))]).to_csv(
                 LOG, mode="a", header=not os.path.exists(LOG), index=False)
             continue
-        # title pre-filter only on very large servers (code-style titles hide chlorophyll otherwise)
-        if len(cat) > 3000:
-            cand = cat[cat.title.str.contains("chl|chlor|fluor|water quality|sonde|buoy|mooring|station|sensor|wq",
-                                              case=False, na=False)]
+        # big servers: ask the server's own full-text search which datasets mention chlorophyll
+        if len(cat) > 300:
+            ids = set()
+            for q in ("chlorophyll", "fluorescence", "chl"):
+                r = get(f"{base}search/index.csv?page=1&itemsPerPage=5000&searchFor={q}", timeout=180)
+                if r is not None and r.status_code == 200:
+                    try:
+                        ids |= set(pd.read_csv(io.StringIO(r.text))["Dataset ID"])
+                    except Exception:
+                        pass
+                time.sleep(1)
+            cand = cat[cat.datasetID.isin(ids)] if ids else cat.head(300)
         else:
             cand = cat
         cand = cand.head(a.max_datasets)
