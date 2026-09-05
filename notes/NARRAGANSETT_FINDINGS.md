@@ -654,6 +654,78 @@ calibration on the first year gives the Narragansett model an unusually low
 POD (0.43) at the pooled level, so its lift is a precision-heavy operating
 point rather than a different ranking (AUCs are within 0.02).
 
+## 23. Can satellite chlorophyll drive the 7-day model? Pre-registered test: no, at any resolution (2026-09-04)
+
+Motivation: sub-daily sondes exist at a few hundred stations worldwide; the
+only chlorophyll source with daily cadence on every coast is satellite ocean
+colour. If a satellite-driven version of the model kept useful skill, the
+project could cover any coastline. Plan and criteria fixed before running.
+
+**Design.** 89 sonde stations across the seven systems (`data/transfer/stations_latlon.csv`).
+For each, the daily satellite chlorophyll in a 3x3-pixel box (median of valid
+pixels) from four products, plus MUR 1 km SST: Copernicus OLCI **300 m**
+(2016-), NOAA gap-filled VIIRS+OLCI **2 km** (2018-), NASA VIIRS **4 km**
+(2012-22), CoastWatch OLCI **4 km** (2019-). The 750 m OLCI sectors begin in
+2025 and could not be used. Features: the tier-A set built from the satellite
+series alone (salinity and DO absent, imputed), chl quantile-rescaled to the
+Narragansett scale. Truth: the **sonde** label (sonde chl > own p75 within 7 d),
+onset rows = sonde chl <= p75 today. Pre-registered GO criterion per product:
+satellite-refit onset lift >= 1.3 with CI excluding 1.0, beating the satellite
+chl>c rule, with >= 60% of sonde bloom onsets having >= 1 satellite observation
+in the prior 7 days. Scripts: `src/transfer/satellite_fetch.py`,
+`satellite_eval.py`, `src/viz/satellite_figure.py`; fig 10
+`figures/nar_fig10_satellite.png`.
+
+**Coverage and observability.** Raw valid-day fraction at the stations: 300 m
+16-38% by source (median ~24%), 4 km 25-35%, gap-filled 2 km 55-100% (it is
+interpolated). Share of real sonde onsets with >=1 satellite look in the prior
+week: 78% (300 m), 84% (4 km), 99% (gap-filled); with >=3 looks: 26-38% for
+the raw products. Clouds hide the run-up more often than not.
+
+**Agreement.** Median Spearman between satellite and sonde daily chlorophyll
+on co-valid days: 0.21 (300 m), 0.09 (4 km), 0.10 (gap-filled), 0.39 (VIIRS,
+shelf sites only). Same-day exceedance kappa 0.04-0.21. The satellite is not
+seeing what the sonde sees inside estuaries; on open shelf moorings (IMOS,
+Cefas) agreement reaches 0.4-0.8.
+
+**Skill against sonde truth, onset rows, observation-based features:**
+
+| Product | Stations | Onset rows | Sat. zero-shot | **Sat. refit** | Sat. chl>c rule | Climatology (no satellite) | Sonde model (upper bound) | Verdict |
+|---|---|---|---|---|---|---|---|---|
+| OLCI 300 m | 39 | 9,383 | 1.01 [0.95, 1.07] | **1.26 [1.19, 1.32]**, AUC 0.64 | 1.00 | 1.44 | 1.76, AUC 0.73 | NO-GO |
+| Gap-filled 2 km | 52 | 41,590 | 1.04 | **1.18 [1.15, 1.22]**, AUC 0.66 | 1.01 | 1.45 | 1.71, AUC 0.74 | NO-GO |
+| VIIRS 4 km | 20 | 3,872 | 1.08 | **1.20 [1.09, 1.32]**, AUC 0.61 | 1.06 | 1.14 | 1.34, AUC 0.66 | NO-GO |
+| OLCI 4 km | 44 | 9,170 | 1.11 | **1.07 [1.04, 1.11]**, AUC 0.59 | 1.06 | 1.46 | 1.68, AUC 0.71 | NO-GO |
+
+Three readings.
+
+1. **Satellite input carries a little skill (lift 1.07-1.26, CIs above 1) but
+   less than the calendar.** Station-DOY climatology, which uses no satellite
+   data at all, beats every satellite model at every resolution except VIIRS
+   on the shelf. The pre-registered bar of 1.3 is not reached anywhere; finer
+   resolution helps (300 m > 2 km > 4 km) but not enough.
+2. **The exported Narragansett model gets nothing from satellite input** (lift
+   1.01-1.11, AUC 0.53-0.56). The run-up shape it learned from sondes is not
+   present in a cloud-gapped satellite series sampled once a day at best.
+3. **Satellite chlorophyll predicts itself, not the water.** Scored against
+   the satellite's own exceedance label, the same refit reports lift 1.75
+   and AUC 0.72 on the gap-filled product (1.18 / 0.66 against the sonde). A
+   satellite-only deployment would believe it forecasts blooms about as well
+   as sondes do while barely beating a calendar on what the water actually did.
+   This is the single most important caveat for any satellite HAB product
+   evaluated without in-situ truth.
+
+**Conclusion for "going global".** Tier 2 (satellite) is closed as a 7-day
+onset forecaster: at 300 m to 4 km, with 20-40% of days visible, satellite
+chlorophyll does not carry the bloom run-up signal at sonde stations. What
+remains viable: tier 1 (any site with sub-daily sondes, via `predict_anywhere.py`)
+and, for satellites, a screening/nowcast role (where is chlorophyll high today)
+rather than a forecast. Caveats: sonde stations sit in narrow estuaries where
+even 300 m pixels are partly land-contaminated (a fair test of satellite skill
+in open water would need offshore truth we do not have); SST for the SF Delta
+was land-masked and imputed; the Lake Erie sonde record (2014-18) overlaps
+only VIIRS and the gap-filled product; window 2016-2023.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
