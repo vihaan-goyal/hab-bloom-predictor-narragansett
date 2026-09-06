@@ -345,14 +345,16 @@ Narragansett: sonde daily mean, with the lab-calibrated 12.8 equivalent):
 | 2015–2023 | **0.06** (0.03–0.11) | 0.34 | 0.23 |
 
 Before 2014 LIS was as bloomy as Narragansett — in 2009–2013 bloomier
-(0.42–0.59). It fell to 0.09 in 2014, the year the Clean Water Act nitrogen
-TMDL for the Sound was met, and has stayed at 0.03–0.11 since. Narragansett,
-with no comparable intervention, held flat throughout: it is effectively the
-control for LIS's cleanup. Today's gap is 5.6× (raw) / 3.8× (calibrated).
+(0.42–0.59). It fell to 0.09 in 2014 and has stayed at 0.03–0.11 since.
+Narragansett held flat throughout. Today's gap is 5.6× (raw) / 3.8× (calibrated).
+~~2014 is the year the nitrogen TMDL was met and this was first read as the
+cleanup taking effect~~ — **withdrawn 2026-09-05**: the satellite cross-check
+below shows no 2014 step in MODIS chlorophyll at the same stations, so the
+cause is unresolved and may be in the lab record.
 
-This is the origin of the rarity that caps LIS precision (§13): the forecast
-is hard because pollution control worked. Same 10 µg/L threshold, same
-recipe — the event became rare. Script: `src/models/experiments/bloom_rate_by_period.py`
+This is the origin of the rarity that caps LIS precision (§13): the *label*
+became rare. Same 10 µg/L threshold, same recipe — the event became rare in
+the record, whatever the cause. Script: `src/models/experiments/bloom_rate_by_period.py`
 (reads parent `data/hab_features_tidal.csv` and `data/narragansett_daily_features.csv`;
 re-run 2026-09-05, reproduces every number in the table; writes `data/bloom_rate_by_period.csv`).
 
@@ -366,6 +368,31 @@ not disprove the TMDL reading of the LIS 2014 step, but it means the step is
 either a much sharper ecological response or partly a measurement change. The
 question is in the draft email to CT DEEP / UConn (parent
 `notes/EMAIL_DRAFT_2014_CLIFF.md`).
+
+**Satellite cross-check (2026-09-05) — the cliff is not in the satellite.**
+Pre-registered test in the parent repo
+(`src/models/experiments/cliff_satellite_check.py`, criterion in the docstring
+before the run): MODIS-Aqua daily chlor_a, 4 km, ~20 km patch around each of
+the 50 LIS stations, valid_frac ≥ 0.5, threshold = P75 of 2005–2013 (10.6
+satellite units); R = share(2015–2023)/share(2009–2013), station-year
+clustered bootstrap n = 2000; step if R < 0.5 and CI upper < 0.7, no step if CI
+lower > 0.8. Satellite share 0.240 (2009–13, n = 22,547) → 0.202 (2014,
+n = 4,225) → 0.260 (2015–23, n = 41,212): **R = 1.08 [1.01, 1.16], NO STEP.**
+Lab on the same satellite-valid station-days: 0.395 (n = 408) → 0.037
+(n = 107) → 0.040 (n = 891), R = 0.10 [0.07, 0.14] (full lab record
+R = 0.13 [0.10, 0.15]). The matched-day lab–satellite agreement, weak before
+2014 (kappa 0.18, 104 joint exceedances vs 74 expected, n = 810), goes to zero
+from 2014 (kappa 0.00, 16 vs 17 expected, n = 1,147). Satellite valid-day
+fraction is flat at 0.21–0.28 per year. An independent instrument with no 2014
+method change sees no step, so the cliff most likely sits in the lab record.
+The table above stands as a description of the *label*; the TMDL attribution
+in this section and in "Revised thesis" is withdrawn pending CT DEEP's answer.
+What survives: the LIS label became rare in 2014 and rarity caps precision
+(§13) — the cause is now an open question, not pollution control. Limits:
+MODIS chlor_a is biased in estuarine water and is a 20 km mean, and only 24 %
+of station-days are satellite-valid; it is a coarse witness, but a 5–8× drop
+would show in it. Outputs: parent `data/cliff_satellite_check.csv`,
+`figures/fig_cliff_satellite.png`.
 
 ## 16. Lift at LIS rarity, nine test years: dense sampling triples the lift
 
