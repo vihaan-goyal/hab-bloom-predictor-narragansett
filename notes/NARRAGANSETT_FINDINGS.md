@@ -908,6 +908,31 @@ months; erddap_top readings flagged 4/9 dropped; nerrs NaN-flag behaviour docume
 under 1.1: 10 ok, 3 stale, 4 warm-up, 3 feed_down. First issuance follows ISEF Form
 1A sign-off; the ledger file does not exist yet. Results will be appended here as §25.x.
 
+### 25.1 The frozen model on the LIS buoys, zero-shot (2026-09-06)
+
+Section 12 retrained the *recipe* on WLIS/EXRX; the exported model itself had never touched
+LIS. `src/transfer/eval_lis_buoys.py` applies it exactly as to the 87 ERDDAP sites (own-station
+p75 label in fluorescence space, 7-day horizon, onset rows, station-year bootstrap) and also at
+the prospective fixed threshold 0.50.
+
+| buoy | rule | years | onset rows | base rate | precision [CI] | lift [CI] | AUC |
+|---|---|---|---|---|---|---|---|
+| EXRX | t* on calibration years (0.35) | 4.7 | 1,073 | 0.226 | 0.43 [0.27, 0.57] | **1.92 [1.33, 2.76]** | 0.81 |
+| EXRX | fixed 0.50 | 6.3 | 1,287 | 0.190 | 0.48 [0.32, 0.61] | **2.52 [1.56, 4.58]** | 0.84 |
+| WLIS | t* on calibration years (0.15) | 4.7 | 1,018 | 0.260 | 0.30 [0.26, 0.35] | 1.14 [1.02, 1.27] | 0.63 |
+| WLIS | fixed 0.50 | 4.7 | 1,018 | 0.260 | 0.39 [0.30, 0.56] | 1.50 [1.27, 1.72] | 0.63 |
+
+EXRX (Execution Rocks, central Sound) transfers like a typical ERDDAP site: lift 1.9-2.5 with the
+CI clear of 1.0, AUC above 0.8. WLIS (western Sound) barely transfers: AUC 0.63 and lift 1.1-1.5.
+Section 12 already noted WLIS's fluorometer gain drifting 7x between deployments, which the
+per-site quantile rescale cannot undo within a record; the weak WLIS result is as likely a sensor
+artefact as a western-Sound effect. Comparison with section 12 (recipe retrained on these buoys,
+p95 label): lift 1.9-2.2. The frozen model matches that at EXRX without any training on LIS,
+consistent with sections 19-24 (retraining does not help). Consequence for the prospective test:
+the pre-registered lis_buoy expectation band is revised before the first issuance from 2-3x to
+1.1-2.5x (protocol amendment 1.2), and WLIS and EXRX will be reported separately.
+Output: `data/transfer/lis_buoys_zero_shot.csv`.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).

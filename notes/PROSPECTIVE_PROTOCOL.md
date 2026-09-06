@@ -209,3 +209,13 @@ updating hourly), scwharf1 (dataset ends 2026-08-19), newport (b), scripps (a), 
 **p75 before/after (1.0 -> 1.1).** Only Scripps changes by design; the other 19 stations were
 re-frozen on the same seeds plus the readings appended by the dry runs, and their values are
 listed in section 3 (any drift there comes from those appended days, not from a rule change).
+
+### 1.2, 2026-09-06 (expectation band only; no data, site, threshold or rule change)
+
+The lis_buoy expected onset-lift band was set at 2-3x from section 12 (recipe retrained on the
+buoys at a p95 label). A retrospective zero-shot run of the frozen model on the same buoys at the
+protocol's own p75 label (`src/transfer/eval_lis_buoys.py`, findings 25.1) gives EXRX 1.9-2.5x
+[CI 1.3-4.6] and WLIS 1.1-1.5x [1.0-1.7] at thresholds 0.35-0.50. The band is revised to
+**1.1-2.5x**, and WLIS and EXRX are to be reported as separate strata once each passes the
+n >= 30 / 5-positive gate. Made before any issuance; `data/prospective/ledger.csv` does not exist.
+
