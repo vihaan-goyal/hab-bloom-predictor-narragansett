@@ -891,6 +891,20 @@ of one pier; the exported model saw 42,207 station-days of run-ups. Same
 conclusion as findings 19 for marine sites: local training buys nothing where
 the exported model already reads the site. `data/registry/refit_top_sites.csv`.
 
+## 25. Prospective test: built and frozen, not yet started (2026-09-05)
+
+Everything before this section is retrospective. A weekly real-time test is now
+built (`src/deploy/prospective_forecast.py`, `score_ledger.py`), pre-registered in
+`notes/PROSPECTIVE_PROTOCOL.md` (protocol 1.0, model sha `5c0f7a17...`, threshold
+0.50, 20 stations in 4 groups, per-station p75 frozen in `data/prospective/site_p75.csv`,
+outcome rule, n >= 30 / >= 5 positives reporting gate). Narragansett itself cannot be
+forecast live (RIDEM releases annual files); the training bay is absent from the
+prospective site list by necessity. Dry run 2026-09-06: 20 rows, 9 ok, 4 stale,
+4 warm-up, 3 feed_down (both Kachemak NERRS stations and Indian River Lagoon Banana
+River have QC'd data ending before the window). Scripps pier reports chl 0.00 in the
+live feed and needs a look before the formal start. First issuance follows ISEF Form
+1A sign-off; the ledger file does not exist yet. Results will be appended here as §25.x.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).

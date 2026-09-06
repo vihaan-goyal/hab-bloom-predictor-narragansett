@@ -77,6 +77,7 @@ cadence, partly sonde calibration — NOT a pure cadence effect.
 | `predict_anywhere.py` + `release/narragansett_bloom_model.joblib` | frozen model for any site (findings §21) |
 | `src/deploy/daily_inference_nar.py --date YYYY-MM-DD` | `data/narragansett_daily_predictions.csv` — per-date station probabilities (findings §18) |
 | `src/models/experiments/bloom_rate_by_period.py` | `data/bloom_rate_by_period.csv` — the 2014-cliff table (findings §15); needs parent repo at `../hab-bloom-predictor` |
+| `src/deploy/prospective_forecast.py`, `score_ledger.py`, `prospective_freeze.py` | weekly prospective forecast ledger (`data/prospective/`, tracked); protocol in `notes/PROSPECTIVE_PROTOCOL.md`. **Do not issue a real forecast (non --dry-run) until the user confirms ISEF Form 1A is signed.** |
 
 Headline after Part II: pooled onset precision 0.656 [0.618, 0.692], lift 2.50.
 Cadence thesis: FAILED its pre-registered test; rarity dominates (findings §11–12).

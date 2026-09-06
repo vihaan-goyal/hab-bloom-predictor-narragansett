@@ -1,0 +1,21 @@
+site_group,site_id,station,chl_p75_site,chl_units,n_station_days,history_first,history_last,min_readings,t_star_site,frozen_at_utc,model_version,code_version,protocol_version
+lis_buoy,WLIS_ECO_FL,WLIS_ECO_FL,249.57548076923078,"ECO-FL fluorescence, night-only, uncalibrated",1656,2021-03-05,2026-07-09,12,,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+lis_buoy,EXRX_ECO_FL,EXRX_ECO_FL,384.67592255717256,"ECO-FL fluorescence, night-only, uncalibrated",1798,2019-05-15,2026-07-09,12,,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+nerrs,kac_ss,kac_ss,3.1125,"ug/L ChlFluor (QARTOD 1,2)",3571,2011-01-27,2025-12-31,48,,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+nerrs,kac_h3,kac_h3,2.7687500000000003,"ug/L ChlFluor (QARTOD 1,2)",2021,2012-06-28,2026-05-11,48,,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+chesapeake,MSC,MSC,23.4046875,ug/L TChlPreCal,3843,2013-03-28,2025-12-31,48,,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+chesapeake,AWS,AWS,25.836354166666666,ug/L TChlPreCal,3411,2016-05-26,2025-12-31,48,,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+chesapeake,AES,AES,25.37291666666667,ug/L TChlPreCal,3261,2016-05-25,2025-12-31,48,,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+chesapeake,MAB,MAB,10.862812499999999,ug/L TChlPreCal,1681,2018-04-06,2024-12-16,48,,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+chesapeake,RIV,RIV,80.07424479166667,ug/L TChlPreCal,2208,2014-04-10,2025-11-10,48,,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+chesapeake,SPS,SPS,18.659010416666668,ug/L TChlPreCal,2416,2010-04-15,2025-11-06,48,,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+erddap_top,edu_ucsc_scwharf1,edu_ucsc_scwharf1,27.267930240491218,site fluorometer units (see catalog),2327,2013-02-14,2026-08-17,48,0.9000000000000001,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+erddap_top,scripps-pier-automated-shore-sta-1,scripps-pier-automated-shore-sta-1,17.78261111111111,site fluorometer units (see catalog),4769,2013-01-22,2026-09-01,48,0.8500000000000001,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+erddap_top,oa2-mbari-buoy,oa2-mbari-buoy,10.301242198175782,site fluorometer units (see catalog),2770,2015-05-14,2026-09-04,48,0.8500000000000001,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+erddap_top,newport-pier-automated-shore-sta,newport-pier-automated-shore-sta,13.318990121083203,site fluorometer units (see catalog),4502,2013-01-24,2026-08-11,48,0.8,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+erddap_top,mlml_mlml_sea,mlml_mlml_sea,3.780901386660677,site fluorometer units (see catalog),5308,2010-09-03,2026-09-05,48,0.6000000000000001,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+erddap_top,tiburon-water-tibc1,tiburon-water-tibc1,3.8219791666666665,site fluorometer units (see catalog),4806,2008-08-08,2026-09-04,48,0.7000000000000001,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+erddap_top,edu_calpoly_marine_morro,edu_calpoly_marine_morro,2.863783318014706,site fluorometer units (see catalog),3318,2016-01-02,2026-09-05,48,0.6500000000000001,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+erddap_top,edu_humboldt_humboldt,edu_humboldt_humboldt,4.029635416666666,site fluorometer units (see catalog),2947,2013-02-15,2026-09-03,48,0.35,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+erddap_top,indian-river-lagoon-banana-river,indian-river-lagoon-banana-river,4.3862796875,site fluorometer units (see catalog),1618,2022-01-01,2026-07-01,12,0.6000000000000001,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
+erddap_top,indian-river-lagoon-vero-beach-i,indian-river-lagoon-vero-beach-i,3.8683333333333336,site fluorometer units (see catalog),3937,2014-12-17,2026-09-04,12,0.7500000000000001,2026-09-06T00:37:39Z,5c0f7a1701599d2a,5b699c6-dirty,1.0
