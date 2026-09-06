@@ -901,8 +901,11 @@ outcome rule, n >= 30 / >= 5 positives reporting gate). Narragansett itself cann
 forecast live (RIDEM releases annual files); the training bay is absent from the
 prospective site list by necessity. Dry run 2026-09-06: 20 rows, 9 ok, 4 stale,
 4 warm-up, 3 feed_down (both Kachemak NERRS stations and Indian River Lagoon Banana
-River have QC'd data ending before the window). Scripps pier reports chl 0.00 in the
-live feed and needs a look before the formal start. First issuance follows ISEF Form
+River have QC'd data ending before the window). Pre-start health check 2026-09-06: Scripps pier's
+catalog chlorophyll channel had been a flat zero flagged QARTOD 4 since April; protocol amended to
+1.1 the same day (Scripps switched to its live `_eco` channel as a fresh site with p75 1.33 on 21
+months; erddap_top readings flagged 4/9 dropped; nerrs NaN-flag behaviour documented). Dry run
+under 1.1: 10 ok, 3 stale, 4 warm-up, 3 feed_down. First issuance follows ISEF Form
 1A sign-off; the ledger file does not exist yet. Results will be appended here as §25.x.
 
 ## Revised thesis (supersedes the "Presentation framing" above)

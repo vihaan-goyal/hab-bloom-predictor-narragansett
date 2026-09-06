@@ -147,7 +147,8 @@ def station_row(site, prow, day, fstatus, fnote, D, a, pack, stamps, subset):
         p = float(last.bloom_prob)
         row.update(chl_today=float(last.chl), bloom_prob=p, alert=bool(p >= pack["threshold"]),
                    onset_row=bool(last.chl <= prow.chl_p75_site), warmup=bool(last.warmup),
-                   alert_site_t=bool(p >= site["t_star_site"]) if site["site_group"] == "erddap_top" else np.nan)
+                   alert_site_t=(bool(p >= site["t_star_site"])                     # fresh sites (t* NaN): NaN
+                                 if site["site_group"] == "erddap_top" and np.isfinite(site["t_star_site"]) else np.nan))
     return row
 
 

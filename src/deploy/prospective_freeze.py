@@ -4,8 +4,11 @@ cached pulls and freeze each station's bloom threshold (own 75th percentile of
 daily-mean chlorophyll) before the first prospective issuance.
 -------------------------------------------------------------------------------
 Purpose : the p75 written here is the outcome definition for the whole
-          prospective protocol; it is never recomputed (protocol_version 1.0).
+          prospective protocol; recomputed only by a dated protocol amendment
+          (1.0 frozen 2026-09-06T00:37Z; 1.1 re-freeze 2026-09-06, Scripps -> _eco).
 Inputs  : data/registry/sites/<id>.csv          (erddap_top, run_catalog cache)
+          live ERDDAP pull for sites with seed_from (protocol 1.1 (a); raw cached
+          under data/prospective/raw/freeze_<version>/; history REPLACED, not appended)
           data/transfer/raw/nerrs/erddap/nerrs_kac{ss,h3}wq.csv (UTC, QARTOD)
           data/transfer/chesapeake_15min.csv     (Eastern clock -> UTC)
           data/buoy_eco_fl/all_buoys_eco_fl.parquet (LIS ECO-FL, night-only;
@@ -33,7 +36,7 @@ LIS_PARQUET = os.path.join(ps.ROOT, "data", "buoy_eco_fl", "all_buoys_eco_fl.par
 LIS_PARQUET_SRC = r"C:\Users\vihaa\hab-bloom-predictor\data\buoy_eco_fl\all_buoys_eco_fl.parquet"
 LIS_STATION_MAP = {"WLIS_WQ_SFC": "WLIS_ECO_FL", "EXRX_WQ_SFC": "EXRX_ECO_FL"}
 EXPECTED_P75 = {"WLIS_ECO_FL": 257, "EXRX_ECO_FL": 417, "MSC": 23, "AWS": 26, "AES": 25, "MAB": 11, "RIV": 80,
-                "SPS": 19, "kac_ss": 3.1, "kac_h3": 2.7, "scripps-pier-automated-shore-sta-1": 18,
+                "SPS": 19, "kac_ss": 3.1, "kac_h3": 2.7, "scripps-pier-automated-shore-sta-1": 1.3,   # 1.1: _eco channel
                 "newport-pier-automated-shore-sta": 13, "edu_ucsc_scwharf1": 27, "oa2-mbari-buoy": 10,
                 "mlml_mlml_sea": 3.8, "tiburon-water-tibc1": 3.8, "edu_calpoly_marine_morro": 2.9,
                 "edu_humboldt_humboldt": 4.0, "indian-river-lagoon-banana-river": 4.4,
@@ -44,10 +47,16 @@ P75_COLS = ["site_group", "site_id", "station", "chl_p75_site", "chl_units", "n_
 
 
 def seed_erddap_top(site):
+    if site.get("seed_from"):                          # protocol 1.1 (a): channel changed -> live re-seed
+        end = pd.Timestamp.utcnow().tz_localize(None) if pd.Timestamp.utcnow().tzinfo else pd.Timestamp.utcnow()
+        frame, status, note = lf.fetch_site(site, pd.Timestamp(site["seed_from"]), end, f"freeze_{ps.PROTOCOL_VERSION}")
+        print(f"  {site['site_id']}: live seed {site['chl_var']} from {site['seed_from']}: {status} "
+              f"({len(frame)} readings){' - ' + note if note else ''}", file=sys.stderr)
+        return frame if status == "ok" else None
     p = os.path.join(SITES_CACHE, f"{site['site_id']}.csv")
     if not os.path.exists(p):
         return None
-    return lf._finish(pd.read_csv(p))
+    return lf._finish(pd.read_csv(p))         # run_catalog contract cache: no qc column, no QARTOD filter
 
 
 def seed_nerrs(site):
@@ -94,6 +103,8 @@ def freeze_site(site, pa, stamps):
     if seed is None or len(seed) == 0:
         print(f"  {site['site_id']}: no cached history found", file=sys.stderr)
         hist = lf.load_history(site)
+    elif site.get("seed_from"):
+        hist = lf.write_history(site, seed)            # channel changed: old-channel history discarded
     else:
         hist = lf.append_history(site, seed)
     day = ps.build_site_daily(site, hist, pa)

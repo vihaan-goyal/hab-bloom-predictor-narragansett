@@ -166,7 +166,8 @@ def summarise(df, as_of, min_n, min_pos):
     """All strata (scope x group + pooled, plus erddap_top at its own t*) -> summary frame."""
     base = df[df.status.isin(SCORABLE_STATUS)].copy()
     base["alert_t"] = (base.bloom_prob >= base.threshold).astype(float)
-    base["alert_site_t_f"] = (base.bloom_prob >= base.t_star_site).astype(float)
+    base["alert_site_t_f"] = ((base.bloom_prob >= base.t_star_site).astype(float)
+                              .where(base.t_star_site.notna()))   # fresh sites (t* NaN) drop out of @t_site
     onset = base.onset_row.astype(str).str.lower().isin(["true", "1", "1.0"])
     rows = []
     for scope, sm in (("onset", onset), ("all", pd.Series(True, index=base.index))):

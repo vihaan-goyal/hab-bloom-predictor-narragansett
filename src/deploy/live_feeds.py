@@ -16,6 +16,7 @@ Run     : library module (imported by prospective_forecast / score_ledger /
 """
 import io
 import os
+import re
 import sys
 import time
 import traceback
@@ -88,9 +89,43 @@ def _utc_naive(series):
     return pd.to_datetime(series, utc=True, errors="coerce").dt.tz_localize(None)
 
 
+_QC_VAR_CACHE = {}
+
+
+def qc_var_for(site):
+    """Protocol 1.1 (c): name of the dataset's <chl_var>_qc_agg variable, or None if it has none.
+    Looked up once per process from ERDDAP info/<id>/index.json (a failed lookup raises FeedError)."""
+    key = (site["base"], site["site_id"])
+    if key not in _QC_VAR_CACHE:
+        r = get(f"{site['base']}info/{site['site_id']}/index.json")
+        if r.status_code != 200:
+            raise FeedError(f"info index HTTP {r.status_code}: {r.text[:120]!r}")
+        names = {row[1] for row in r.json()["table"]["rows"] if row[0] == "variable"}
+        want = f"{site['chl_var']}_qc_agg"
+        _QC_VAR_CACHE[key] = want if want in names else None
+    return _QC_VAR_CACHE[key]
+
+
+def parse_ioos_frame(x, site, qc_var=None):
+    """Raw ERDDAP CSV (units row removed) -> contract frame; QARTOD {1,2,NaN} on chl when qc_var is present."""
+    sv = site["station_var"]
+    st = (x[sv].astype(str) if sv and sv in x and x[sv].notna().any() else pd.Series(site["station"], index=x.index))
+    chl = pd.to_numeric(x[site["chl_var"]], errors="coerce")
+    if qc_var and qc_var in x:
+        qc = pd.to_numeric(x[qc_var], errors="coerce")
+        chl = chl.where(qc.isin(ps.ERDDAP_TOP_QC_KEEP) | qc.isna())
+    out = pd.DataFrame({"station": st, "datetime": _utc_naive(x["time"]), "chl": chl})
+    for name, v in (("temp", site["temp_var"]), ("sal", site["sal_var"]), ("do", site["do_var"])):
+        out[name] = x[v] if v and v in x else np.nan
+    return _finish(out)
+
+
 def fetch_ioos(site, start_utc, end_utc):
-    """erddap_top site on IOOS Sensors ERDDAP -> (frame, raw_text)."""
+    """erddap_top site on IOOS Sensors ERDDAP -> (frame, raw_text). Requests <chl_var>_qc_agg when the
+    dataset has it and keeps chl only where the flag is 1, 2 or NaN (protocol 1.1 (c))."""
+    qc_var = qc_var_for(site)
     cols = ["time"] + ([site["station_var"]] if site["station_var"] else []) + [site["chl_var"]]
+    cols += [qc_var] if qc_var else []
     cols += [v for v in (site["temp_var"], site["sal_var"], site["do_var"]) if v and v not in cols]
     url = (f"{site['base']}tabledap/{site['site_id']}.csv?{','.join(cols)}"
            f"&time>={_iso(start_utc)}&time<={_iso(end_utc)}")
@@ -98,12 +133,7 @@ def fetch_ioos(site, start_utc, end_utc):
     x = _erddap_frame(r)
     if x is None:
         return _empty(), r.text
-    sv = site["station_var"]
-    st = (x[sv].astype(str) if sv and sv in x and x[sv].notna().any() else pd.Series(site["station"], index=x.index))
-    out = pd.DataFrame({"station": st, "datetime": _utc_naive(x["time"]), "chl": x[site["chl_var"]]})
-    for name, v in (("temp", site["temp_var"]), ("sal", site["sal_var"]), ("do", site["do_var"])):
-        out[name] = x[v] if v and v in x else np.nan
-    return _finish(out), r.text
+    return parse_ioos_frame(x, site, qc_var), r.text
 
 
 def fetch_nerrs_kac(site, start_utc, end_utc):
@@ -119,7 +149,8 @@ def fetch_nerrs_kac(site, start_utc, end_utc):
 
 
 def parse_nerrs_frame(x, station):
-    """Shared by the live fetch and the freeze seed (raw ERDDAP CSV, units row removed)."""
+    """Shared by the live fetch and the freeze seed (raw ERDDAP CSV, units row removed).
+    chl is kept where the QARTOD aggregate flag is 1, 2 or NaN (protocol 1.1 (d) documents the NaN case)."""
     chl = pd.to_numeric(x[ps.NERRS_VARS[1]], errors="coerce")
     qc = pd.to_numeric(x[ps.NERRS_VARS[2]], errors="coerce")
     out = pd.DataFrame({"station": station, "datetime": _utc_naive(x["time"]),
@@ -212,8 +243,25 @@ def fetch_site(site, start_utc, end_utc, issue_date):
         return _empty(), "parse_error", f"{type(e).__name__}: {str(e)[:160]}"
     _cache_raw(issue_date, site["site_id"], text, ok=True)
     if len(frame) == 0:
-        return frame, "empty", "feed returned no readings in window"
+        return frame, "empty", empty_note(text)
     return frame, "ok", ""
+
+
+def empty_note(text):
+    """Why an empty fetch was empty (diagnostic only; from the raw response text).
+    Distinguishes: the dataset ending before the window (ERDDAP 404 'outside actual_range'),
+    rows present but no usable chl (all NaN / out of [0, 1000)), and a bare header."""
+    m = re.search(r"actual_range: \S+ to (\S+?)\)", text)
+    if m:
+        return f"dataset ends {m.group(1)} (before window)"
+    lines = [ln for ln in text.splitlines() if ln.strip()]
+    if lines and lines[0].startswith("Error"):
+        return "feed returned no readings in window"
+    n_hdr = 2 if len(lines) > 1 and lines[1].startswith("UTC") else 1        # ERDDAP units row vs EOTB
+    n = max(len(lines) - n_hdr, 0)
+    if n == 0:
+        return "feed returned no readings in window"
+    return f"{n} rows in window, 0 usable chl readings (NaN or outside [0, 1000))"
 
 
 def history_path(site):
@@ -240,6 +288,16 @@ def append_history(site, df):
             .reset_index(drop=True))
     full.to_csv(history_path(site), index=False, date_format="%Y-%m-%d %H:%M:%S")
     return full
+
+
+def write_history(site, df):
+    """Replace the site history with df (used when a site's chl channel changes: protocol 1.1 (a))."""
+    os.makedirs(HISTORY_DIR, exist_ok=True)
+    new = df[COLS].copy()
+    new["datetime"] = pd.to_datetime(new["datetime"])
+    new = new.drop_duplicates(["station", "datetime"]).sort_values(["station", "datetime"]).reset_index(drop=True)
+    new.to_csv(history_path(site), index=False, date_format="%Y-%m-%d %H:%M:%S")
+    return new
 
 
 if __name__ == "__main__":

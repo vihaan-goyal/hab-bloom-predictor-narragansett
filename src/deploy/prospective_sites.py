@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-PROTOCOL_VERSION = "1.0"
+PROTOCOL_VERSION = "1.1"   # 1.0 frozen 2026-09-06T00:37Z; 1.1 amendment 2026-09-06 (see notes/PROSPECTIVE_PROTOCOL.md)
 HORIZON = 7
 MODEL_PATH = os.path.join(ROOT, "release", "narragansett_bloom_model.joblib")
 SKILL_CSV = os.path.join(ROOT, "data", "registry", "site_skill.csv")
@@ -49,7 +49,15 @@ NERRS_VARS = ["time", "mass_concentration_of_chlorophyll_in_sea_water",
               "mass_concentration_of_chlorophyll_in_sea_water_qc_agg",
               "sea_water_temperature", "sea_water_practical_salinity",
               "mass_concentration_of_oxygen_in_sea_water"]
-NERRS_QC_KEEP = {1, 2}        # QARTOD aggregate: 1 pass, 2 not evaluated
+# QARTOD aggregate flag filter: 1 pass, 2 not evaluated. Rows whose flag is NaN/absent are KEPT
+# (protocol 1.1 (d): this was the 1.0 code behaviour for nerrs and the frozen p75 used it).
+# Protocol 1.1 (c): the same rule applies to erddap_top sites via <chl_var>_qc_agg when the dataset has it.
+QARTOD_KEEP = {1, 2}
+# erddap_top (protocol 1.1, amended 2026-09-06): drop only QARTOD 4 (fail) and 9 (missing).
+# Flag 3 (suspect) is kept because mlml_mlml_sea flags most readings 3 and the frozen p75 rests
+# on unfiltered history; the Scripps flat-line zeros were flag 4 and are still excluded.
+ERDDAP_TOP_QC_KEEP = {1, 2, 3}
+NERRS_QC_KEEP = QARTOD_KEEP   # 1.0 name, still used by parse_nerrs_frame
 
 EOTB_PARAMS = ["wtemp", "Salinity", "DO", "ph", "DOpctSat", "TChlPreCal"]
 
@@ -68,7 +76,25 @@ def _site(site_group, site_id, feed, base, chl_var, min_readings, chl_units, sta
     return dict(site_group=site_group, site_id=site_id, feed=feed, base=base, chl_var=chl_var,
                 temp_var=temp_var, sal_var=sal_var, do_var=do_var, station_var=station_var,
                 station=station or site_id, min_readings=int(min_readings), chl_units=chl_units,
-                t_star_site=float(t_star_site))
+                t_star_site=float(t_star_site), fresh_site=False, seed_from=None)
+
+
+# Protocol 1.1 amendments (2026-09-06, before the first issuance). Per-site overrides applied on top of
+# the pre-registered erddap_top rule; every key here is a deliberate departure from insitu_catalog.csv.
+#  (a) scripps-pier-automated-shore-sta-1: the catalog chl_var (..._ctd) has read a constant 0.0 flagged
+#      QARTOD 4 since 2026-04-09 and NaN since 2026-09-01; the ECO fluorometer channel (..._eco, live since
+#      2024-12-04) replaces it. History re-seeded from _eco only: prospective_freeze pulls the channel live
+#      from seed_from (2024-12-01) to the freeze time, QARTOD {1,2,NaN} applied, raw cached under
+#      data/prospective/raw/freeze_1.1/. t_star_site (chosen on _ctd) withdrawn; fresh_site=True so
+#      alert_site_t is not computed and the site is reported with that caveat.
+#  (b) newport-pier-automated-shore-sta: NOT changed. Its _ctd chl went NaN after 2026-08-11T15:24Z and an
+#      _eco channel appeared 2026-08-13 (too short for a p75). It stays on _ctd (feed_down/warmup until
+#      the CTD returns); a dated amendment may switch it to _eco once 90 days of _eco exist.
+SITE_OVERRIDES = {
+    "scripps-pier-automated-shore-sta-1": dict(
+        chl_var="mass_concentration_of_chlorophyll_in_sea_water_eco", t_star_site=float("nan"),
+        fresh_site=True, seed_from="2024-12-01"),
+}
 
 
 LIS_UNITS = "ECO-FL fluorescence, night-only, uncalibrated"
@@ -106,6 +132,7 @@ def erddap_top_from_catalog(n=10):
                          temp_var=_str_or_none(row.temp_var), sal_var=_str_or_none(row.sal_var),
                          do_var=_str_or_none(row.do_var), station_var=_str_or_none(row.station_var),
                          t_star_site=row.t_star))
+        out[-1].update(SITE_OVERRIDES.get(row.dataset_id, {}))      # protocol 1.1 (a)
     return out
 
 
@@ -170,7 +197,7 @@ def build_site_daily(site, hist, pa):
 
 
 if __name__ == "__main__":
-    cols = ["site_group", "site_id", "feed", "station", "chl_var", "min_readings", "t_star_site"]
+    cols = ["site_group", "site_id", "feed", "station", "chl_var", "min_readings", "t_star_site", "fresh_site"]
     print(pd.DataFrame(SITES)[cols].to_string(index=False))
     print(f"\n{len(SITES)} sites | model {model_version()} | code {code_version()} | protocol {PROTOCOL_VERSION}")
 
