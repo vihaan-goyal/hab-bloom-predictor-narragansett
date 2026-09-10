@@ -38,6 +38,8 @@ docstring says where its raw input comes from. Rows marked *parent* live in
 | 22 | `src/transfer/regime_models.py`, `src/viz/regime_figure.py` | §19 daily files | `data/transfer/regime_loso*.csv`, `figures/nar_fig9` |
 | 23 | `src/transfer/satellite_fetch.py`, `satellite_eval.py`, `src/viz/satellite_figure.py` | NOAA CoastWatch ERDDAP (docstring) | `data/transfer/satellite_*.csv`, `figures/nar_fig10` |
 | 24 | `src/registry/erddap_crawl.py`, `run_catalog.py`, `refit_top_sites.py`, `src/viz/registry_map.py` | 60 public ERDDAP servers (`data/registry/erddaps.json`) | `data/registry/*.csv` (committed), `figures/nar_fig11` |
+| 26 | `python -m src.nn.build_windows`, `python -m src.nn.seq_vs_daily` (env `hab-nn`, `environment-nn.yml`) | `data/narragansett_surface_15min.csv` + daily features | `data/nn/index.csv`, `windows_f32.npy`, `seq_vs_daily_{results,predictions}.csv`, `figures/nar_fig12` |
+| 27 | `python -m src.nn.pooled_site_nn` (env `hab-nn`) | §19 daily files + daily features | `data/nn/pooled_site_nn_{results,predictions}.csv`, `figures/nar_fig13` |
 
 Seeds: model `random_state=42`; bootstrap `seed=42`, n=2000. Environment:
 `environment.yml` (see README "Reproduce" for the clean-machine check).
@@ -932,6 +934,97 @@ consistent with sections 19-24 (retraining does not help). Consequence for the p
 the pre-registered lis_buoy expectation band is revised before the first issuance from 2-3x to
 1.1-2.5x (protocol amendment 1.2), and WLIS and EXRX will be reported separately.
 Output: `data/transfer/lis_buoys_zero_shot.csv`.
+
+## 26. Pre-registered test: does a sequence model on the raw 15-minute sondes beat the daily-feature GB? (2026-09-10)
+
+**Hypothesis (user's).** Sub-daily structure that daily means discard (diel chl/DO cycles,
+within-day ramps, tidal-phase signal) carries forecast skill for bloom onset within 7 d.
+§11 already shows skill falling as cadence is thinned (AUC 0.87 daily → 0.81 weekly), so the
+15-minute record may hold signal the tier-A daily contract throws away. In the LIS parent repo
+every neural and tree alternative lost to logistic regression on 11k station-days / 74 test
+blooms; this is the first test on a dataset large enough to give a network a fair chance.
+Scripts `src/nn/build_windows.py`, `src/nn/seq_vs_daily.py`; fig 12
+`figures/nar_fig12_seq_vs_daily.png`. Environment `hab-nn` (`environment-nn.yml`, CPU torch;
+version recorded with the results). The frozen release model and the prospective protocol are
+not touched by this section.
+
+**Design, fixed before running.** A 2×2 (input: daily tier-A features vs a 7-day 15-minute
+window; model: gradient boosting vs neural network) plus a hybrid cell, so that architecture and
+input resolution are separated:
+
+| Cell | Input | Model | Purpose |
+|---|---|---|---|
+| GB-daily | 23 tier-A, train-median impute | reference `GB_KW` refit on the filtered train rows | reference on identical rows |
+| MLP-daily | 23 tier-A, standardised | MLP 64-32, dropout 0.3 (~3.7k params) | architecture control |
+| CNN-15min | 4 value + 4 mask channels × 672 steps, + sin/cos DOY | strided 1-D CNN, global mean+max pool, ~37k params | the hypothesis |
+| Hybrid | CNN embedding + 23 tier-A + DOY | same head | does 15-min structure add to daily features |
+
+Rows: labelled station-days (train ≤ 2020, val 2021–22, test 2023, as `train_narragansett.py`)
+whose 7-day window has ≥ 336 of 672 chl slots observed; rows failing this are dropped from
+every cell, including train and val, so all cells score the identical row set (counts recorded
+with the results; expected test onset rows 1,727 before the rule). Window = `(t−6 d) 00:00` to
+`t 23:45`; nothing after day t enters; the daily row's own features are whole-day-t aggregates, so
+both inputs share the same information horizon. Builder asserts, for every row, that the mean of
+the window's last 96 chl slots equals the daily file's `chl` (catches off-by-one-day errors).
+Channels `log1p(chl)`, temp, sal, DO (mg/L) with missingness masks; pH excluded (90 % missing).
+Normalisation from observed train slots only. No station identity to any cell.
+Recipe, identical for all NN cells: AdamW 1e-3, weight decay 1e-4, batch 256, BCE with
+`pos_weight = n_neg/n_pos`, max 60 epochs, early stop on val AUC (patience 8, best weights
+restored), deterministic, seeds 42–46. **The 5-seed mean-probability ensemble is the primary
+object**; per-seed results are the robustness check. `t*` = argmax val F1 (`pick_t`) per model
+on val onset rows. Val is used twice for the NN cells (early stopping and `t*`) and once for GB;
+test 2023 is touched once per cell.
+Scoring: test-2023 onset rows (today's chl ≤ 10), **paired** station-year clustered bootstrap
+(13 clusters, n = 2000, seed 42, same resampling as `boot_ci`, every model evaluated on the same
+resamples so difference CIs are paired). Paired rather than the disjoint-CI convention of §20–22
+because with 13 clusters disjoint marginal CIs would need an implausibly large effect; marginal
+CIs are reported alongside for continuity.
+
+**Criteria.** Primary GO: paired ΔAUC(CNN ensemble − GB-daily) 95 % CI excludes 0 **and** point
+estimate ≥ +0.02 (0.839 → ≥ 0.859). NO-GO otherwise; "harm" if the upper bound < 0.
+Secondary: paired Δlift at each model's val `t*` with CI excluding 0; ≥ 4 of 5 CNN seeds above GB
+on point AUC. Interpretation grid, written before running: MLP ≈ GB and CNN > both → resolution
+carries the gain; MLP > GB as well → architecture, not resolution; Hybrid > both but CNN ≈ GB →
+15-min structure is complementary, not sufficient; all within CI → daily aggregation loses
+nothing the model can use (consistent with §11). Pre-registered tie-breaker, run only if the
+primary CI includes 0 with a positive point estimate: rolling-origin test years 2019–2023
+(train ≤ T−2, val T−1, as §7), CNN and GB only, 3 seeds, pooled paired bootstrap over ~50
+clusters, appended as §26.1. It is a tie-breaker, not a second chance at a different criterion.
+Known asymmetry: `chl_climatology`/`chl_anomaly` in the daily file are all-years station × DOY-bin
+means (including 2023), a mild pre-existing leak that favours the daily cells; left as in the
+reference, and the CNN is given nothing equivalent.
+
+*Results: pending.*
+
+## 27. Pre-registered test: does a pooled multi-site NN with a site embedding close the reverse-transfer gap? (2026-09-10)
+
+**Hypothesis (user's).** The pooled foreign GB of §20 (blind on Narragansett: lift 1.64
+[1.31, 2.10], AUC 0.76 vs local 2.00 / 0.839) treats every site as one distribution. A network
+with a learned site embedding and an UNK token can separate site offset from bloom shape and
+should transfer better to an unseen site. `src/nn/pooled_site_nn.py`; fig 13
+`figures/nar_fig13_pooled_site_nn.png`. Runs only after §26 completes.
+
+**Design, fixed before running.** Training rows exactly as §20: the six foreign daily files
+(Chesapeake, NERRS, Cefas, IMOS, Lake Erie, SF Bay), own-station p75 label within 7 d, chl
+quantile-mapped to the Narragansett scale (`pooled_model_test.load_site`), tier-A features,
+pooled-median imputation, pooled-train standardisation. Narragansett is never in training.
+Early stopping on a seed-42 random 15 % holdout of foreign station-years, never on
+Narragansett; Narragansett 2021–22 is used for `t*` only (as §20, threshold calibration, no
+refitting); test = the same test-2023 onset rows as §26. Cells: (a) pooled GB re-run on these
+rows, (b) pooled MLP without embedding (architecture control), (c) pooled MLP with a 4-d site
+embedding over 6 sites + UNK, where each training row's site is replaced by UNK with probability
+0.3 and Narragansett uses UNK at test; (d) mean-of-site-embeddings sensitivity. Same recipe and
+seeds as §26; 5-seed ensemble primary. ERDDAP registry sites (§24) deferred: rebuilding daily
+features from 2.7 GB of heterogeneous sub-daily files is its own project, §22 showed pooled
+volume did not help the GB, and keeping the §20 rows makes the comparison clean.
+
+**Criteria.** GO: UNK-embedding ensemble AUC ≥ 0.80 **and** paired Δlift(NN − pooled GB) CI
+excludes 0 **and** lift point ≥ 1.82 (closes at least half the 1.64 → 2.00 gap). PARTIAL: AUC and
+lift bars met but the paired CI includes 0. NO-GO otherwise. Not "lift lower CI > 1.64": the
+pooled GB's own CI was [1.31, 2.10] on these 13 clusters, so that bar would effectively require
+beating the local model. Cell (b) tells whether any gain came from the embedding or from the MLP.
+
+*Results: pending.*
 
 ## Revised thesis (supersedes the "Presentation framing" above)
 
