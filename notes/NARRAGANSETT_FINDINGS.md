@@ -1041,7 +1041,7 @@ tuned after the result. A GRU, a longer window, or a larger network are not pre-
 here and would be a new section, with the prior that they would need to overcome a
 reliably negative ~0.02 rather than a null.
 
-## 27. Pre-registered test: does a pooled multi-site NN with a site embedding close the reverse-transfer gap? (2026-09-10)
+## 27. Pre-registered test: does a pooled multi-site NN with a site embedding close the reverse-transfer gap? No, it widens it. (2026-09-10)
 
 **Hypothesis (user's).** The pooled foreign GB of §20 (blind on Narragansett: lift 1.64
 [1.31, 2.10], AUC 0.76 vs local 2.00 / 0.839) treats every site as one distribution. A network
@@ -1069,7 +1069,46 @@ lift bars met but the paired CI includes 0. NO-GO otherwise. Not "lift lower CI 
 pooled GB's own CI was [1.31, 2.10] on these 13 clusters, so that bar would effectively require
 beating the local model. Cell (b) tells whether any gain came from the embedding or from the MLP.
 
-*Results: pending.*
+**Results (2026-09-10; same env as §26).** Pooled training rows 144,475 from six systems
+(594 station-years; 89 station-years / 22,532 rows held out for early stopping); Narragansett
+val onset rows 3,750 (threshold only), test onset rows 1,697 (identical to §26). The pooled GB
+re-run reproduces §20 (AUC 0.762; lift 1.57 at `t*` = 0.30 chosen by val F1, vs 1.64 in
+§20 where `t*` was chosen on the same years by a slightly different rule; AUC is the
+threshold-free comparison). Best epochs ranged 9–58 of 60 for the MLPs; the pooled MLPs reach
+early-stop AUC 0.84–0.85 on the *foreign* holdout, i.e. they fit the foreign data at least as
+well as the GB does, and still transfer worse.
+
+| Model | AUC [CI] | ΔAUC vs pooled GB [paired CI] | t* | Precision | POD | Lift [CI] | ΔLift [paired CI] | seeds AUC min–max |
+|---|---|---|---|---|---|---|---|---|
+| Always alert | 0.500 | - | - | 0.347 | 1.000 | 1.00 | - | - |
+| Pooled GB (§20 reference, re-run) | 0.762 [0.686, 0.818] | 0 | 0.30 | 0.544 | 0.759 | 1.57 [1.27, 1.96] | 0 | - |
+| Pooled MLP, no embedding (5-seed ens.) | 0.719 [0.648, 0.769] | -0.042 [-0.062, -0.016] | 0.20 | 0.491 | 0.837 | 1.41 [1.21, 1.62] | -0.15 [-0.34, -0.03] | 0.679-0.729 |
+| Pooled MLP + UNK site embedding (5-seed ens.) | 0.700 [0.634, 0.744] | -0.061 [-0.088, -0.022] | 0.20 | 0.472 | 0.766 | 1.36 [1.20, 1.52] | -0.21 [-0.45, -0.05] | 0.678-0.727 |
+| Pooled MLP, mean-of-sites embedding (sensitivity) | 0.723 [0.661, 0.767] | -0.039 [-0.064, +0.000] | 0.20 | 0.503 | 0.737 | 1.45 [1.24, 1.68] | -0.12 [-0.28, -0.01] | 0.704-0.741 |
+| Local Narragansett GB (§26 reference, context) | 0.839 [0.778, 0.880] | +0.077 [+0.049, +0.114] | 0.40 | 0.642 | 0.708 | 1.85 [1.41, 2.45] | +0.28 [+0.11, +0.60] | - |
+
+`data/nn/pooled_site_nn_results.csv` (all seeds), `_predictions.csv` (row-level).
+
+**Verdict: NO-GO on every pre-registered bar.** The UNK-embedding ensemble reaches AUC
+0.700 (bar ≥ 0.80) and lift 1.36 (bar ≥ 1.82), and its paired Δlift against the pooled GB is
+-0.21 [-0.45, -0.05], entirely below zero: the network transfers *worse* than the
+boosted trees it was meant to improve on. The architecture control tells the story: the MLP
+without any embedding already loses to the GB (ΔAUC -0.042 [-0.062, -0.016]), and adding
+the site embedding makes it slightly worse again, with the mean-of-sites vector marginally
+better than UNK but still below the no-embedding MLP. So the reverse-transfer gap of §20 is
+not a site-identity problem that an embedding can absorb; it is the weak-event problem already
+named there (foreign "blooms" are 75th-percentile wiggles, Narragansett's are real run-ups),
+and a more flexible model fits the foreign wiggles better without learning anything that
+carries to a strong-bloom bay. Combined with §26, the picture across four model families is
+one number: precursor ranking skill on onset rows is ~0.82–0.84 AUC locally and ~0.76 when
+imported, and no model class moves either. ERDDAP registry sites remain deferred and, given
+this result, are not worth adding to a pooled network.
+
+Caveats: one test year and 13 clusters, as in §26; the embedding is small (4-d, six sites) by
+design, since the six training sites cannot support more; the UNK dropout rate (0.3) and MLP
+size were fixed before running and not tuned; the run was slowed by an accidental duplicate
+process (a hibernated earlier launch resumed alongside it; results are seed-deterministic and
+unaffected, and the duplicate was killed before scoring).
 
 ## Revised thesis (supersedes the "Presentation framing" above)
 
