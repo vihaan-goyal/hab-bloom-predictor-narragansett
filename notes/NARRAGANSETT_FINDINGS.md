@@ -935,7 +935,7 @@ the pre-registered lis_buoy expectation band is revised before the first issuanc
 1.1-2.5x (protocol amendment 1.2), and WLIS and EXRX will be reported separately.
 Output: `data/transfer/lis_buoys_zero_shot.csv`.
 
-## 26. Pre-registered test: does a sequence model on the raw 15-minute sondes beat the daily-feature GB? (2026-09-10)
+## 26. Pre-registered test: does a sequence model on the raw 15-minute sondes beat the daily-feature GB? No, it is reliably slightly worse. (2026-09-10)
 
 **Hypothesis (user's).** Sub-daily structure that daily means discard (diel chl/DO cycles,
 within-day ramps, tidal-phase signal) carries forecast skill for bloom onset within 7 d.
@@ -994,7 +994,52 @@ Known asymmetry: `chl_climatology`/`chl_anomaly` in the daily file are all-years
 means (including 2023), a mild pre-existing leak that favours the daily cells; left as in the
 reference, and the CNN is given nothing equivalent.
 
-*Results: pending.*
+**Results (2026-09-10; torch 2.12.0+cpu, sklearn 1.7.2).** Rows after the coverage rule:
+train 33,174 / val 5,398 / test 2,609 (2.43 % of labelled station-days dropped, the first days of
+each deployment); test onset rows **1,697** (base 0.347, 13 station-year clusters). Alignment
+check: every window's day-t chl mean matched the daily file to within 1.5 % (F4 logged every
+10 min in 2005, which slot-averaging shifts by < 1 %; zero rows beyond 2 %). GB-daily on the
+filtered rows reproduces the reference exactly (AUC 0.839; the full-train GB gives 0.838 on the
+same rows, paired ΔAUC −0.001 [−0.003, +0.002]), so the row filter did not move the reference.
+`t*` here is argmax val-F1 on onset rows (0.40 for GB), which trades a little precision for POD
+relative to the fixed 0.50 of §5 (0.642 / 0.708 vs 0.696 / 0.600); AUC is threshold-free.
+Best epochs: MLP [6, 4, 9, 7, 4], CNN [4, 3, 6, 4, 5], Hybrid [5, 5, 6, 2, 1] of max 60 (early stopping
+fired every time; no NaN losses). Wall clock ~2.5 min per CNN seed on 12 CPU threads.
+
+| Cell | AUC [CI] | ΔAUC vs GB [paired CI] | t* | Precision | POD | Lift [CI] | ΔLift [paired CI] | seeds AUC min–max |
+|---|---|---|---|---|---|---|---|---|
+| GB-daily (reference) | 0.839 [0.778, 0.880] | 0 | 0.40 | 0.642 | 0.708 | 1.85 [1.41, 2.45] | 0 | - |
+| MLP-daily (5-seed ens.) | 0.829 [0.781, 0.865] | -0.010 [-0.026, +0.007] | 0.40 | 0.636 | 0.703 | 1.83 [1.44, 2.40] | -0.02 [-0.18, +0.08] | 0.822-0.835 |
+| CNN-15min (5-seed ens.) | 0.822 [0.769, 0.861] | -0.017 [-0.027, -0.002] | 0.40 | 0.638 | 0.667 | 1.84 [1.45, 2.39] | -0.01 [-0.15, +0.08] | 0.814-0.826 |
+| Hybrid (5-seed ens.) | 0.827 [0.775, 0.865] | -0.012 [-0.021, +0.000] | 0.40 | 0.637 | 0.691 | 1.84 [1.43, 2.42] | -0.01 [-0.13, +0.06] | 0.808-0.831 |
+
+Full-scope AUC (all 2,609 test rows, context): GB 0.912, MLP 0.907, CNN 0.907, Hybrid 0.909.
+Per-seed and per-model rows, marginal and paired CIs: `data/nn/seq_vs_daily_results.csv`;
+row-level probabilities: `data/nn/seq_vs_daily_predictions.csv`.
+
+**Verdict: pre-registered primary criterion not met; the direction is "harm".** The paired
+ΔAUC(CNN ensemble − GB) is -0.017 with a 95 % CI of [-0.027, -0.002], entirely
+below zero, so the sequence model is reliably (slightly) *worse* than the daily-feature GB on the
+identical rows; 0 of 5 CNN seeds beat GB on point AUC. The secondary Δlift CI includes 0 for
+every cell (all four cells sit at lift 1.83–1.85 with overlapping CIs), and the tie-breaker is
+not triggered (its trigger requires a positive point estimate). Reading the interpretation grid
+written before the run: MLP-daily ≈ GB (-0.010 [-0.026, +0.007]) says
+architecture is not the issue; CNN < GB and Hybrid ≈ MLP-daily say the 15-minute record adds
+nothing the model can use *on top of* the daily aggregates, and used alone it is a slightly
+noisier input. This is the same conclusion as §11 from the other direction: thinning cadence
+below daily costs skill, but going finer than daily does not buy any. For the thesis the
+daily-mean contract is the right resolution for this problem, and the simplest model wins again,
+as it did on LIS. The 15-minute data's value is in *building* the daily rows densely (§11–13),
+not in feeding a sequence model.
+
+Caveats: one test year (2023) and 13 clusters, so the CI on a ~0.02 effect is close to its
+resolution limit, although the sign is settled; the CNN saw no station identity and no
+all-years climatology while the daily cells did (the asymmetry noted above, which favours the
+daily cells by at most the size of the `chl_climatology` ablation in §6); val was used for
+both early stopping and `t*` in the NN cells; the recipe was fixed before running and not
+tuned after the result. A GRU, a longer window, or a larger network are not pre-registered
+here and would be a new section, with the prior that they would need to overcome a
+reliably negative ~0.02 rather than a null.
 
 ## 27. Pre-registered test: does a pooled multi-site NN with a site embedding close the reverse-transfer gap? (2026-09-10)
 

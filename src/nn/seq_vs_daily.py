@@ -124,7 +124,16 @@ def run_nn(cell, d, Z, src, tr, va, te, seeds, max_epochs):
     rows_tr, rows_va, rows_te = (np.where(m)[0] for m in (tr, va, te))
     pos_w = float((y[tr] == 0).sum() / max((y[tr] == 1).sum(), 1))
     val, test, meta = {}, {}, {}
+    if os.path.exists(preds_path(cell)):                       # resume: keep finished seeds
+        z = np.load(preds_path(cell), allow_pickle=False)
+        meta = json.loads(str(z["meta"]))
+        for k in z.files:
+            if k.startswith("val_"):
+                val[k[4:]], test[k[4:]] = z[k], z["test_" + k[4:]]
+        print(f"  resuming {cell}: seeds done {sorted(val)}")
     for seed in seeds:
+        if f"s{seed}" in val:
+            continue
         t0 = time.time(); set_seed(seed)
         if cell == "mlp":
             model = MLP(len(TIER_A))
