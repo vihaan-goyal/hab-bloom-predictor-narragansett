@@ -1,0 +1,41 @@
+# environment-nn.yml: the hab-nn env used for the neural-network experiments
+# (findings 26-27, src/nn/). Identical to environment.yml plus a CPU torch wheel.
+# Built 2026-09-10 as `conda create -n hab-nn --clone <clean environment.yml env>`
+# then `pip install torch==2.12.0 --index-url https://download.pytorch.org/whl/cpu`;
+# `conda env create -f environment-nn.yml` is the equivalent from scratch.
+#
+# Environment that produced every number in notes/NARRAGANSETT_FINDINGS.md.
+# Pins are the versions installed in the conda BASE env used for all runs
+# (verified 2026-09-05: a fresh `conda env create -f environment.yml` builds
+# and runs the pipeline; see README "Reproduce").
+#
+#   conda env create -f environment.yml && conda activate hab
+#
+# The LIS deep-learning and XGBoost experiments in the parent repo
+# (src/models/lstm_*.py, convlstm_model.py, tune_xgboost.py, shap_*.py) need
+# the OPTIONAL extras at the bottom; nothing in this fork imports them.
+name: hab-nn
+channels:
+  - defaults
+dependencies:
+  - python=3.13
+  - pip
+  - pip:
+    - numpy==2.3.5
+    - scipy==1.16.3
+    - pandas==2.3.3
+    - scikit-learn==1.7.2     # release/narragansett_bloom_model.joblib was pickled with this
+    - joblib==1.5.2
+    - matplotlib==3.10.6
+    - xarray==2025.10.1
+    - netCDF4==1.7.4
+    - requests==2.32.5
+    - python-calamine==0.8.2   # NBFSMN .xls/.xlsx parsing (build_narragansett.py uses engine="calamine")
+    - openpyxl==3.1.5
+    # --- optional, parent-repo LIS experiments only ---
+    - --extra-index-url https://download.pytorch.org/whl/cpu
+    - torch==2.12.0            # CPU wheel; findings 26-27 (src/nn/). Pulls no scipy/MKL.
+    # - torchvision==0.27.0
+    # - xgboost==3.2.0
+    # - shap==0.51.0
+    # - earthaccess==0.17.0

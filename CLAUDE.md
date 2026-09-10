@@ -11,6 +11,10 @@ conflict); `environment.yml` was re-pinned to the base env's real versions on 20
 fresh `conda env create -f environment.yml` builds and runs the pipeline, so recreate rather
 than repair.
 
+Neural-network experiments (findings 26-27, `src/nn/`) run in the separate `hab-nn` env
+(`environment-nn.yml`; `~/anaconda3/envs/hab-nn/python.exe`), which is base + CPU torch.
+Never install torch into base. Run them as `python -m src.nn.<script>` from the repo root.
+
 ```bash
 # 1. Consolidate raw RIDEM corrected sonde files -> 15-min tidy CSV
 python src/features/build_narragansett.py

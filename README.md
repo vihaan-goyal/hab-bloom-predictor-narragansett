@@ -157,6 +157,17 @@ python src/features/build_narragansett_daily.py    # station-days + label
 python src/models/train_narragansett.py            # models + baselines -> results CSV
 ```
 
+The neural-network experiments (findings §26–27, `src/nn/`) need PyTorch, which the
+base env deliberately does not carry. They run in a second env built from
+`environment-nn.yml` (same pins plus a CPU torch wheel):
+
+```bash
+conda env create -f environment-nn.yml && conda activate hab-nn
+python -m src.nn.build_windows                     # 15-min window cache -> data/nn/
+python -m src.nn.seq_vs_daily --cells gb,mlp,cnn,hyb --score   # findings 26, fig 12
+python -m src.nn.pooled_site_nn                    # findings 27, fig 13
+```
+
 Raw zips: `https://datadem.ri.gov/documents/bart/nbfsmnYY.zip` (2003–2023
 available; 2005–2023 parsed, 2003–04 format unsupported). `data/` is gitignored throughout.
 
