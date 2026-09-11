@@ -82,6 +82,7 @@ cadence, partly sonde calibration — NOT a pure cadence effect.
 | `src/deploy/daily_inference_nar.py --date YYYY-MM-DD` | `data/narragansett_daily_predictions.csv` — per-date station probabilities (findings §18) |
 | `src/models/experiments/bloom_rate_by_period.py` | `data/bloom_rate_by_period.csv` — the 2014-cliff table (findings §15); needs parent repo at `../hab-bloom-predictor` |
 | `src/nn/build_windows.py`, `seq_vs_daily.py`, `pooled_site_nn.py` (env `hab-nn`) | `data/nn/*` - neural-network tests (findings 26-27, figs 12-13): 15-min CNN vs daily GB, pooled site-embedding MLP |
+| parent `src/models/lr_geometry.py` | parent `data/lr_geometry_*.csv`, fig 14 - class overlap along the LR axis, both bays (findings 28) |
 | `src/deploy/prospective_forecast.py`, `score_ledger.py`, `prospective_freeze.py` | weekly prospective forecast ledger (`data/prospective/`, tracked); protocol in `notes/PROSPECTIVE_PROTOCOL.md`. **Do not issue a real forecast (non --dry-run) until the user confirms ISEF Form 1A is signed.** |
 
 Headline after Part II: pooled onset precision 0.656 [0.618, 0.692], lift 2.50.

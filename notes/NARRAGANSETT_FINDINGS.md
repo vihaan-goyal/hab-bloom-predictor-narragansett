@@ -40,6 +40,7 @@ docstring says where its raw input comes from. Rows marked *parent* live in
 | 24 | `src/registry/erddap_crawl.py`, `run_catalog.py`, `refit_top_sites.py`, `src/viz/registry_map.py` | 60 public ERDDAP servers (`data/registry/erddaps.json`) | `data/registry/*.csv` (committed), `figures/nar_fig11` |
 | 26 | `python -m src.nn.build_windows`, `python -m src.nn.seq_vs_daily` (env `hab-nn`, `environment-nn.yml`) | `data/narragansett_surface_15min.csv` + daily features | `data/nn/index.csv`, `windows_f32.npy`, `seq_vs_daily_{results,predictions}.csv`, `figures/nar_fig12` |
 | 27 | `python -m src.nn.pooled_site_nn` (env `hab-nn`) | §19 daily files + daily features | `data/nn/pooled_site_nn_{results,predictions}.csv`, `figures/nar_fig13` |
+| 28 | *parent* `src/models/lr_geometry.py --nar-root ..` (base env, from the parent root) | daily features (fork) + *parent* `data/hab_features_tidal.csv` | *parent* `data/lr_geometry_{summary,rows_nar,rows_lis}.csv`, `figures/fig_lr_geometry.png` = `figures/nar_fig14` |
 
 Seeds: model `random_state=42`; bootstrap `seed=42`, n=2000. Environment:
 `environment.yml` (see README "Reproduce" for the clean-machine check).
@@ -1110,7 +1111,7 @@ size were fixed before running and not tuned; the run was slowed by an accidenta
 process (a hibernated earlier launch resumed alongside it; results are seed-deterministic and
 unaffected, and the duplicate was killed before scoring).
 
-## 28. The precision ceiling as geometry: class overlap along the LR axis in both bays (2026-09-11)
+## 28. The precision ceiling as geometry: class overlap along the LR axis is no worse in LIS; rarity is the difference (2026-09-11)
 
 **Question (user's).** Plot station-days as points in feature space: what does the geometry
 say? Logistic regression matched boosting and every network in both bays (§5, §26–27), so the
@@ -1142,7 +1143,45 @@ as "same separability, different base rate", i.e. the precision gap is rarity. I
 Narragansett's by > 0.10, separability contributes too. Descriptive section: no GO/NO-GO, only
 this pre-stated reading.
 
-*Results: pending.*
+**Results (2026-09-11).** Sanity checks passed: Narragansett reproduces the shipped `LR_onset`
+row exactly (t* 0.40, precision 0.641, POD 0.695, AUC 0.810, TP/FP/FN 417/234/183, n 1,727) and
+axis-1 AUC equals model AUC in both bays to 1e-9 (the decision value is a monotone transform of
+the probability, so nothing about ranking is lost by drawing it). `t*` sits at logit 0.40 = −0.41
+(Narragansett) and logit 0.35 = −0.62 (LIS) on the same axis.
+
+| Bay | Onset rows | Blooms | Base rate | AUC | t* | Precision | POD | OVL | Blooms inside the no-bloom central 90 % band |
+|---|---|---|---|---|---|---|---|---|---|
+| Narragansett (test 2023, 7-d label) | 1,727 | 600 | 0.347 | 0.810 | 0.40 | 0.641 | 0.695 | **0.52** | 0.75 |
+| LIS (test 2020–25, 21-d label, 35 features) | 1,866 | 68 | 0.036 | 0.855 | 0.35 | 0.112 | 0.868 | **0.44** | 0.71 |
+
+Parent `data/lr_geometry_summary.csv`, `data/lr_geometry_rows_{nar,lis}.csv`; fig 14
+(= parent `figures/fig_lr_geometry.png`).
+
+**Reading, against the rule fixed above.** OVL differs by 0.07, inside the pre-stated 0.10 band,
+and in the *opposite* direction to a separability explanation: the LIS classes overlap *less*
+(0.44 vs 0.52; LIS AUC 0.855 vs 0.810). Meanwhile the bloom share differs 10× (0.036 vs 0.347).
+So the geometry says what §13 and §16 said with re-thresholding: the precision gap between the
+bays is rarity, not separability. Panel (c) makes the first half visible, the two bloom densities
+sit at the same place on the axis and the LIS one is narrower; panel (d) makes the second half
+visible, orange is a third of every bar in Narragansett and a sliver in LIS, so any vertical cut
+that catches most LIS blooms also catches hundreds of no-bloom rows (59 TP against 469 FP at
+`t*`). The "blooms inside the no-bloom central band" column is the ceiling in one number: about
+three quarters of blooms in both bays lie where no-bloom rows are also common, and no model on
+these features can pull them apart, which is why every model family lands at the same AUC
+(§5, §26–27). What *would* move precision is fewer no-bloom rows in that band, i.e. a rarer
+denominator (§13) or a different feature family that spreads the classes along a new axis
+(nutrients were the one such candidate, parent `notes/PRECISION_CEILING_INVESTIGATION.md`; the
+oracle test gave +1.5 pp).
+
+Notes on the picture. The orthogonal axis (PC 1 after removing `w`) carries no label information
+by construction; in Narragansett it separates the year-round F-stations from the seasonal
+B-stations (the two horizontal bands), in LIS it tracks the salinity/temperature gradient across
+the Sound. It is there to spread the points out, not to be read. Caveats: one weight vector per
+bay from a single split (train ≤ 2020 / ≤ 2019); the LIS test window 2020–25 is wider than the
+2023–25 window of the parent README (chosen for row count, 68 positives; the shipped
+walk-forward AUC 0.875 is within 0.02 of this split's 0.855); the two bays use different feature
+lists (23 vs 35) and horizons (7 vs 21 d), so only the *shape* of the overlap is being compared,
+not the axis units; OVL from a Gaussian KDE with Scott's bandwidth, so ±0.02 is noise.
 
 ## Revised thesis (supersedes the "Presentation framing" above)
 
