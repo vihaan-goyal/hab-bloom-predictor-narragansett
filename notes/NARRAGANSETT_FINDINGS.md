@@ -1110,6 +1110,40 @@ size were fixed before running and not tuned; the run was slowed by an accidenta
 process (a hibernated earlier launch resumed alongside it; results are seed-deterministic and
 unaffected, and the duplicate was killed before scoring).
 
+## 28. The precision ceiling as geometry: class overlap along the LR axis in both bays (2026-09-11)
+
+**Question (user's).** Plot station-days as points in feature space: what does the geometry
+say? Logistic regression matched boosting and every network in both bays (§5, §26–27), so the
+decision surface is close to a hyperplane. Projecting every station-day onto the LR weight
+direction (the model's own log-odds axis) and one orthogonal principal component gives a 2-D
+picture in which the two classes are overlapping clouds. The overlap along the LR axis *is* the
+precision ceiling drawn as geometry: rows inside it cannot be separated by any model on these
+features. The thesis claim (§13, §16) is that the LIS-vs-Narragansett precision gap is base
+rate, not separability; this section tests that with one number per bay.
+*Parent* `src/models/lr_geometry.py`; parent `figures/fig_lr_geometry.png` = fig 14 here.
+
+**Design, fixed before running.** Test-period onset rows only (today's chl ≤ 10), scored out of
+sample. Narragansett: the LR of `train_narragansett.py` (tier-A, train ≤ 2020 medians and
+scaler, C = 0.05, balanced; `t*` = max-F1 on val 2021–22), test 2023. LIS: the parent's locked
+LR (35 features, `fit_locked_model` with train_end 2019-12-31, 21-day label), test 2020–2025,
+`t*` = 0.35 (README frozen operating point). Axis 1 = the LR decision value `z·w + b`
+(log-odds; `t*` is a vertical line at logit `t*`, the same quantity in both bays). Axis 2 =
+first principal component of the standardized test matrix after projecting out `w/|w|` (display
+only). Numbers per bay: n onset rows, positives, base rate, model AUC and axis-1 AUC (identical
+by construction; a sanity check), precision and POD at `t*`, overlap coefficient
+OVL = ∫ min(f_bloom, f_no-bloom) of the two class-conditional densities along axis 1 (Gaussian
+KDE, common grid), and the share of positives inside the negatives' central 90 % band.
+
+**Reading rule, fixed before running.** (1) Sanity: Narragansett must reproduce the shipped
+`LR_onset` row of `data/narragansett_model_results.csv` exactly (t* 0.40, precision 0.641, POD
+0.695, AUC 0.810, TP/FP/FN 417/234/183); axis-1 AUC must equal model AUC. (2) Expectation: OVL
+differs between bays by < 0.10 while the positive share differs ~7× (0.35 vs ~0.05); that reads
+as "same separability, different base rate", i.e. the precision gap is rarity. If LIS OVL exceeds
+Narragansett's by > 0.10, separability contributes too. Descriptive section: no GO/NO-GO, only
+this pre-stated reading.
+
+*Results: pending.*
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
