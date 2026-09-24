@@ -22,8 +22,8 @@
 - Perreira documents nutrient reductions under Clean Water Act phases:
   - Phase III (2001-2016): 58.5% nitrogen reduction target
   - PIV (2017-2019): TMDL goal achieved, NOx down 74% relative to 2001-2016
-- Your model shows bloom frequency drop after 2014 -- directly linked to CWA Phase III enforcement and TMDL achievement
-- Use this to explain the inflection point in your bloom trend figure
+- The step in the monitoring record after 2014 is mostly a sensor scale change, not the TMDL: the old label came from DEEP's CTD fluorometer, which read 1.8-3.2x the lab in 2009-2013 (SeaBird to YSI EXO2 around 2009/2010) and 0.8-1.05x from 2016 on (DEEP, 2026-09-23). The lab record has no 2014 step, only a real, temporary low in 2012-2017.
+- Use the nitrogen-reduction history as background, not as the explanation of the step in the bloom trend figure
 
 **4. Spring (Feb-Mar) Bloom Dominance**
 - Perreira confirms seasonal trend: larger bloom in late winter/early spring (Feb-Mar), smaller bloom in late summer, another in early fall
@@ -86,12 +86,12 @@
 
 ### Results additions (Section 4.1):
 - Reference Perreira's west-east gradient when presenting your station bloom rate map
-- Attribute post-2014 decline specifically to CWA Phase III/TMDL achievement
+- Do not attribute the post-2014 step to CWA Phase III/TMDL achievement: it is mostly a CTD sensor scale change (DEEP, 2026-09-23); the lab record shows only a temporary 2012-2017 low
 
 ### Discussion additions (Section 5):
 - Spring bloom peak: explain via diatom dominance in cold water, reduced grazing (cite George et al. 2015 via Perreira)
 - 2002 spike: attribute to documented PIII CHLA rebound (cite Perreira, Rice et al. 2013)
-- Post-2014 decline: attribute to TMDL achievement and nitrogen reductions (cite Perreira)
+- Post-2014 step: mostly a sensor scale change in the monitoring record, not the TMDL (DEEP, 2026-09-23); the nitrogen reductions themselves are real background (cite Perreira)
 - Limitation: CT DEEP station A4 coverage gap means westernmost bloom dynamics may be underrepresented
 - Limitation: poor individual correlations between nutrients and blooms (r² < 0.3) justify multi-feature ML approach
 
@@ -393,6 +393,7 @@ counted, genuine HABs are missed.
 
 Incidental confirmation of the TMDL regime shift already in this file: Jul–Oct mean
 chlorophyll drops from 11–13 µg/L (2009–2013) to 3.5–5.7 µg/L (2014–2020).
+Superseded 2026-09-23: the LIS label was rebuilt on the lab scale (the CTD fluorometer read 2-3x high before 2016); current LIS numbers in the parent's notes/S1_NUMBERS_SHEET.md, rationale in the parent's notes/LABEL_REBUILD_PREREG.md.
 
 ## Sources to obtain
 

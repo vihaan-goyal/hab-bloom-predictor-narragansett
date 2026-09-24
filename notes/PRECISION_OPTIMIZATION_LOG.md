@@ -1,3 +1,5 @@
+> Mirror of the parent repo's file as of an earlier date. LIS numbers here are on the original sensor label; for current LIS numbers see the parent's notes/S1_NUMBERS_SHEET.md (label rebuilt 2026-09-23).
+
 > **PARTLY SUPERSEDED.** Marked 2026-08-30. This log is on the **28-day** label and the
 > retired single-split framing. Its "LOCKED BASELINE (June 2026)" block — precision
 > 0.500 / recall 0.486 / AUC 0.815 at t=0.60 — is the inflated headline killed in

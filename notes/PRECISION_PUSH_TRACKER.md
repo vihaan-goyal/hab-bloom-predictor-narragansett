@@ -1,5 +1,7 @@
 # Precision Push Tracker  (refreshed)
 
+> Mirror of the parent repo's file as of an earlier date. LIS numbers here are on the original sensor label; for current LIS numbers see the parent's notes/S1_NUMBERS_SHEET.md (label rebuilt 2026-09-23).
+
 Status key: DONE / DEAD / OVERTAKEN / OPEN
 
 Powered backbone for all inference: rolling-origin CV, 156 pooled positives (h21)

@@ -1,3 +1,5 @@
+> Mirror of the parent repo's file as of an earlier date. LIS numbers here are on the original sensor label; for current LIS numbers see the parent's notes/S1_NUMBERS_SHEET.md (label rebuilt 2026-09-23).
+
 > **SUPERSEDED — do not write from this file.** Marked 2026-08-30.
 > Written on the old MODIS + 28-day + aeration framing. It shares **no headline number**
 > with the current README. Specifically stale: MODIS as a contribution (tested and

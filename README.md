@@ -15,8 +15,10 @@ the parent repo and in this repo's git history (branch point `8ae2e2a`).
 
 **Chapter 1 (LIS, parent repo).** A regularized logistic regression forecasts
 chlorophyll exceedances (>10 µg/L within 21 d) in Long Island Sound with good
-ranking skill (AUC 0.875) but alert precision capped near 0.14. Thirteen
-improvement attempts failed.
+ranking skill (AUC 0.825) but alert precision near 0.12 (0.117 at the 21-day
+operating point; was AUC 0.875 / precision 0.14 on the original sensor label,
+before the parent rebuilt the LIS label on the lab scale on 2026-09-23).
+Thirteen improvement attempts failed (sensor label; not re-run).
 
 **Chapter 2 (this repo).** The same recipe on Narragansett Bay's 15-minute
 sonde network reaches **0.66 [0.62, 0.69] onset precision across nine test
@@ -28,23 +30,25 @@ smooth risk curve with no point of no return.
 sampling cadence explains it. Three controlled tests say cadence is real but
 secondary:
 - Thinning Narragansett to one sample every 21 days cuts onset precision
-  0.86 → 0.52, not to 0.14 (pre-registered criterion failed).
+  0.86 → 0.52, not to the Sound's ~0.12 (pre-registered criterion failed).
 - LIS buoy fluorometers sampled every 15 minutes still give boat-level skill
   (onset precision 0.16–0.18).
 - Sonde chlorophyll reads ~1.3–1.6× above lab chlorophyll (n=734 pairs), and
   even at the calibrated threshold Narragansett blooms ~5× more often than LIS.
 - **Decisive:** re-threshold Narragansett to LIS's 5% rarity and keep daily
-  sampling — onset precision falls to **0.139, identical to LIS's 0.136**.
-  Rarity alone reproduces the LIS ceiling (findings §13).
+  sampling — onset precision falls to **0.09–0.14, and the Sound's 0.117 sits
+  inside that range**. Rarity reproduces most of the LIS ceiling, but not
+  all of it: on the rebuilt label the Sound also separates the classes less
+  well (overlap 0.62 vs 0.52; findings §13, §28).
 
 **But dense sampling does buy ranking skill.** At LIS-level rarity, nine years
-of daily data give lift **7–8× [5.3–6.0 lower bound]** vs the boat network's
-2.7× (findings §16): sensors would not make LIS alerts mostly right, but
+of daily data give lift **6.9–8.5× [5.3–6.0 lower bound]** vs the boat network's
+2.59× (findings §16): sensors would not make LIS alerts mostly right, but
 would target sampling ~3× more efficiently.
 
-**Precision is a base-rate quantity.** On the fair axis, lift over
-climatology, the two bays are within ~1.5× of each other (2.0–2.5 vs
-2.7–3.0). The defensible conclusion: in a bloom-rare system like LIS no
+**Precision is mostly a base-rate quantity.** On the fair axis, lift, the
+two bays are close (Narragansett 2.0–2.5 vs LIS 2.59; was 2.7–3.0 on the
+original sensor label). The defensible conclusion: in a bloom-rare system like LIS no
 cadence or model class produces high-precision alerts; the actionable
 quantity everywhere is a 2–3× lift over climatology. Full write-up with
 tables: [`notes/NARRAGANSETT_FINDINGS.md`](notes/NARRAGANSETT_FINDINGS.md).
@@ -97,7 +101,7 @@ Three honest readings:
    from the LIS basin alert, reappearing on schedule.
 2. **The onset-only task is the real forecast** — days not currently blooming,
    where persistence cannot alert at all. There the model predicts new blooms
-   7 days ahead at **72% precision** (LIS: 14%). The gap is mostly a base-rate
+   7 days ahead at **72% precision** (LIS: ~12%). The gap is mostly a base-rate
    effect (blooms ~5× more frequent here), not a cadence effect — see the
    thesis section and findings §10–12.
 3. **Sonde-native features add nothing** (tier B ≈ tier A everywhere). The

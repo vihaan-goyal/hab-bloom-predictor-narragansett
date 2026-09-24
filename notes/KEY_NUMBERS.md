@@ -1,5 +1,7 @@
 # KEY_NUMBERS.md — HAB Bloom Predictor Reference
 
+> Mirror of the parent repo's file as of an earlier date. LIS numbers here are on the original sensor label; for current LIS numbers see the parent's notes/S1_NUMBERS_SHEET.md (label rebuilt 2026-09-23).
+
 Corrected pipeline. Do NOT use numbers from the OLD docs listed in Section 6.
 Last updated: 2026-06-04
 

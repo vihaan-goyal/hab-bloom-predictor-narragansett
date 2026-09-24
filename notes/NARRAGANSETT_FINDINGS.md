@@ -141,6 +141,8 @@ the ramp the model exploits is 3 days long — shorter than one LIS revisit
 gap. Replications (DO, no-PONR) show the biology transfers; the temperature
 divergence shows the two bays are genuinely different systems, not copies.
 
+Superseded 2026-09-23: the LIS label was rebuilt on the lab scale (the CTD fluorometer read 2-3x high before 2016); current LIS numbers in the parent's notes/S1_NUMBERS_SHEET.md, rationale in the parent's notes/LABEL_REBUILD_PREREG.md.
+
 
 ## 6. Full-data update (2026-09-01, all 21 available years attempted)
 
@@ -246,8 +248,9 @@ precision at k=21 < 0.30 confirms the cadence thesis; > 0.5 refutes it.
 | same: base rate | 0.64 | 0.57 | 0.45 | 0.27 | 0.25 |
 
 Thinning to LIS cadence degrades skill (AUC 0.87→0.81, precision 0.86→0.52)
-but stops far above LIS's 0.14. **Cadence is real but secondary.** The
-larger confound is event rarity: LIS's base rate is 0.046 vs 0.25–0.64 here.
+but stops far above LIS's 0.117 (was 0.14 on the original sensor label).
+**Cadence is real but secondary.** The larger confound is event rarity: LIS's
+base rate is 0.045 (21-day station-day test, lab-scale label) vs 0.25–0.64 here.
 (A matched-rarity rerun — re-thresholding Narragansett to a 5% base rate,
 then thinning — is in §12.) `data/cadence_thinning.csv`.
 
@@ -266,7 +269,8 @@ test 2025–26 (78 onset positives):
 | value > 58% of threshold (rule) | 0.354 | 4.30 | 0.791 |
 
 Dense sampling inside LIS does **not** produce Narragansett-like precision;
-it reproduces the boat network's (0.14 / 2.7×). Caveats are severe
+it is close to the boat network's (0.117 / 2.59× on the rebuilt lab-scale
+label; was 0.14 / 2.7×). Caveats are severe
 (uncalibrated sensor, two buoys, two test years), but the direction agrees
 with §11. Parent repo: `data/lis_buoy_recipe.csv`. The parent note
 `PRECISION_PUSH_TRACKER.md` claimed "no buoy chlorophyll exists" — corrected.
@@ -283,16 +287,18 @@ Same features, same models, daily (k=1) sampling, test 2023 onset-only:
 | 10 µg/L (original) | 0.64 | 0.86 | 1.3 | 0.87 | ~1,000 |
 | 39.0 (10% rarity) | 0.073 | 0.48 | 6.6 | 0.85 | 177 |
 | **52.5 (LIS 5% rarity)** | 0.009 | **0.139** | 16.3 | 0.97 | 21 |
-| LIS boat network (reference) | 0.046 | 0.136 | 2.7 | 0.875 | 48 |
+| LIS boat network (reference, lab-scale label S1) | 0.045 | 0.117 | 2.59 | 0.825 | 43 |
+| LIS boat network (original sensor label, historical) | 0.046 | 0.136 | 2.7 | 0.875 | 48 |
 
-**With daily data, at LIS-level rarity, precision is 0.139 — identical to
-LIS's 0.136.** Rarity alone moves precision 0.86 → 0.14. Thinning to 21 days
+**With daily data, at LIS-level rarity, precision is 0.139 — close to LIS's
+0.117 (was 0.136 on the original sensor label; matched-rarity tests give
+0.09–0.14, and the Sound sits inside).** Rarity moves precision 0.86 → 0.14. Thinning to 21 days
 at matched rarity is not estimable (the 2023 test has < 1 expected positive),
 so cadence cannot be isolated at that rarity; from §11, its effect at the
 original threshold is 0.86 → 0.52.
 
 Two honest notes. (1) Lift at matched rarity is far higher with daily data
-(16× vs 2.7×) — dense sampling may buy ranking skill even where precision
+(16× vs 2.59×; was 2.7× on the original sensor label) — dense sampling may buy ranking skill even where precision
 stays flat — but with 21 positives that number is unstable and the 2023
 base rate (0.009) undershoots the 0.05 target because 2023 was a quiet year.
 (2) The threshold that reproduces LIS rarity in sonde units (52.5) is ~3–4×
@@ -301,8 +307,10 @@ system, not merely a miscalibrated one. `data/cadence_thinning_matched.csv`.
 
 ### Revised thesis, final form
 
-**Precision is set by rarity.** The same recipe gives 0.14 precision in LIS
-and 0.14 in Narragansett once the label is made equally rare. Everything
+**Precision is set mostly by rarity, not only.** The same recipe gives 0.117
+precision in LIS (was 0.14 on the original sensor label) and 0.09–0.14 in
+Narragansett once the label is made equally rare; on the rebuilt label the
+Sound also separates the classes less well (§28). Everything
 else — cadence (−0.3 at boat spacing), calibration (sonde ≈ 1.3–1.6× lab),
 model class, feature engineering — is second-order. The quantity that
 transfers between systems is lift over climatology, and a dense network
@@ -336,10 +344,29 @@ Files: `data/tuning_search_nar_{grid,selected,null}.csv`,
 `src/models/experiments/tuning_search_nar.py`.
 
 
-## 15. Why LIS is bloom-rare: the 2014 cliff
+## 15. Why LIS is bloom-rare: the 2014 step in the old label was mostly a CTD sensor scale change (revised 2026-09-23)
 
-Share of station-days with chlorophyll > 10 µg/L (LIS: lab bottle samples;
-Narragansett: sonde daily mean, with the lab-calibrated 12.8 equivalent):
+**Current reading (2026-09-23).** The LIS column below is the *original* label, which came
+from DEEP's CTD fluorometer, not from lab bottles. Matched to DEEP's lab chlorophyll on the same
+station and date, that sensor read 2.1-4.8× the lab in 1994-1999, 1.8-3.2× in 2009-2013 and
+0.8-1.05× from 2016 on; the CTD changed from a SeaBird to a YSI EXO2 around 2009/2010. The step
+from 0.42-0.59 (2009-2013) to 0.03-0.11 (from 2014) is mostly this sensor scale change. The lab
+record has no 2014 step. It does have a real, temporary low in 2012-2017 (lab exceedance share
+0.03-0.07, against 0.10-0.23 before and 0.10-0.19 after). It is **not** the nitrogen TMDL and
+**not** a change at DEEP's lab: DEEP (K. O'Brien-Clayton, 2026-09-22/23) confirmed its lab and
+methods are unchanged for 30+ years and recommends the lab data. The parent rebuilt the LIS
+label on the lab scale (S1). LIS is still bloom-rare on that label (21-day station-day test base
+rate 0.045 vs 0.25-0.64 here), so rarity remains the main reason LIS precision is low, but it
+did not arrive as a 2014 step. Current numbers: parent `notes/S1_NUMBERS_SHEET.md`; rationale:
+parent `notes/LABEL_REBUILD_PREREG.md`. *Earlier readings (withdrawn):* the step was first read
+as the TMDL taking effect (withdrawn 2026-09-05), then, after the satellite check below, as a
+change in the lab record (withdrawn 2026-09-23).
+
+The table and text below are the original analysis, kept as history.
+
+Share of station-days with chlorophyll > 10 µg/L (LIS: original label, which was the CTD
+fluorometer, not lab bottles as first written; Narragansett: sonde daily mean, with the
+lab-calibrated 12.8 equivalent):
 
 | period | LIS | Narragansett (sonde >10) | Narragansett (>12.8) |
 |---|---|---|---|
@@ -355,7 +382,7 @@ cleanup taking effect~~ — **withdrawn 2026-09-05**: the satellite cross-check
 below shows no 2014 step in MODIS chlorophyll at the same stations, so the
 cause is unresolved and may be in the lab record.
 
-This is the origin of the rarity that caps LIS precision (§13): the *label*
+(Original reading, superseded by the top of §15.) This is the origin of the rarity that caps LIS precision (§13): the *label*
 became rare. Same 10 µg/L threshold, same recipe — the event became rare in
 the record, whatever the cause. Script: `src/models/experiments/bloom_rate_by_period.py`
 (reads parent `data/hab_features_tidal.csv` and `data/narragansett_daily_features.csv`;
@@ -371,6 +398,7 @@ not disprove the TMDL reading of the LIS 2014 step, but it means the step is
 either a much sharper ecological response or partly a measurement change. The
 question is in the draft email to CT DEEP / UConn (parent
 `notes/EMAIL_DRAFT_2014_CLIFF.md`).
+Superseded 2026-09-23: the LIS label was rebuilt on the lab scale (the CTD fluorometer read 2-3x high before 2016); current LIS numbers in the parent's notes/S1_NUMBERS_SHEET.md, rationale in the parent's notes/LABEL_REBUILD_PREREG.md.
 
 **Satellite cross-check (2026-09-05) — the cliff is not in the satellite.**
 Pre-registered test in the parent repo
@@ -387,32 +415,38 @@ R = 0.13 [0.10, 0.15]). The matched-day lab–satellite agreement, weak before
 2014 (kappa 0.18, 104 joint exceedances vs 74 expected, n = 810), goes to zero
 from 2014 (kappa 0.00, 16 vs 17 expected, n = 1,147). Satellite valid-day
 fraction is flat at 0.21–0.28 per year. An independent instrument with no 2014
-method change sees no step, so the cliff most likely sits in the lab record.
-The table above stands as a description of the *label*; the TMDL attribution
-in this section and in "Revised thesis" is withdrawn pending CT DEEP's answer.
-What survives: the LIS label became rare in 2014 and rarity caps precision
-(§13) — the cause is now an open question, not pollution control. Limits:
+method change sees no step, ~~so the cliff most likely sits in the lab record~~
+(withdrawn 2026-09-23: the "lab" shares here were the CTD-fluorometer label, and the
+step sat in that sensor's scale, not in DEEP's lab; the satellite's "no step" agrees).
+The table above stands as a description of the *original label*; the TMDL attribution
+in this section and in "Revised thesis" is withdrawn. ~~What survives: the LIS label
+became rare in 2014 and rarity caps precision (§13) — the cause is now an open
+question~~ (answered 2026-09-23, see the current reading at the top of §15). Limits:
 MODIS chlor_a is biased in estuarine water and is a 20 km mean, and only 24 %
 of station-days are satellite-valid; it is a coarse witness, but a 5–8× drop
 would show in it. Outputs: parent `data/cliff_satellite_check.csv`,
 `figures/fig_cliff_satellite.png`.
+Superseded 2026-09-23: the LIS label was rebuilt on the lab scale (the CTD fluorometer read 2-3x high before 2016); current LIS numbers in the parent's notes/S1_NUMBERS_SHEET.md, rationale in the parent's notes/LABEL_REBUILD_PREREG.md.
 
 ## 16. Lift at LIS rarity, nine test years: dense sampling triples the lift
 
 Confirms §13's single-year lead with pooled rolling-origin CV (2015–2023),
 GB tier A, onset-only, t* per fold on val (POD ≥ 0.6), station-year clustered
-bootstrap. Thresholds chosen to bracket LIS's 0.046 base rate at h21:
+bootstrap. Thresholds chosen to bracket LIS's base rate at h21 (0.046 on the original
+sensor label; 0.045 on the rebuilt lab-scale label):
 
 | threshold | h | base rate | precision | lift [95% CI] | top-decile lift | AUC | n_pos |
 |---|---|---|---|---|---|---|---|
 | 39 µg/L | 21 | 0.069 | 0.479 | **6.9 [5.3, 9.3]** | 6.5 | 0.909 | 1,541 |
 | 52.5 µg/L | 21 | 0.034 | 0.289 | **8.5 [6.0, 12.8]** | 7.9 | 0.956 | 768 |
-| LIS boat network | 21 | 0.046 | 0.136 | 2.7 | — | 0.875 | 48 |
+| LIS boat network (lab-scale label S1) | 21 | 0.045 | 0.117 | 2.59 | — | 0.825 | 43 |
+| LIS boat network (original sensor label, historical) | 21 | 0.046 | 0.136 | 2.7 | — | 0.875 | 48 |
 
-The single-year 16× (§13) was the high tail; the nine-year value is **~7–8×,
-lower CI bound 5.3–6.0, versus 2.7× for the LIS boat network**. The
+The single-year 16× (§13) was the high tail; the nine-year value is **~7–8×
+(8.48× [5.98, 12.81] at T=52.5, 6.92× [5.32, 9.31] at T=39), versus 2.59× for
+the LIS boat network (was 2.7× on the original sensor label)**. The
 threshold-free top-decile lift agrees, so it is not a t* artefact. Precision
-at matched rarity is 0.29–0.48 here vs 0.14 in LIS (the single-year "0.139"
+at matched rarity is 0.29–0.48 here vs 0.117 in LIS (the single-year "0.139"
 match in §13 was 2023-specific); with pooled years, daily sampling does raise
 precision ~2–3× at LIS rarity as well.
 
@@ -669,11 +703,13 @@ builds the release file). Verification:
 | Lake Erie, all seasons, onset p75 | prec 0.693, lift 1.96, AUC 0.666 | harness §19: 0.695, 1.96, 0.667 |
 | SF Bay, end-to-end, onset p75 | prec 0.251, lift 1.51, AUC 0.655 | harness §19: 0.251, 1.51, 0.655 |
 | Narragansett 2023, no rescale | prec 0.81, lift 2.31, AUC 0.875 | held-out reference 0.70, 2.00, 0.84 (CLI model saw 2023: in-sample, expected higher) |
-| LIS 2023–25 boat visits, 21-d label | prec 0.08, lift 1.6–1.9, AUC 0.77 | LIS locked model 0.14, 2.7, 0.875 |
+| LIS 2023–25 boat visits, 21-d label | prec 0.08, lift 1.6–1.9, AUC 0.77 (sensor label; not re-run) | LIS locked model 0.117, 2.59, 0.825 on the lab-scale label (was 0.14, 2.7, 0.875) |
 
 The packaged pipeline reproduces the harness to three decimals. It does not
 reproduce LIS: a 7-day daily-sonde model asked a 21-day question on visits 2–4
-weeks apart lands at AUC 0.77 vs 0.875 for the model trained on LIS. Same
+weeks apart lands at AUC 0.77 vs 0.875 for the model trained on LIS (both on the
+original sensor label; the LIS model is 0.825 on the rebuilt label, and the CLI run is
+not re-run). Same
 asymmetry as §20. Guidance in the README: use it where you have daily sondes;
 if you have years of local data, refit.
 
@@ -1111,7 +1147,10 @@ size were fixed before running and not tuned; the run was slowed by an accidenta
 process (a hibernated earlier launch resumed alongside it; results are seed-deterministic and
 unaffected, and the duplicate was killed before scoring).
 
-## 28. The precision ceiling as geometry: class overlap along the LR axis is no worse in LIS; rarity is the difference (2026-09-11)
+## 28. The precision ceiling as geometry: rarity is most of the difference, but not all (2026-09-11; LIS row re-run on the lab-scale label 2026-09-23)
+
+*Originally titled "class overlap along the LR axis is no worse in LIS; rarity is the difference".
+That held on the original sensor label; on the rebuilt label LIS overlaps more (see Results).*
 
 **Question (user's).** Plot station-days as points in feature space: what does the geometry
 say? Logistic regression matched boosting and every network in both bays (§5, §26–27), so the
@@ -1119,8 +1158,8 @@ decision surface is close to a hyperplane. Projecting every station-day onto the
 direction (the model's own log-odds axis) and one orthogonal principal component gives a 2-D
 picture in which the two classes are overlapping clouds. The overlap along the LR axis *is* the
 precision ceiling drawn as geometry: rows inside it cannot be separated by any model on these
-features. The thesis claim (§13, §16) is that the LIS-vs-Narragansett precision gap is base
-rate, not separability; this section tests that with one number per bay.
+features. The thesis claim as stated before the run (§13, §16) was that the LIS-vs-Narragansett
+precision gap is base rate, not separability; this section tests that with one number per bay.
 *Parent* `src/models/lr_geometry.py`; parent `figures/fig_lr_geometry.png` = fig 14 here.
 
 **Design, fixed before running.** Test-period onset rows only (today's chl ≤ 10), scored out of
@@ -1152,16 +1191,25 @@ the probability, so nothing about ranking is lost by drawing it). `t*` sits at l
 | Bay | Onset rows | Blooms | Base rate | AUC | t* | Precision | POD | OVL | Blooms inside the no-bloom central 90 % band |
 |---|---|---|---|---|---|---|---|---|---|
 | Narragansett (test 2023, 7-d label) | 1,727 | 600 | 0.347 | 0.810 | 0.40 | 0.641 | 0.695 | **0.52** | 0.75 |
-| LIS (test 2020–25, 21-d label, 35 features) | 1,866 | 68 | 0.036 | 0.855 | 0.35 | 0.112 | 0.868 | **0.44** | 0.71 |
+| LIS (test 2020–25, 21-d label, 35 features), lab-scale label S1 | (sensor label; not re-run) | (sensor label; not re-run) | 0.026 | 0.770 | 0.35 | 0.055 | 0.667 | **0.62** | (sensor label; not re-run) |
+| LIS, original sensor label (historical) | 1,866 | 68 | 0.036 | 0.855 | 0.35 | 0.112 | 0.868 | **0.44** | 0.71 |
 
 Parent `data/lr_geometry_summary.csv`, `data/lr_geometry_rows_{nar,lis}.csv`; fig 14
 (= parent `figures/fig_lr_geometry.png`).
 
-**Reading, against the rule fixed above.** OVL differs by 0.07, inside the pre-stated 0.10 band,
-and in the *opposite* direction to a separability explanation: the LIS classes overlap *less*
-(0.44 vs 0.52; LIS AUC 0.855 vs 0.810). Meanwhile the bloom share differs 10× (0.036 vs 0.347).
-So the geometry says what §13 and §16 said with re-thresholding: the precision gap between the
-bays is rarity, not separability. Panel (c) makes the first half visible, the two bloom densities
+**Reading, against the rule fixed above (current, lab-scale label).** LIS OVL is 0.62 against
+Narragansett's 0.52, just over the pre-stated 0.10 margin, and LIS AUC is 0.770 vs 0.810: the
+Sound separates the classes somewhat less well. Meanwhile the bloom share differs ~13× (0.026 vs
+0.347). So the precision gap between the bays is **mostly rarity, not only**: separability
+contributes too. The matched-rarity tests still hold: at 5% rarity Narragansett precision is
+0.09–0.14 with the Sound's 0.117 inside, and lift at rarity (8.48×, 6.92×) is above the Sound's
+2.59 (§13, §16).
+
+*Original reading (sensor label, 2026-09-11; withdrawn 2026-09-23).* OVL differed by 0.07, inside
+the band and in the *opposite* direction to a separability explanation (LIS 0.44 vs 0.52; LIS AUC
+0.855 vs 0.810; bloom share 0.036 vs 0.347), read then as "rarity, not separability". The
+panel description below refers to that original figure (sensor label; not re-run).
+Panel (c) makes the first half visible, the two bloom densities
 sit at the same place on the axis and the LIS one is narrower; panel (d) makes the second half
 visible, orange is a third of every bar in Narragansett and a sliver in LIS, so any vertical cut
 that catches most LIS blooms also catches hundreds of no-bloom rows (59 TP against 469 FP at
@@ -1178,26 +1226,33 @@ by construction; in Narragansett it separates the year-round F-stations from the
 B-stations (the two horizontal bands), in LIS it tracks the salinity/temperature gradient across
 the Sound. It is there to spread the points out, not to be read. Caveats: one weight vector per
 bay from a single split (train ≤ 2020 / ≤ 2019); the LIS test window 2020–25 is wider than the
-2023–25 window of the parent README (chosen for row count, 68 positives; the shipped
-walk-forward AUC 0.875 is within 0.02 of this split's 0.855); the two bays use different feature
+2023–25 window of the parent README (chosen for row count; on the original sensor label the
+shipped walk-forward AUC 0.875 was within 0.02 of this split's 0.855, and on the lab-scale label
+the 21-day station-day test AUC is 0.825 against this onset split's 0.770); the two bays use different feature
 lists (23 vs 35) and horizons (7 vs 21 d), so only the *shape* of the overlap is being compared,
 not the axis units; OVL from a Gaussian KDE with Scott's bandwidth, so ±0.02 is noise.
 
 ## Revised thesis (supersedes the "Presentation framing" above)
 
-1. LIS forecasting is capped near precision 0.14 and 13 fixes failed (Ch. 1).
+1. LIS forecasting sits near precision 0.12 (0.117 at the 21-day operating point, AUC 0.825,
+   base 0.045, lift 2.59, on the lab-scale label rebuilt 2026-09-23; was 0.14 on the original
+   sensor label) and 13 fixes failed (Ch. 1; sensor label; not re-run).
 2. The same recipe on Narragansett sondes reaches 0.66 [0.62, 0.69] onset
    precision across nine test years and beats every trivial rule (§7–8).
 3. **Why the gap? Mostly rarity, partly cadence, partly calibration.**
    Blooms (at any comparable threshold) are ~5× more frequent in Narragansett
    (§10); thinning Narragansett to boat cadence costs ~0.3 precision but not
    0.7 (§11); LIS buoys sampled every 15 min stay at boat-level skill (§12).
-   Precision is a base-rate quantity; lift is the fair comparison, and on
-   lift the two bays are within a factor of ~1.5 of each other (2.0–2.5 vs
-   2.7–3.0).
+   At matched 5% rarity Narragansett precision is 0.09–0.14 and the Sound's
+   0.117 sits inside, so precision is mostly a base-rate quantity, but not
+   only: on the rebuilt label the Sound also separates the classes less well
+   (OVL 0.62 vs 0.52, §28). Lift is the fairer comparison: Narragansett
+   2.0–2.5 vs LIS 2.59 (was 2.7–3.0 on the original sensor label). LIS's
+   rarity is not a 2014 event: the old label's 2014 step was mostly a CTD
+   sensor scale change (§15).
 4. What transfers across bays: DO conditioning, the smooth no-PONR risk
    curve, and the 3-day run-up; what does not: temperature dependence.
 5. What a manager should take away: in a bloom-rare system like LIS, no
    sampling cadence or model class produces high-precision alerts, because
-   precision is bounded by rarity; the actionable quantity is lift over
-   climatology, which is ~2–3× in both bays.
+   precision is bounded mostly by rarity; the actionable quantity is lift,
+   which is ~2–3× in both bays.

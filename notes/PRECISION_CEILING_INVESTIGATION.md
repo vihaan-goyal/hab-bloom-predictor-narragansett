@@ -1,5 +1,7 @@
 # Precision Ceiling Investigation: Results
 
+> Mirror of the parent repo's file as of an earlier date. LIS numbers here are on the original sensor label; for current LIS numbers see the parent's notes/S1_NUMBERS_SHEET.md (label rebuilt 2026-09-23).
+
 Canonical record of the powered, leakage-free investigation into the HAB precision
 ceiling. Supersedes the original planning version of this document. Every hypothesis
 below was tested under rolling-origin expanding-window cross-validation (11 folds,
