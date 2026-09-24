@@ -51,7 +51,9 @@ TOP_FRAC = 0.10
 N_BOOT = 2000
 SEED = 42
 OUT = "data/lift_at_rarity_cv.csv"
-LIS_REF = dict(precision=0.136, lift=2.7, auc=0.875, base_rate=0.046)
+# LIS reference on the lab-consistent label S1 (parent notes/LABEL_REBUILD_PREREG.md, 2026-09-23).
+# Sensor-label original: precision 0.136, lift 2.7, AUC 0.875, base 0.046.
+LIS_REF = dict(precision=0.117, lift=2.59, auc=0.825, base_rate=0.045)
 
 # Tier-A feature list, copied verbatim from src/models/train_narragansett.py
 TIER_A = ['chl', 'chl_lag1', 'chl_lag2', 'chl_lag3', 'chl_lag4',
@@ -243,13 +245,13 @@ def main():
         if not len(g):
             print(f"T={T} h=21 GB: no pooled row"); continue
         r = g.iloc[0]
-        print(f"T={T:>5} h=21 GB: base={r.base_rate:.3f} (LIS 0.046) | precision={r.precision:.3f} "
-              f"[{r.precision_ci_lo:.3f},{r.precision_ci_hi:.3f}] (LIS 0.136) | lift={r.lift:.2f} "
-              f"[{r.lift_ci_lo:.2f},{r.lift_ci_hi:.2f}] (LIS 2.7) | AUC={r.auc:.3f} "
-              f"[{r.auc_ci_lo:.3f},{r.auc_ci_hi:.3f}] (LIS 0.875) | POD={r.pod:.3f} | "
+        print(f"T={T:>5} h=21 GB: base={r.base_rate:.3f} (LIS {LIS_REF['base_rate']}) | precision={r.precision:.3f} "
+              f"[{r.precision_ci_lo:.3f},{r.precision_ci_hi:.3f}] (LIS {LIS_REF['precision']}) | lift={r.lift:.2f} "
+              f"[{r.lift_ci_lo:.2f},{r.lift_ci_hi:.2f}] (LIS {LIS_REF['lift']}) | AUC={r.auc:.3f} "
+              f"[{r.auc_ci_lo:.3f},{r.auc_ci_hi:.3f}] (LIS {LIS_REF['auc']}) | POD={r.pod:.3f} | "
               f"top-decile precision={r.top10_precision:.3f} lift={r.top10_lift:.2f} "
               f"[{r.top10_lift_ci_lo:.2f},{r.top10_lift_ci_hi:.2f}] | n_onset={int(r.n_onset)} "
-              f"n_pos={int(r.n_pos)} folds={int(r.n_folds)} | lift CI lower bound > 2.7: "
+              f"n_pos={int(r.n_pos)} folds={int(r.n_folds)} | lift CI lower bound > {LIS_REF['lift']}: "
               f"{r.lift_ci_lo > LIS_REF['lift']}")
     print(f"\nWrote {OUT} ({len(pooled)} rows). Runtime {time.time()-t0:.0f}s")
 

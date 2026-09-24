@@ -33,7 +33,10 @@ HORIZONS = (7, 21)
 TARGETS = (0.05, 0.10)
 SEED = 42
 OUT = "data/cadence_thinning_matched.csv"
-LIS_REF = dict(precision=0.136, auc=0.875, base_rate=0.046, lift=0.136 / 0.046)
+# LIS 21-day station-day reference, lab-consistent label S1 (parent notes/LABEL_REBUILD_PREREG.md,
+# 2026-09-23; parent data/decision_value_rows.csv, test 2023-25, t*=0.35). Sensor-label original:
+# precision 0.136, AUC 0.875, base 0.046.
+LIS_REF = dict(precision=0.117, auc=0.825, base_rate=0.045, lift=0.117 / 0.045)
 
 FEATURES = ["chl", "chl_lag1", "chl_lag2", "chl_lag3", "chl_lag4",
             "chl_roll3_mean", "chl_roll6_mean", "chl_roll9_mean", "chl_trend",
