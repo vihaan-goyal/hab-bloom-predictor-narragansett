@@ -54,9 +54,12 @@ chl-a. Most stations deploy May–Nov; B3w/B12w are the winter deployments.
 
 ## Headline numbers (test 2023)
 
-Onset-only, GB, tier A: precision 0.718 @ POD 0.580, AUC 0.835, lift 2.07
-(always-alert lift = 1.00; persistence cannot alert on onset days).
-All-days GB AUC 0.909. Tier B (sonde-native features) does not beat tier A.
+Onset-only, GB, tier A: precision 0.682 [0.584, 0.783] @ POD 0.572, AUC 0.829, lift 1.94
+[1.53, 2.51] (always-alert lift = 1.00; persistence cannot alert on onset days).
+All-days GB AUC 0.907. Tier B (sonde-native features) does not beat tier A.
+(2026-09-28 leak fix: chl_climatology is now prior-years only, and a negative label needs >= 4
+observed days in the 7-day window. Before: 0.696 / 0.600 / 0.839 / 2.00 on the 2026-09-01 build;
+the 0.718 / 0.580 / 0.835 / 2.07 once quoted here predates that build.)
 
 ## LIS cross-reference
 
@@ -78,14 +81,15 @@ cadence, partly sonde calibration — NOT a pure cadence effect.
 | `src/transfer/transfer_eval.py`, `fetch_<site>.py`, `pooled_model_test.py`, `regime_models.py` | `data/transfer/*` — cross-site transfer (findings §19–22) |
 | `src/transfer/satellite_fetch.py`, `satellite_eval.py`, `run_satellite_pipeline.ps1` | `data/transfer/satellite_*.csv` - satellite feasibility (findings 23, fig 10) |
 | `src/registry/erddap_crawl.py`, `run_catalog.py`, `src/viz/registry_map.py` | `data/registry/*` - ERDDAP catalog + per-site skill (findings 24, fig 11) |
-| `predict_anywhere.py` + `release/narragansett_bloom_model.joblib` | frozen model for any site (findings §21) |
+| `predict_anywhere.py` + `release/narragansett_bloom_model_v2.joblib` | model for any site (findings §21). v2 (2026-09-28) = causal features, threshold 0.45 from the rolling CV. `release/narragansett_bloom_model.joblib` (v1) is FROZEN for the prospective test (sha256 in notes/PROSPECTIVE_PROTOCOL.md): never re-export over it |
 | `src/deploy/daily_inference_nar.py --date YYYY-MM-DD` | `data/narragansett_daily_predictions.csv` — per-date station probabilities (findings §18) |
 | `src/models/experiments/bloom_rate_by_period.py` | `data/bloom_rate_by_period.csv` — the 2014-cliff table (findings §15); needs parent repo at `../hab-bloom-predictor` |
 | `src/nn/build_windows.py`, `seq_vs_daily.py`, `pooled_site_nn.py` (env `hab-nn`) | `data/nn/*` - neural-network tests (findings 26-27, figs 12-13): 15-min CNN vs daily GB, pooled site-embedding MLP |
 | parent `src/models/lr_geometry.py` | parent `data/lr_geometry_*.csv`, fig 14 - class overlap along the LR axis, both bays (findings 28) |
 | `src/deploy/prospective_forecast.py`, `score_ledger.py`, `prospective_freeze.py` | weekly prospective forecast ledger (`data/prospective/`, tracked); protocol in `notes/PROSPECTIVE_PROTOCOL.md`. **Do not issue a real forecast (non --dry-run) until the user confirms ISEF Form 1A is signed.** |
 
-Headline after Part II: pooled onset precision 0.656 [0.618, 0.692], lift 2.50.
+Headline after Part II: pooled onset precision 0.666 [0.628, 0.702], lift 2.47 [2.18, 2.79],
+AUC 0.877 (2026-09-28 leak-free rebuild; was 0.656 / 2.50 / 0.878).
 Cadence thesis: FAILED its pre-registered test; rarity dominates (findings §11–12).
 
 ## Reproducibility

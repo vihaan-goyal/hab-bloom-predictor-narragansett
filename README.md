@@ -1,5 +1,8 @@
 # HAB Bloom Predictor — Narragansett Bay
 
+> **LIS cross-reference update (2026-09-28).** LIS reference values quoted in this file (precision 0.117, lift 2.59×, AUC 0.825, base 0.045) predate the parent repo's 2026-09-28 audit (leak fixes, unobserved windows dropped, single validation threshold t*=0.20). Current LIS 21-day station-day values: precision 0.125, lift 1.63×, base 0.077 (560 rows, 43 events); walk-forward AUC 0.736 (2023-25) and 0.693 (2016-25). The comparisons' direction is unchanged: LIS stays far below Narragansett at matched rarity. Parent: notes/S1_NUMBERS_SHEET.md.
+
+
 **Same recipe, two bays: what actually limits bloom forecasting — sampling
 cadence, or how rare blooms are?**
 
@@ -87,12 +90,16 @@ every precision.
 
 | Model | Features | AUC | POD | Precision | base rate | Lift |
 |---|---|---|---|---|---|---|
-| GB, all days | A | 0.909 | 0.825 | 0.859 | 0.551 | 1.56 |
-| LR, all days | A | 0.889 | 0.875 | 0.803 | 0.551 | 1.46 |
-| persistence (chl>10 today) | — | 0.887 | 0.589 | 0.931 | 0.551 | 1.69 |
-| **GB, onset-only** (today ≤10) | A | 0.835 | 0.580 | **0.718** | 0.347 | **2.07** |
-| LR, onset-only | A | 0.801 | 0.700 | 0.628 | 0.347 | 1.81 |
-| always-alert, onset | — | — | 1.000 | 0.347 | 0.347 | 1.00 |
+| GB, all days | A | 0.907 | 0.823 | 0.845 | 0.554 | 1.52 |
+| LR, all days | A | 0.894 | 0.862 | 0.813 | 0.554 | 1.47 |
+| persistence (chl>10 today) | — | 0.886 | 0.589 | 0.932 | 0.554 | 1.68 |
+| **GB, onset-only** (today ≤10) | A | 0.829 | 0.572 | **0.682** | 0.351 | **1.94** |
+| LR, onset-only | A | 0.806 | 0.667 | 0.638 | 0.351 | 1.82 |
+| always-alert, onset | — | — | 1.000 | 0.351 | 0.351 | 1.00 |
+
+(2026-09-28: re-run after the leak fix: prior-years chl climatology, and a negative label needs at
+least 4 observed days in the window. The table previously showed pre-2026-09-01 numbers, e.g. GB
+onset 0.718 / lift 2.07.)
 
 Three honest readings:
 
@@ -101,7 +108,7 @@ Three honest readings:
    from the LIS basin alert, reappearing on schedule.
 2. **The onset-only task is the real forecast** — days not currently blooming,
    where persistence cannot alert at all. There the model predicts new blooms
-   7 days ahead at **72% precision** (LIS: ~12%). The gap is mostly a base-rate
+   7 days ahead at **68% precision** (LIS: ~11%). The gap is mostly a base-rate
    effect (blooms ~5× more frequent here), not a cadence effect — see the
    thesis section and findings §10–12.
 3. **Sonde-native features add nothing** (tier B ≈ tier A everywhere). The
@@ -112,7 +119,9 @@ Three honest readings:
 ## Use the model on your own water body
 
 Two files, no training, no Narragansett data: `predict_anywhere.py` and
-`release/narragansett_bloom_model.joblib` (122 kB). Needs pandas, numpy,
+`release/narragansett_bloom_model_v2.joblib` (124 kB; v2 of 2026-09-28 uses the leak-free
+prior-years climatology and a threshold of 0.45 taken from the rolling CV. The v1 file stays frozen
+for the prospective test). Needs pandas, numpy,
 scikit-learn, joblib.
 
 ```bash
@@ -128,8 +137,9 @@ transfer work (findings §19). Output: `bloom_predictions.csv` with a
 probability and alert per station-day, plus a table for the latest day.
 
 Tested on six other systems (Chesapeake, NERRS reserves, UK shelf, Australia,
-Lake Erie, SF Bay): the exported model matches a locally trained one at most
-sites, lift 1.3–2.5× over always-alert, AUC 0.60–0.86 (findings §19–20).
+Lake Erie, SF Bay): the exported model ranks as well as a locally trained one at most
+sites, AUC 0.61–0.85, lift about 1.3–1.9× over always-alert (findings §19, leak-free re-run of
+2026-09-28; lift depends on the threshold a site picks).
 
 ### Where it works (coverage conclusion, 2026-09-04)
 
@@ -138,8 +148,8 @@ lake, and against four satellite chlorophyll products (findings 19-23):
 
 | Input available at a site | What to run | Expected skill |
 |---|---|---|
-| Sub-daily chlorophyll sonde (any units), any coast or lake | `predict_anywhere.py` with the exported model | onset lift 1.3-2.5x over always-alert, AUC 0.6-0.86; matches a locally trained model at most sites |
-| Same, plus 3+ years of local history | refit locally (`src/transfer/transfer_eval.py` recipe) | +0.3-0.5 lift in fresh/estuarine water; no gain on open shelf, and none at the 11 best ERDDAP sites (findings 24 addendum: median delta lift -0.06) |
+| Sub-daily chlorophyll sonde (any units), any coast or lake | `predict_anywhere.py` with the exported model | onset lift ~1.3-2x over always-alert (ERDDAP median 1.51), AUC 0.6-0.85; ranks as well as a locally trained model at most sites (2026-09-28 leak-free figures) |
+| Same, plus 3+ years of local history | refit locally (`src/transfer/transfer_eval.py` recipe) | AUC gain only in Chesapeake (+0.09) and SF Bay (+0.05); lift gain +0.2 (Chesapeake, NERRS) to +0.5 (SF Bay), none in Australia; at the best ERDDAP sites a small lift gain (median +0.05, 10 of 16 sites) with no AUC gain (findings 19 and 24 addendum, leak-free re-runs of 2026-09-28; the earlier "+0.3-0.5" and "-0.06" figures used leaky scaling and cross-fold thresholds) |
 | Satellite chlorophyll only (300 m to 4 km) | nowcast / screening only | 7-day onset lift 1.07-1.26, below climatology: **not a forecast** (findings 23) |
 
 Satellites failed the pre-registered test because the run-up is visible only
@@ -148,9 +158,12 @@ Satellites failed the pre-registered test because the run-up is visible only
 value (lift 1.75 against itself, 1.18 against the water). A water-type
 ("regime") model library was also tested and rejected (findings 22). The exported
 model has since been run on 87 further public sonde sites found by crawling
-48 ERDDAP servers: median onset lift 1.58, 67 of 74 scored sites with a
-confidence interval above 1.0, none below (findings 24, fig 11;
-`data/registry/site_skill.csv`).
+48 ERDDAP servers: median onset lift 1.51, 65 of 74 scored sites with a
+confidence interval above 1.0, none below, median AUC 0.74 (findings 24, 2026-09-28 leak-free
+re-score with the v2 model: rescaling fit on calibration years only; the first scoring, 1.58 and
+67 of 74, fit it on the whole record. The 74 sites are partly correlated, e.g. 9 Indian River
+Lagoon stations; the median over 50 dataset families is 1.54.
+`data/registry/site_skill_causal_v2.csv`).
 
 ## Reproduce
 

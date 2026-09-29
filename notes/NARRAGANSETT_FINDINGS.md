@@ -1,5 +1,8 @@
 # Narragansett findings — replication of the LIS analyses
 
+> **LIS cross-reference update (2026-09-28).** LIS reference values quoted in this file (precision 0.117, lift 2.59×, AUC 0.825, base 0.045) predate the parent repo's 2026-09-28 audit (leak fixes, unobserved windows dropped, single validation threshold t*=0.20). Current LIS 21-day station-day values: precision 0.125, lift 1.63×, base 0.077 (560 rows, 43 events); walk-forward AUC 0.736 (2023-25) and 0.693 (2016-25). The comparisons' direction is unchanged: LIS stays far below Narragansett at matched rarity. Parent: notes/S1_NUMBERS_SHEET.md.
+
+
 Written 2026-09-01. Source scripts: `src/models/narragansett_lis_analyses.py`,
 `src/models/bootstrap_narragansett.py`, `src/models/train_narragansett.py`.
 Data: 22,851 station-days (2015–2023, 15 stations, daily aggregates of
@@ -34,13 +37,14 @@ docstring says where its raw input comes from. Rows marked *parent* live in
 | 18 | `src/deploy/daily_inference_nar.py --date YYYY-MM-DD` | daily features | `data/narragansett_daily_predictions.csv` |
 | 19 | `src/transfer/fetch_{chesapeake,nerrs,cefas_portal,imos,lake_erie,sfbay}.py` then `python -m src.transfer.transfer_eval --source <name>` | public feeds (each docstring); **Cefas is a manual portal export**, see §19 | `data/transfer/<name>_{15min,daily,results}.csv` |
 | 20 | `src/transfer/pooled_model_test.py` | §19 daily files | `data/transfer/pooled_to_narragansett.csv` |
-| 21 | `src/deploy/export_model.py`, `predict_anywhere.py` | daily features | `release/narragansett_bloom_model.joblib` (committed) |
+| 21 | `src/deploy/export_model.py`, `predict_anywhere.py` | daily features | `release/narragansett_bloom_model_v2.joblib` (2026-09-28, causal features, threshold 0.45 = median rolling-CV fold t*); `release/narragansett_bloom_model.joblib` = v1, frozen for §25 |
 | 22 | `src/transfer/regime_models.py`, `src/viz/regime_figure.py` | §19 daily files | `data/transfer/regime_loso*.csv`, `figures/nar_fig9` |
 | 23 | `src/transfer/satellite_fetch.py`, `satellite_eval.py`, `src/viz/satellite_figure.py` | NOAA CoastWatch ERDDAP (docstring) | `data/transfer/satellite_*.csv`, `figures/nar_fig10` |
-| 24 | `src/registry/erddap_crawl.py`, `run_catalog.py`, `refit_top_sites.py`, `src/viz/registry_map.py` | 60 public ERDDAP servers (`data/registry/erddaps.json`) | `data/registry/*.csv` (committed), `figures/nar_fig11` |
+| 24 | `src/registry/erddap_crawl.py`, `run_catalog.py` (`--rescore --model v2|v1` for the leak-free scores), `refit_top_sites.py --model v2|v1`, `src/viz/registry_map.py` | 60 public ERDDAP servers (`data/registry/erddaps.json`) | `data/registry/*.csv` (committed; `site_skill.csv` frozen as the §25 site-list input, leak-free scores in `site_skill_causal_{v2,v1}.csv`), `figures/nar_fig11` (drawn from the old scores) |
 | 26 | `python -m src.nn.build_windows`, `python -m src.nn.seq_vs_daily` (env `hab-nn`, `environment-nn.yml`) | `data/narragansett_surface_15min.csv` + daily features | `data/nn/index.csv`, `windows_f32.npy`, `seq_vs_daily_{results,predictions}.csv`, `figures/nar_fig12` |
 | 27 | `python -m src.nn.pooled_site_nn` (env `hab-nn`) | §19 daily files + daily features | `data/nn/pooled_site_nn_{results,predictions}.csv`, `figures/nar_fig13` |
 | 28 | *parent* `src/models/lr_geometry.py --nar-root ..` (base env, from the parent root) | daily features (fork) + *parent* `data/hab_features_tidal.csv` | *parent* `data/lr_geometry_{summary,rows_nar,rows_lis}.csv`, `figures/fig_lr_geometry.png` = `figures/nar_fig14` |
+| 29 | `src/models/tank_feature_check.py` | daily features + `data/narragansett_surface_15min.csv` | `data/tank_feature_check.csv` |
 
 Seeds: model `random_state=42`; bootstrap `seed=42`, n=2000. Environment:
 `environment.yml` (see README "Reproduce" for the clean-machine check).
@@ -125,10 +129,13 @@ not proceed to bloom. Two systems, two sampling regimes, same shape.
 Station-clustered bootstrap (13 test clusters, n_boot=2000, seed=42),
 test 2023:
 
-- GB onset-only: precision 0.718 [0.643, 0.792], lift 2.07 [1.57, 2.69],
-  POD 0.580 [0.444, 0.694]; **lift lower bound > 1.5** — decisively beats
+- GB onset-only: precision 0.682 [0.584, 0.783], lift 1.94 [1.53, 2.51],
+  POD 0.572 [0.410, 0.700]; **lift lower bound > 1.5** — decisively beats
   always-alert, which the LIS basin alert never did (its CI touched zero).
-- GB all-days AUC 0.909 [0.880, 0.926].
+- GB all-days AUC 0.907 [0.876, 0.924].
+- *(Re-run 2026-09-28 after the leak fix: prior-years chl climatology, negatives need >= 4 observed
+  days. Superseded: 0.718 [0.643, 0.792] / lift 2.07 / POD 0.580 / AUC 0.909, from the 9-year build;
+  0.696 / 2.00 / 0.600 / AUC 0.839 on the 2026-09-01 full build, §6.)*
 - Tree model beats LR here (LIS: LR won) — dense data supplies the event
   count tree models need. Sonde-native features still add nothing over the
   LIS-analog set in either model.
@@ -152,7 +159,8 @@ format, 34 files skipped): **4.52M readings, 18 stations, 2005-2023,
 station-days; test 2023 unchanged. Results (GB, onset-only, clustered CIs):
 precision 0.696 [0.622, 0.778], POD 0.600 [0.452, 0.719], lift 2.00
 [1.50, 2.68], AUC 0.839 [0.780, 0.878] -- statistically identical to the
-9-year build. **Doubling the training data did not move the model.**
+9-year build. **Doubling the training data did not move the model.** *(These are pre-leak-fix
+values; the current single split is in §5, 2026-09-28.)*
 
 Stratification (surface-minus-bottom density/temp/salinity + bottom DO,
 tier C) adds nothing: removing it costs 0.4pp precision; tier C == tier A
@@ -184,12 +192,16 @@ clustered bootstrap n=2000:
 
 | model | onset precision | POD | lift | AUC |
 |---|---|---|---|---|
-| GB tier A | 0.656 [0.618, 0.692] | 0.653 | 2.50 [2.21, 2.83] | 0.878 |
-| LR | 0.634 [0.593, 0.674] | 0.646 | 2.42 [2.17, 2.74] | 0.868 |
+| GB tier A | 0.666 [0.628, 0.702] | 0.665 | 2.47 [2.18, 2.79] | 0.877 |
+| LR | 0.650 [0.610, 0.688] | 0.639 | 2.41 [2.16, 2.72] | 0.865 |
 
-Per-year onset precision 0.55–0.77 (GB); lift 1.95–3.75, highest in the
-rarest years (2019, 2020). The 2023 fold reproduces the single split
-(0.724 vs 0.696, AUC 0.840 vs 0.839). Files: `data/rolling_origin_cv_nar*.csv`.
+*(2026-09-28 leak-free rebuild: n = 14,703 onset rows, 3,964 positives, base 0.270. Superseded:
+GB 0.656 [0.618, 0.692] / 0.653 / 2.50 [2.21, 2.83] / 0.878; LR 0.634 / 0.646 / 2.42 / 0.868 on
+15,118 rows.)*
+
+Per-year onset precision 0.55–0.78 (GB); lift 1.86–3.68, highest in the
+rarest years. The 2023 fold (0.754, AUC 0.835) sits close to the single split (0.682, AUC 0.829);
+2026-09-28 values, previously 0.724 vs 0.696, AUC 0.840 vs 0.839. Files: `data/rolling_origin_cv_nar*.csv`.
 
 ## 8. Trivial-rule baselines: the model wins, modestly
 
@@ -287,7 +299,7 @@ Same features, same models, daily (k=1) sampling, test 2023 onset-only:
 | 10 µg/L (original) | 0.64 | 0.86 | 1.3 | 0.87 | ~1,000 |
 | 39.0 (10% rarity) | 0.073 | 0.48 | 6.6 | 0.85 | 177 |
 | **52.5 (LIS 5% rarity)** | 0.009 | **0.139** | 16.3 | 0.97 | 21 |
-| LIS boat network (reference, lab-scale label S1) | 0.045 | 0.117 | 2.59 | 0.825 | 43 |
+| LIS boat network (reference, lab-scale label S1; after the 2026-09-28 audit) | 0.077 | 0.125 | 1.63 | 0.736 (walk-forward) | 43 |
 | LIS boat network (original sensor label, historical) | 0.046 | 0.136 | 2.7 | 0.875 | 48 |
 
 **With daily data, at LIS-level rarity, precision is 0.139 — close to LIS's
@@ -437,16 +449,17 @@ sensor label; 0.045 on the rebuilt lab-scale label):
 
 | threshold | h | base rate | precision | lift [95% CI] | top-decile lift | AUC | n_pos |
 |---|---|---|---|---|---|---|---|
-| 39 µg/L | 21 | 0.069 | 0.479 | **6.9 [5.3, 9.3]** | 6.5 | 0.909 | 1,541 |
-| 52.5 µg/L | 21 | 0.034 | 0.289 | **8.5 [6.0, 12.8]** | 7.9 | 0.956 | 768 |
-| LIS boat network (lab-scale label S1) | 21 | 0.045 | 0.117 | 2.59 | — | 0.825 | 43 |
+| 39 µg/L | 21 | 0.069 | 0.501 | **7.2 [5.6, 9.8]** | 6.6 | 0.914 | 1,541 |
+| 52.5 µg/L | 21 | 0.034 | 0.312 | **9.1 [6.6, 13.6]** | 8.3 | 0.962 | 768 |
+| LIS boat network (lab-scale label S1; after the 2026-09-28 audit) | 21 | 0.077 | 0.125 | 1.63 | — | 0.736 (walk-forward) | 43 |
 | LIS boat network (original sensor label, historical) | 21 | 0.046 | 0.136 | 2.7 | — | 0.875 | 48 |
 
 The single-year 16× (§13) was the high tail; the nine-year value is **~7–8×
-(8.48× [5.98, 12.81] at T=52.5, 6.92× [5.32, 9.31] at T=39), versus 2.59× for
+(9.15× [6.60, 13.64] at T=52.5, 7.24× [5.59, 9.77] at T=39; 2026-09-28 leak-free re-run with the
+top-decile cutoff taken from validation, previously 8.48× and 6.92×), versus 2.59× for
 the LIS boat network (was 2.7× on the original sensor label)**. The
 threshold-free top-decile lift agrees, so it is not a t* artefact. Precision
-at matched rarity is 0.29–0.48 here vs 0.117 in LIS (the single-year "0.139"
+at matched rarity is 0.31–0.50 here vs 0.117 in LIS (the single-year "0.139"
 match in §13 was 2023-specific); with pooled years, daily sampling does raise
 precision ~2–3× at LIS rarity as well.
 
@@ -620,6 +633,32 @@ rule):
 | Lake Erie | 0.36 | 0.70 / 0.67 | 0.47 / 0.63 | 0.63 / 0.55 |
 | SF Bay / Suisun–Delta | 0.17 | 0.25 / 0.66 | 0.32 / 0.63 | 0.39 / 0.73 |
 
+**Leak-free re-run (2026-09-28).** The tables above fit the zero-shot quantile map on each site's
+whole record (the years being scored included), built the chl climatology from the whole record,
+and scored every refit fold at the *median* of all folds' thresholds (early folds used thresholds
+chosen on later years). Now the map is fit on the first year and zero-shot is scored on the later
+years, the climatology is prior-years only, and each refit fold uses its own validation threshold
+(`python -m src.transfer.transfer_eval --source <name>`; `*_results_preFix_backup.csv` keep the old
+tables). Onset-only, p75 label, lift [95% CI] / AUC:
+
+| Site | Zero-shot rescaled (map fit on year 1, t = 0.50) | chl>c rule | Refit GB (per-fold t) | Climatology |
+|---|---|---|---|---|
+| Chesapeake Bay | 1.31 [1.22, 1.40] / 0.61 | 1.30 [1.21, 1.39] / 0.60 | 1.51 [1.44, 1.60] / 0.70 | 1.44 |
+| NERRS reserves | 1.33 [1.22, 1.46] / 0.69 | 1.42 [1.29, 1.59] / 0.64 | 1.50 [1.33, 1.73] / 0.71 | 1.18 |
+| UK shelf (Cefas) | 1.75 [1.65, 1.86] / 0.85 | 2.85 [2.56, 3.18] / 0.73 | 2.77 [2.41, 3.17] / 0.85 | 1.87 |
+| Australia (IMOS) | 1.92 [1.74, 2.11] / 0.69 | 1.35 [1.23, 1.50] / 0.61 | 1.41 [1.29, 1.56] / 0.69 | 1.27 |
+| Lake Erie | no alerts at 0.50 / 0.67 | 1.45 [1.23, 1.70] / 0.63 | 1.05 [0.99, 1.15] / 0.55 | 0.92 |
+| SF Bay / Suisun–Delta | 1.86 [1.48, 2.44] / 0.68 | 1.89 [1.51, 2.45] / 0.63 | 2.39 [1.99, 2.98] / 0.73 | 1.36 |
+
+What changes: (a) the **ranking** (AUC) of the transferred model is unchanged at every site
+(0.61-0.85); (b) its **lift at the fixed 0.50** moves both ways once the map sees only year 1 (UK
+2.54 → 1.75, Australia 1.39 → 1.92, Lake Erie no longer alerts), because a one-year scale estimate
+shifts the probabilities; a site-chosen threshold, as in §24, is the fairer comparison; (c) refit
+lifts drop 0.0-0.13 with per-fold thresholds. The claim "a local refit adds +0.3-0.5 lift in
+estuarine water" becomes: refit beats the rescaled zero-shot by +0.2 lift in Chesapeake and NERRS,
++0.5 in SF Bay, +1.0 on the UK shelf (a threshold effect: equal AUC), and loses by 0.5 in
+Australia; on AUC the refit wins only in Chesapeake (+0.09) and SF Bay (+0.05).
+
 **Which is "best":** UK shelf for ranking (AUC 0.86 with no retraining, other
 continent, other instrument); Lake Erie for the only clean beat-the-baseline
 win (lift 1.96 vs 1.45, CIs disjoint) on a freshwater lake with five dead
@@ -696,7 +735,12 @@ GB tier A trained on all 42,207 Narragansett station-days) let anyone score
 their own sondes: input `station, datetime, chl[, temp, sal, do]` at any
 cadence, output a 7-day bloom probability and alert per station-day, with the
 chlorophyll quantile-rescaled to the training scale (`src/deploy/export_model.py`
-builds the release file). Verification:
+builds the release file). *(2026-09-28: `predict_anywhere.py` now loads
+`release/narragansett_bloom_model_v2.joblib`, trained on 41,220 station-days with the prior-years
+climatology, shipped threshold 0.45 = median of the rolling-CV folds' validation thresholds; the
+v1 file here is kept byte-identical for the §25 prospective test. The tool's climatology is now
+prior-years only, and `rescale_chl(..., fit_chl=...)` lets evaluations fit the scale on
+calibration data only.)* Verification:
 
 | Test | CLI | Reference |
 |---|---|---|
@@ -762,6 +806,11 @@ water-type models is not worth building; the useful hierarchy is two-level:
 the exported Narragansett model everywhere, replaced by a local refit where
 ≥3 years of local sondes exist (fresh/estuarine gain 0.3–0.5 lift; marine
 gains nothing). Per the plan, nothing was wired into `predict_anywhere.py`.
+*(2026-09-28: the regime-pooled models here were not re-run; they fit each site's quantile map on
+its whole record, a small scale-only look-ahead. The refit-gain figures are superseded by the
+leak-free §19 re-run: +0.2 lift in Chesapeake/NERRS, +0.5 SF Bay, a threshold-only gain on the UK
+shelf, a loss in Australia. §20 pooled reverse transfer and §23 satellite tests were likewise not
+re-run and carry the same full-record map.)*
 
 Caveats: regimes defined by salinity alone; Chesapeake, NERRS, SF and
 Narragansett each contribute to two regimes, so "leave-one-site-out" still
@@ -863,6 +912,29 @@ quantile-rescaled chlorophyll, and scored it with the section-19 protocol
 **Result: 87 new sites with predictions, 74 with enough history to score
 (598 station-years).**
 
+> **Leak-free re-score (2026-09-28).** The first scoring (tables below, kept for the record) fit
+> each site's quantile rescaling and its chl climatology on the site's *whole* record, including the
+> test years being scored. Re-scored with the rescaling fit on the calibration years only and a
+> prior-years climatology (`python -m src.registry.run_catalog --rescore --model v2|v1`;
+> `data/registry/site_skill_causal_{v2,v1}.csv`; `site_skill.csv` itself is left untouched because
+> the frozen prospective test re-derives its site list from it):
+>
+> | | old (leaky) | v1 frozen model, leak-free | **v2 model, leak-free** |
+> |---|---|---|---|
+> | Median onset lift (IQR) | 1.58 (1.31-2.05) | 1.50 (1.25-1.91) | **1.51 (1.26-2.00)** |
+> | Lift CI entirely above 1.0 | 67 of 74 | 62 of 74 | **65 of 74** |
+> | CI includes 1.0 / below 1.0 | 7 / 0 | 12 / 0 | 9 / 0 |
+> | Median AUC | 0.744 | 0.714 | **0.742** |
+> | Median precision / base rate | 0.48 / 0.28 | 0.44 / 0.28 | 0.44 / 0.28 |
+> | Median over 50 dataset families | 1.60 | 1.58 | 1.54 |
+>
+> By network (v2): IOOS-Sensors 54 sites, median lift 1.52 / AUC 0.73; NERACOOS 2, 2.83 / 0.76;
+> ONC 6, 1.75 / 0.79; PacIOOS 12, 1.35 / 0.77. **Correlated sites:** the 74 are not independent
+> (e.g. 9 Indian River Lagoon stations, 7 nearby Lake Erie intakes, two Barkley Canyon deployments),
+> so "65 of 74" overstates the independent evidence; the median over 50 crude dataset families
+> (1.54) is the fairer summary. The transfer conclusion survives: skill above always-alert at most
+> sites, none below chance, with the median lift about 0.07 lower than first reported.
+
 | | |
 |---|---|
 | Median onset lift (IQR) | **1.58** (1.31-2.05) |
@@ -914,21 +986,31 @@ of the coverage claim in section 21, now at 74 sites instead of six networks.
 **Caveats.** Fluorometer units differ across networks (rescaling handles
 scale, not sensor drift); thresholds were set on one calibration slice per
 site, which is why a few long records land at lift ~1.0 despite AUC ~0.7; the
-p75 label is a per-site definition of "bloom", not a harmful-species event;
+p75 label is a per-site definition of "bloom", not a harmful-species event, and it is computed over
+each station's whole record, so the label threshold itself carries information from later years (a
+label definition, not a feature leak; noted 2026-09-28);
 13 sites had predictions but too little history to score; datasets with
 blank start dates on some servers were excluded by the years >= 1 rule. Fig 11
 `figures/nar_fig11_coverage_map.png` maps every site by onset lift.
 
-**Addendum: does training on the best sites' own data beat the exported model? No.**
-`src/registry/refit_top_sites.py` refit HistGB on each of the 11 best new sites
-(top by AUC and by precision with >= 300 onset rows and enough years) with
-rolling-origin CV and compared it with the exported model on identical onset
-test rows. Median change: lift -0.06, AUC -0.014; the exported
-model was better on lift at 8 of 11 sites, the refit at 3
-(Scripps Pier +0.69 the only clear win). A refit sees a few years
-of one pier; the exported model saw 42,207 station-days of run-ups. Same
-conclusion as findings 19 for marine sites: local training buys nothing where
-the exported model already reads the site. `data/registry/refit_top_sites.csv`.
+**Addendum: does training on the best sites' own data beat the exported model? Slightly, on lift;
+not on ranking (corrected 2026-09-28).**
+`src/registry/refit_top_sites.py` refits HistGB on the best new sites (top by AUC and by precision
+with >= 300 onset rows and enough years) with rolling-origin CV and compares it with the exported
+model on identical onset test rows.
+
+*Superseded first version:* median change lift -0.06, AUC -0.014, exported better on lift at 8 of
+11 sites. That comparison tuned the exported model's single threshold on every test year but one,
+i.e. on other folds' test rows, and used the leaky rescaling above.
+
+*Corrected (per-fold threshold chosen on year T-1 only, calibration-year rescaling, test years
+after the calibration period):* with the v2 model, 16 sites, median change **lift +0.05, AUC
+-0.015**; the refit is better on lift at 10 sites and the exported model at 6
+(`data/registry/refit_top_sites_causal_v2.csv`). With the frozen v1 model, 13 sites: lift +0.10,
+AUC -0.008, refit better at 11 of 13. **Reading:** a local refit buys a small lift gain at most
+long-record sites (Scripps +0.70, UCSC wharf +0.59, Humboldt +0.41), but no ranking gain: the
+exported model's AUC is equal or higher at most sites. "Local training buys nothing" was wrong on
+lift.
 
 ## 25. Prospective test: built and frozen, not yet started (2026-09-05)
 
@@ -960,6 +1042,26 @@ the prospective fixed threshold 0.50.
 | EXRX | fixed 0.50 | 6.3 | 1,287 | 0.190 | 0.48 [0.32, 0.61] | **2.52 [1.56, 4.58]** | 0.84 |
 | WLIS | t* on calibration years (0.15) | 4.7 | 1,018 | 0.260 | 0.30 [0.26, 0.35] | 1.14 [1.02, 1.27] | 0.63 |
 | WLIS | fixed 0.50 | 4.7 | 1,018 | 0.260 | 0.39 [0.30, 0.56] | 1.50 [1.27, 1.72] | 0.63 |
+
+**Leak-free re-run (2026-09-28;** the table above fit the rescaling and climatology on the whole
+buoy record. Now: prior-years climatology; rescaling fit on the calibration years for the t* rule
+and on the first year for the fixed rule. `data/transfer/lis_buoys_zero_shot.csv`):
+
+| Model | Station | Rule | Precision [CI] | Lift [CI] | AUC |
+|---|---|---|---|---|---|
+| v1 (frozen, prospective) | EXRX | t* on calibration years (0.75) | 0.40 [0.20, 0.53] | 1.76 [1.23, 2.32] | 0.79 |
+| v1 (frozen, prospective) | EXRX | fixed 0.50 | 0.78 [0.54, 0.91] | 4.10 [2.36, 8.94] (POD 0.10) | 0.72 |
+| v1 (frozen, prospective) | WLIS | t* on calibration years (0.10) | 0.28 [0.22, 0.36] | 1.08 [0.98, 1.16] | 0.62 |
+| v1 (frozen, prospective) | WLIS | fixed 0.50 | 0.37 [0.28, 0.49] | 1.44 [1.21, 1.57] | 0.62 |
+| v2 | EXRX | t* on calibration years (0.75) | 0.42 [0.24, 0.54] | 1.87 [1.28, 2.48] | 0.83 |
+| v2 | EXRX | fixed 0.45 | 0.76 [0.67, 0.83] | 4.01 [2.16, 9.97] (POD 0.25) | 0.84 |
+| v2 | WLIS | t* on calibration years (0.05) | 0.27 [0.21, 0.35] | 1.04 [1.00, 1.07] | 0.63 |
+| v2 | WLIS | fixed 0.45 | 0.38 [0.29, 0.50] | 1.45 [1.26, 1.58] | 0.63 |
+
+EXRX still transfers (lift about 1.8-1.9 at the calibrated threshold, AUC about 0.8); WLIS still
+barely does. With a first-year-only rescaling the fixed threshold alerts rarely at EXRX (POD
+0.10-0.25), so its high lift rests on few alerts; the band for the prospective test should use the
+calibrated-threshold rows.
 
 EXRX (Execution Rocks, central Sound) transfers like a typical ERDDAP site: lift 1.9-2.5 with the
 CI clear of 1.0, AUC above 0.8. WLIS (western Sound) barely transfers: AUC 0.63 and lift 1.1-1.5.
@@ -1202,7 +1304,7 @@ Narragansett's 0.52, just over the pre-stated 0.10 margin, and LIS AUC is 0.770 
 Sound separates the classes somewhat less well. Meanwhile the bloom share differs ~13× (0.026 vs
 0.347). So the precision gap between the bays is **mostly rarity, not only**: separability
 contributes too. The matched-rarity tests still hold: at 5% rarity Narragansett precision is
-0.09–0.14 with the Sound's 0.117 inside, and lift at rarity (8.48×, 6.92×) is above the Sound's
+0.09–0.14 with the Sound's 0.117 inside, and lift at rarity (9.15×, 7.24×; 2026-09-28 re-run) is above the Sound's
 2.59 (§13, §16).
 
 *Original reading (sensor label, 2026-09-11; withdrawn 2026-09-23).* OVL differed by 0.07, inside
@@ -1231,6 +1333,55 @@ shipped walk-forward AUC 0.875 was within 0.02 of this split's 0.855, and on the
 the 21-day station-day test AUC is 0.825 against this onset split's 0.770); the two bays use different feature
 lists (23 vs 35) and horizons (7 vs 21 d), so only the *shape* of the overlap is being compared,
 not the axis units; OVL from a Gaussian KDE with Scott's bandwidth, so ±0.02 is noise.
+
+## 29. Tank-only features: how much skill survives with what a bench tank can measure (2026-09-28, corrected the same day)
+
+**Question.** The bench tanks run this model on their own sensors: chlorophyll and temperature
+automatically, DO and salinity by hand kit. They have no multi-year site history, so no
+`chl_climatology` or `chl_anomaly`. How much forecast skill is left?
+
+**Method.** `src/models/tank_feature_check.py`, `data/tank_feature_check.csv`. Same split and spec
+as `train_narragansett.py` (GB tier A, train ≤ 2020, validation 2021-22, test 2023, onset rows,
+1,711 rows, base 0.351), on the leak-free daily file (prior-years climatology). AUC CI:
+station-clustered bootstrap. Thresholds: validation-F1. The DEPLOY rows run the full model the way
+`predict_anywhere.py` runs on a tank: each station-year's raw readings are fed to `build_daily` as
+a one-season record (rolling features start empty; no prior-year climatology), with only the tank's
+inputs, no rescaling (already on the training scale), and the threshold chosen the same way on
+2021-22.
+
+| Setup | Onset AUC [95% CI] | POD | Precision | Lift |
+|---|---|---|---|---|
+| Full tier A (reference) | 0.829 [0.778, 0.866] | 0.572 | 0.682 | 1.94 |
+| Retrained on tank + kits (chl, temp, DO, salinity, month) | 0.822 [0.762, 0.861] | 0.687 | 0.649 | 1.85 |
+| Retrained on tank sensors (chl, temp, month) | 0.805 [0.751, 0.844] | 0.632 | 0.652 | 1.86 |
+| Retrained on chlorophyll only | 0.801 [0.742, 0.834] | 0.630 | 0.643 | 1.83 |
+| **Deployed full model, tank sensors, one-season record** | **0.804 [0.744, 0.842]** | 0.713 | 0.615 | 1.75 |
+| Deployed full model, tank + kits, one-season record | 0.820 [0.762, 0.858] | 0.572 | 0.683 | 1.95 |
+
+**Findings.**
+1. **Most of the skill is in the chlorophyll history.** A tank with only its fluorometer and
+   thermometer loses about 0.025 AUC (0.829 → 0.804); with the DO and salinity kits it loses
+   about 0.01. Every interval overlaps the full model's.
+2. **No special tank model is needed.** Deploying the full model on a one-season tank-style record
+   performs like retraining on tank features.
+3. **Superseded first version (same day):** reported 0.839 → 0.810 and a "deploy" row that only
+   median-filled columns of the full-history table. That row did not follow the real
+   `predict_anywhere` path, which at the time also built a look-ahead climatology from the input's
+   own record (on a one-season record it included chl up to 14 days ahead). The climatology is now
+   prior-years only (§5 note).
+
+**For the bench:** the tank trigger behaves like a forecast with onset AUC about 0.80 and lift about
+1.75 at Narragansett rarity. Report the tank as testing the control loop, with forecast skill taken
+from field data and discounted by this measured 0.025 AUC.
+
+## 30. Pre-registered: the model beats the calendar on bloom starts, every year (2026-09-28)
+
+`notes/CALENDAR_BASELINE_PREREG_NAR.md` (rules written before running); `src/models/calendar_baseline_nar.py`.
+- **Setup:** walk-forward GB tier A, onset rows 2015-2023 (14,703 rows, 3,964 events), against a past-years station × 15-day-bin calendar.
+- **Pooled:** AUC **0.877 vs 0.817**, +0.060 [+0.047, +0.074], p < 0.0001. The model wins **9 of 9** years.
+- **2023 alone:** 0.835 vs 0.768, +0.066 [+0.018, +0.128], p = 0.0005.
+- **Lift at the top 10%:** 3.05 vs 2.61.
+- **Contrast:** the LIS model on 3-weekly boat data beats its calendar over 2016-2025 (+0.077) but ties it in 2023-25. Daily sensors are what make forecasting beyond the season reliable.
 
 ## Revised thesis (supersedes the "Presentation framing" above)
 
