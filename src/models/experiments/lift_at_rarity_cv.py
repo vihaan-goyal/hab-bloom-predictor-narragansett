@@ -19,9 +19,10 @@ Design
   are skipped.  Out-of-fold TEST ONSET predictions are pooled per (T, h,
   model) with each fold's own t*.  Station-year clustered bootstrap (n=2000,
   seed 42) gives 95% CIs for precision, lift, AUC and the top-decile metrics.
-  Top-decile alert = within each fold's test onset rows, alert on the 10%
-  highest probabilities (threshold-free; per-fold so probability scales are
-  not mixed across folds).
+  Top-decile alert = alert where the test probability is at or above the 90th
+  percentile of that fold's VALIDATION onset probabilities (per-fold, so
+  probability scales are not mixed; since 2026-09-28 the cutoff no longer comes
+  from the test fold itself).
 
 Output: data/lift_at_rarity_cv.csv (one row per T, h, model).
 Run from repo root with the BASE anaconda python (not the hab env):
@@ -127,13 +128,12 @@ def fit_model(name, Xtr, ytr):
     return lambda X: m.predict_proba(X)[:, 1]
 
 
-def top_decile_alert(p):
-    """Alert on the ceil(10%) highest probabilities (ties broken by rank)."""
-    k = int(np.ceil(TOP_FRAC * len(p)))
-    alert = np.zeros(len(p), dtype=int)
-    if k > 0:
-        alert[np.argsort(-p, kind="stable")[:k]] = 1
-    return alert
+def top_decile_alert(p, p_val):
+    """Alert where p >= the 90th percentile of the VALIDATION onset probabilities (2026-09-28: the
+    cutoff used to come from the test fold's own probabilities, i.e. the test fold set its own
+    alert rate). The test alert rate is then ~10% only if validation and test score alike."""
+    cut = np.quantile(p_val, 1 - TOP_FRAC) if len(p_val) else np.inf
+    return (p >= cut).astype(int)
 
 
 def clustered_bootstrap(s, rng):
@@ -191,7 +191,7 @@ def main():
                     t_star, rule, val_obj = choose_threshold(yv[ov], pv[ov])
                     mv = metrics(yv[ov], pv[ov] >= t_star)
                     mt = metrics(yt[ot], pt[ot] >= t_star)
-                    a10 = top_decile_alert(pt[ot]); m10 = metrics(yt[ot], a10)
+                    a10 = top_decile_alert(pt[ot], pv[ov]); m10 = metrics(yt[ot], a10)
                     fold_rows.append(dict(
                         bloom_T=T, horizon=h, model=mn, test_year=Y, t_star=t_star, rule=rule,
                         val_onset_pos=val_on_pos, val_precision=mv["precision"], val_pod=mv["pod"],

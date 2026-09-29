@@ -209,7 +209,10 @@ for mn in ("LR", "GB"):
           f"| onset lift min {f.onset_lift.min():.2f} max {f.onset_lift.max():.2f}  "
           f"| onset AUC min {f.onset_auc.min():.3f} max {f.onset_auc.max():.3f}")
 
-print("\n=== Sanity: T=2023 GB onset fold vs single-split (prec 0.696, AUC 0.839; "
+_ss = pd.read_csv("data/narragansett_model_results.csv")        # single split, read not hard-coded
+_ss = _ss[(_ss.model == "GB_onset") & (_ss.features == "A_LIS_analog")].iloc[0]
+SS_PREC, SS_AUC = float(_ss.precision), float(_ss.auc_test)
+print(f"\n=== Sanity: T=2023 GB onset fold vs single-split (prec {SS_PREC:.3f}, AUC {SS_AUC:.3f}; "
       "single split trained <=2020 with val 2021-22, this fold trains <=2021 with val 2022) ===")
 g23 = folds[(folds.model == "GB") & (folds.test_year == 2023)]
 if len(g23):
@@ -219,6 +222,6 @@ if len(g23):
           f"POD={r.onset_pod:.3f} lift={r.onset_lift:.2f} t*={r.t_star:.2f}")
     print(f"pooled GB onset 95% CI: precision [{ci.precision_ci_lo:.3f}, {ci.precision_ci_hi:.3f}] "
           f"AUC [{ci.auc_ci_lo:.3f}, {ci.auc_ci_hi:.3f}]")
-    print(f"single-split 0.696 within pooled precision CI: "
-          f"{ci.precision_ci_lo <= 0.696 <= ci.precision_ci_hi}; "
-          f"0.839 within pooled AUC CI: {ci.auc_ci_lo <= 0.839 <= ci.auc_ci_hi}")
+    print(f"single-split {SS_PREC:.3f} within pooled precision CI: "
+          f"{ci.precision_ci_lo <= SS_PREC <= ci.precision_ci_hi}; "
+          f"{SS_AUC:.3f} within pooled AUC CI: {ci.auc_ci_lo <= SS_AUC <= ci.auc_ci_hi}")

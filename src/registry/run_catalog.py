@@ -33,8 +33,13 @@ from src.transfer.transfer_eval import add_label, boot_ci, metrics, pick_t
 
 UA = {"User-Agent": "Mozilla/5.0 (hab-bloom-predictor research; student project)"}
 CAT = "data/registry/insitu_catalog.csv"
-SKILL = "data/registry/site_skill.csv"
+# 2026-09-28: data/registry/site_skill.csv and predictions/ are the INPUTS the frozen prospective test
+# re-derives its site list from (src/deploy/prospective_sites.py), so they are never overwritten.
+# Leak-free scores (calibration-year rescaling, prior-years climatology) go to *_causal_<model>.
+SKILL_FROZEN = "data/registry/site_skill.csv"
+SKILL = "data/registry/site_skill_causal_v2.csv"
 RAW, SITES, PRED = "data/registry/raw", "data/registry/sites", "data/registry/predictions"
+PRED_CAUSAL = "data/registry/predictions_causal_{model}"
 
 spec = importlib.util.spec_from_file_location("pa", "predict_anywhere.py")
 pa = importlib.util.module_from_spec(spec); spec.loader.exec_module(pa)
@@ -94,7 +99,17 @@ def pull(row):
     return site
 
 
-def score(site_id, server, day, min_year_rows=100):
+def calibrated_probs(day, pack, fit_mask):
+    """Model probabilities with the site's quantile rescaling fit on `fit_mask` rows only."""
+    scored = pa.rescale_chl(day, pack["chl_quantiles"], fit_chl=day.loc[fit_mask, "chl"])
+    X = scored[pack["features"]].fillna(pd.Series(pack["medians"])).fillna(0.0).values
+    return pack["model"].predict_proba(X)[:, 1]
+
+
+def score(site_id, server, day, min_year_rows=100, pack=None):
+    """With `pack`, bloom_prob is recomputed so the rescaling sees calibration years only (leak-free,
+    2026-09-28); `day` must then carry the tier-A feature columns. Without it, the day's own
+    bloom_prob column is scored (legacy; that path fit the rescaling on the whole record)."""
     day = day.copy().sort_values(["station", "date"]).reset_index(drop=True)   # add_label needs a RangeIndex
     day["year"] = day.date.dt.year
     day["thr"] = day.groupby("station")["chl"].transform(lambda s: s.quantile(0.75))
@@ -108,6 +123,9 @@ def score(site_id, server, day, min_year_rows=100):
     ycal = next((y for y in years if cum[y] >= min_year_rows), None)
     if ycal is None or ycal == years[-1]:
         return None
+    if pack is not None:
+        day["bloom_prob"] = calibrated_probs(day, pack, (day.year <= ycal).values)
+        on = on.assign(bloom_prob=day.loc[on.index, "bloom_prob"].values)
     cal = on[on.year <= ycal]; test = on[on.year > ycal]
     if cal.bloom_fwd.nunique() < 2 or test.bloom_fwd.nunique() < 2 or len(test) < 100:
         return None
@@ -115,7 +133,7 @@ def score(site_id, server, day, min_year_rows=100):
     r = metrics(test.bloom_fwd, test.bloom_prob >= t)
     r.update(server=server, dataset_id=site_id, n_stations=test.station.nunique(),
              years=round((test.date.max() - test.date.min()).days / 365.25, 1), n_onset=len(test),
-             auc=roc_auc_score(test.bloom_fwd, test.bloom_prob), t_star=t)
+             auc=roc_auc_score(test.bloom_fwd, test.bloom_prob), t_star=t, ycal=ycal)
     r.update(boot_ci(test, "bloom_prob", "bloom_fwd", t))
     return r
 
@@ -124,10 +142,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--top", type=int, default=40)
     ap.add_argument("--datasets", default="all")
-    ap.add_argument("--rescore", action="store_true", help="rebuild site_skill.csv from saved predictions and exit")
+    ap.add_argument("--rescore", action="store_true",
+                    help="leak-free rescore of every saved site -> site_skill_causal_<model>.csv and exit")
+    ap.add_argument("--model", choices=["v1", "v2"], default="v2",
+                    help="v1 = frozen prospective model, v2 = causal-feature model (default)")
     a = ap.parse_args()
     if a.rescore:
-        rescore_all(); return
+        rescore_all(a.model); return
     for d in (SITES, PRED):
         os.makedirs(d, exist_ok=True)
     cat = pd.read_csv(CAT)
@@ -164,7 +185,7 @@ def main():
         day["bloom_prob"] = pack["model"].predict_proba(X)[:, 1]
         day["alert"] = day.bloom_prob >= pack["threshold"]
         day[["station", "date", "chl", "temp", "sal", "do", "bloom_prob", "alert"]].to_csv(f"{PRED}/{row.dataset_id}.csv", index=False)
-        r = score(row.dataset_id, row.server, day)
+        r = score(row.dataset_id, row.server, day, pack=pack)
         if r is None:
             print("   predictions written; not enough history to score skill", flush=True)
             r = dict(server=row.server, dataset_id=row.dataset_id, n_stations=day.station.nunique(),
@@ -177,11 +198,18 @@ def main():
 
 
 COLS = ["server", "dataset_id", "n_stations", "years", "n_onset", "n_test", "tp", "fp", "fn", "base_rate",
-        "precision", "pod", "lift", "lift_lo", "lift_hi", "auc", "auc_lo", "auc_hi", "precision_lo", "precision_hi", "t_star"]
+        "precision", "pod", "lift", "lift_lo", "lift_hi", "auc", "auc_lo", "auc_hi", "precision_lo", "precision_hi", "t_star",
+        "ycal"]
 
 
-def rescore_all():
-    """Rebuild site_skill.csv from the saved prediction files (dedupes, fixes column order)."""
+def rescore_all(model="v2"):
+    """Leak-free rescore of every saved site (2026-09-28). The daily rows in predictions/ are rebuilt
+    into tier-A features with the prior-years climatology, then scored with the rescaling fit on
+    calibration years only. Writes site_skill_causal_<model>.csv and predictions_causal_<model>/."""
+    pack = joblib.load(pa.MODEL_PATH if model == "v2" else
+                       os.path.join(os.path.dirname(pa.MODEL_PATH), "narragansett_bloom_model.joblib"))
+    out_skill = SKILL.replace("_v2", f"_{model}")
+    out_pred = PRED_CAUSAL.format(model=model); os.makedirs(out_pred, exist_ok=True)
     cat = pd.read_csv(CAT).drop_duplicates(subset=["dataset_id"]).set_index("dataset_id")
     rows = []
     import re
@@ -202,13 +230,20 @@ def rescore_all():
         if sig in seen_sig:
             continue
         seen_sig.add(sig)
-        r = score(did, server, day)
+        feat = pa.build_daily(day.rename(columns={"date": "datetime"})[["station", "datetime", "chl", "temp", "sal", "do"]],
+                              min_readings=1)
+        r = score(did, server, feat, pack=pack)
         if r is None:
             r = dict(server=server, dataset_id=did, n_stations=day.station.nunique(),
                      years=round((day.date.max() - day.date.min()).days / 365.25, 1))
+            feat["bloom_prob"] = calibrated_probs(feat, pack, np.ones(len(feat), bool)); feat["ycal"] = np.nan
+        else:
+            feat["bloom_prob"] = calibrated_probs(feat, pack, (feat.date.dt.year <= r["ycal"]).values)
+            feat["ycal"] = r["ycal"]
+        feat[["station", "date", "chl", "temp", "sal", "do", "bloom_prob", "ycal"]].to_csv(f"{out_pred}/{f}", index=False)
         rows.append(r)
-    pd.DataFrame(rows).reindex(columns=COLS).to_csv(SKILL, index=False)
-    print(f"rescored {len(rows)} sites -> {SKILL}")
+    pd.DataFrame(rows).reindex(columns=COLS).to_csv(out_skill, index=False)
+    print(f"rescored {len(rows)} sites -> {out_skill}")
 
 
 if __name__ == "__main__":

@@ -32,8 +32,10 @@ USAGE
     python predict_anywhere.py daily_means.csv --min-readings 1
 
 Needs: python >= 3.9, pandas, numpy, scikit-learn, joblib.
-Expected skill on new sites (onset-only, own-site 75th-percentile label):
-lift 1.3-2.5x over always-alert, AUC 0.6-0.86 (findings §19). Your first
+Expected skill on new sites (onset-only, own-site 75th-percentile label; leak-free re-scoring of
+2026-09-28): median lift 1.51x over always-alert across 74 ERDDAP sites, AUC 0.6-0.85 (findings
+§19, §24). Climatology features need at least one prior year of your record; before that they are
+imputed. Your first
 21 days per station carry NaN rolling features and score lower.
 
 Vihaan Goyal, Westhill High School. github.com/vihaan-goyal/hab-bloom-predictor-narragansett
@@ -46,11 +48,39 @@ import joblib
 import numpy as np
 import pandas as pd
 
+# v2 (2026-09-28): trained on causal (prior-years) climatology features. The v1 file
+# release/narragansett_bloom_model.joblib stays untouched because the prospective test froze it by
+# sha256 (notes/PROSPECTIVE_PROTOCOL.md); src/deploy/prospective_sites.py loads v1 explicitly.
 MODEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                          "release", "narragansett_bloom_model.joblib")
+                          "release", "narragansett_bloom_model_v2.joblib")
+MIN_PRIOR_CLIM = 3        # prior same-bin station-days needed before a climatology cell is used
 
 
-def build_daily(df, min_readings):
+def prior_years_climatology(day):
+    """Station x 15-day-bin mean of chl over PRIOR calendar years only (2026-09-28).
+
+    A row in year Y uses only that station's same-bin days from years < Y, and is NaN until
+    MIN_PRIOR_CLIM such days exist (the model then imputes the training median). The old version
+    averaged the whole record, so a scored day's own future (and, on a one-season record, the next
+    14 days) leaked into chl_climatology / chl_anomaly. A record shorter than one full prior year
+    therefore gets no climatology at all, by construction."""
+    d = day[["station", "date", "chl"]].copy()
+    d["bin"] = ((d["date"].dt.dayofyear - 1) // 15).astype("int64")
+    d["year"] = d["date"].dt.year.astype("int64")
+    d["station"] = d["station"].astype(str)
+    agg = (d.groupby(["station", "bin", "year"])["chl"].agg(s="sum", n="count").reset_index()
+             .sort_values(["station", "bin", "year"]))
+    g = agg.groupby(["station", "bin"])
+    agg["ps"] = g["s"].cumsum() - agg["s"]
+    agg["pn"] = g["n"].cumsum() - agg["n"]
+    agg["clim"] = (agg["ps"] / agg["pn"]).where(agg["pn"] >= MIN_PRIOR_CLIM)
+    out = d.merge(agg[["station", "bin", "year", "clim"]], on=["station", "bin", "year"], how="left")
+    return out["clim"].values
+
+
+def build_daily(df, min_readings, clim="prior_years"):
+    """clim="prior_years" (default, leak-free) or "record" (legacy: mean over the whole input
+    record; kept only for the frozen prospective protocol, whose input is past-only history)."""
     df = df.copy()
     df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce")
     df = df.dropna(subset=["datetime", "chl"])
@@ -74,15 +104,21 @@ def build_daily(df, min_readings):
             lambda s: s.rolling(w, min_periods=max(2, w // 3)).mean())
     day["chl_trend"] = day["chl"] - day["chl_roll6_mean"]
     day["month"] = day["date"].dt.month
-    day["doy_bin"] = (day["date"].dt.dayofyear - 1) // 15
-    day["chl_climatology"] = day.groupby(["station", "doy_bin"])["chl"].transform("mean")
+    if clim == "record":
+        b = (day["date"].dt.dayofyear - 1) // 15
+        day["chl_climatology"] = day.groupby([day["station"], b])["chl"].transform("mean")
+    else:
+        day["chl_climatology"] = prior_years_climatology(day)
     day["chl_anomaly"] = day["chl"] - day["chl_climatology"]
-    return day.drop(columns=["doy_bin"])
+    return day
 
 
-def rescale_chl(day, ref_quantiles):
-    """Quantile-map this site's chlorophyll columns onto the Narragansett scale."""
-    src = np.sort(day["chl"].dropna().values)
+def rescale_chl(day, ref_quantiles, fit_chl=None):
+    """Quantile-map this site's chlorophyll columns onto the Narragansett scale.
+    fit_chl: the chlorophyll values the site's source distribution is estimated from. Default is
+    the whole input (fine live, where the input is past data only). In any retrospective
+    evaluation pass the calibration period's values only, or the map sees the scored future."""
+    src = np.sort(pd.Series(day["chl"] if fit_chl is None else fit_chl).dropna().values)
     grid = np.linspace(0, 1, len(ref_quantiles))
 
     def qm(x):

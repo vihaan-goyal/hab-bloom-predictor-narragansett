@@ -31,6 +31,7 @@ Usage (fork root, BASE env):
     python -m src.transfer.transfer_eval --source chesapeake --min-readings 48
 """
 import argparse
+import importlib.util
 import os
 
 import numpy as np
@@ -39,6 +40,9 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import StandardScaler
+
+_spec = importlib.util.spec_from_file_location("pa", "predict_anywhere.py")
+pa = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(pa)
 
 HORIZON = 7
 NAR_PATH = "data/narragansett_daily_features.csv"
@@ -77,12 +81,11 @@ def build_daily(df15, min_readings=48):
             lambda s: s.rolling(w, min_periods=max(2, w // 3)).mean())
     day["chl_trend"] = day["chl"] - day["chl_roll6_mean"]
     day["month"] = day["date"].dt.month
-    day["doy_bin"] = (day["date"].dt.dayofyear - 1) // 15
-    clim = day.groupby(["station", "doy_bin"])["chl"].transform("mean")
-    day["chl_climatology"] = clim
-    day["chl_anomaly"] = day["chl"] - clim
+    # prior-years climatology (2026-09-28; the old full-record mean leaked test years into every row)
+    day["chl_climatology"] = pa.prior_years_climatology(day)
+    day["chl_anomaly"] = day["chl"] - day["chl_climatology"]
     day["year"] = day["date"].dt.year
-    return day.drop(columns=["doy_bin"])
+    return day
 
 
 def add_label(day, thr_col):
@@ -144,15 +147,25 @@ def pick_t(y, p):
 
 
 def summarise(df, pcol, t, source, evalname, model, thr_name):
+    """t is a number, or the name of a per-row threshold column (each refit fold's own t_fold;
+    2026-09-28: the median over all folds was applied before, so early folds used thresholds chosen
+    on later years)."""
+    if isinstance(t, str):
+        df = df.assign(_alert=(df[pcol] >= df[t]).astype(float)); acol, tt, t_rep = "_alert", 0.5, float(df[t].median())
+    else:
+        acol, tt, t_rep = pcol, t, t
     on = df[df.chl <= df.thr]           # onset-only rows
     rows = []
     for scope, d in (("all", df), ("onset", on)):
         if len(d) < 30 or d.bloom_fwd.nunique() < 2: continue
-        r = metrics(d.bloom_fwd, d[pcol] >= t)
+        r = metrics(d.bloom_fwd, d[acol] >= tt)
         r.update(source=source, eval=evalname, model=model, threshold=thr_name,
-                 scope=scope, t_star=t, auc=roc_auc_score(d.bloom_fwd, d[pcol]),
+                 scope=scope, t_star=t_rep, auc=roc_auc_score(d.bloom_fwd, d[pcol]),
                  n_pos=int(d.bloom_fwd.sum()), years=f"{d.year.min()}-{d.year.max()}")
-        r.update(boot_ci(d, pcol, "bloom_fwd", t))
+        ci = boot_ci(d, acol, "bloom_fwd", tt)
+        if acol != pcol:
+            ci.update({k: v for k, v in boot_ci(d, pcol, "bloom_fwd", 0.5).items() if k.startswith("auc")})
+        r.update(ci)
         rows.append(r)
     return rows
 
@@ -166,11 +179,13 @@ def train_reference():
     return gb, med, nar
 
 
-def quantile_map(target, ref_vals):
-    """Map target chl-scale columns onto the Narragansett chl distribution."""
+def quantile_map(target, ref_vals, fit_chl=None):
+    """Map target chl-scale columns onto the Narragansett chl distribution. fit_chl = the target
+    values the source distribution is estimated from (default: all of target; evaluations pass the
+    calibration year only so the map never sees the scored years, 2026-09-28)."""
     t = target.copy()
     ref = np.sort(ref_vals[~np.isnan(ref_vals)])
-    src = np.sort(t["chl"].dropna().values)
+    src = np.sort(pd.Series(t["chl"] if fit_chl is None else fit_chl).dropna().values)
     def qm(x):
         q = np.searchsorted(src, x, side="right") / len(src)
         return np.interp(np.clip(q, 0, 1), np.linspace(0, 1, len(ref)), ref)
@@ -260,14 +275,17 @@ def run(source, min_readings):
         print(f"  [{thr_name}] labeled={len(lab):,} pos={lab.bloom_fwd.mean():.3f} "
               f"onset rows={(lab.chl <= lab.thr).sum():,}")
         lab["p"] = gb.predict_proba(lab[TIER_A].fillna(med).values)[:, 1]
-        rows += summarise(lab, "p", 0.5, source, "zeroshot_raw", "GB_nar", thr_name)
-        qm = quantile_map(lab, nar.chl.values)
-        lab["p_qm"] = gb.predict_proba(qm[TIER_A].fillna(med).values)[:, 1]
-        rows += summarise(lab, "p_qm", 0.5, source, "zeroshot_qm", "GB_nar", thr_name)
+        # zero-shot (2026-09-28): the quantile map is fit on the first year only and both zero-shot
+        # rows are scored on the later years, so the map never sees the scored data.
+        y0 = int(lab.year.min()); zs = lab[lab.year > y0].copy()
+        rows += summarise(zs, "p", 0.5, source, "zeroshot_raw", "GB_nar", thr_name)
+        qm = quantile_map(zs, nar.chl.values, fit_chl=d.loc[d.year == y0, "chl"])
+        zs["p_qm"] = gb.predict_proba(qm[TIER_A].fillna(med).values)[:, 1]
+        rows += summarise(zs, "p_qm", 0.5, source, "zeroshot_qm", "GB_nar", thr_name)
         for mn in ("GB", "LR"):
             oof, t = rolling_refit(d, mn)
             if oof is None: print(f"  [{thr_name}] refit {mn}: not enough years"); continue
-            rows += summarise(oof, "p", t, source, "refit_cv", mn, thr_name)
+            rows += summarise(oof, "p", "t_fold", source, "refit_cv", mn, thr_name)
         oof = climatology_baseline(d)
         if oof is not None: rows += summarise(oof, "p", 0.5, source, "baseline", "climatology", thr_name)
         oof = rule_baseline(d)

@@ -184,11 +184,14 @@ def lis_stuck_days(hist):
     return set(frac[frac > MAX_STUCK_FRAC].index)
 
 
-def build_site_daily(site, hist, pa):
-    """Station-day table with tier-A features; LIS buoys also drop stuck-sensor days."""
+def build_site_daily(site, hist, pa, clim="record"):
+    """Station-day table with tier-A features; LIS buoys also drop stuck-sensor days.
+    clim="record" keeps the frozen protocol's feature rule (climatology over the site's history to
+    date, which is past-only when issued live); retrospective evaluations must pass
+    clim="prior_years" (2026-09-28)."""
     if hist is None or len(hist) == 0:
         return None
-    day = pa.build_daily(hist, site["min_readings"])
+    day = pa.build_daily(hist, site["min_readings"], clim=clim)
     if site["site_group"] == "lis_buoy" and len(day):
         stuck = lis_stuck_days(hist)
         keep = [(s, d) not in stuck for s, d in zip(day.station, day.date)]

@@ -35,14 +35,15 @@ def run(source="cefas", min_readings=12):
         print(f"  [{thr_name}] labeled={len(lab):,} pos={lab.bloom_fwd.mean():.3f} "
               f"onset rows={(lab.chl <= lab.thr).sum():,}")
         lab["p"] = gb.predict_proba(lab[te.TIER_A].fillna(med).values)[:, 1]
-        rows += te.summarise(lab, "p", 0.5, source, "zeroshot_raw", "GB_nar", thr_name)
-        qm = te.quantile_map(lab, nar.chl.values)
-        lab["p_qm"] = gb.predict_proba(qm[te.TIER_A].fillna(med).values)[:, 1]
-        rows += te.summarise(lab, "p_qm", 0.5, source, "zeroshot_qm", "GB_nar", thr_name)
+        y0 = int(lab.year.min()); zs = lab[lab.year > y0].copy()     # same leak-free rule as transfer_eval
+        rows += te.summarise(zs, "p", 0.5, source, "zeroshot_raw", "GB_nar", thr_name)
+        qm = te.quantile_map(zs, nar.chl.values, fit_chl=d.loc[d.year == y0, "chl"])
+        zs["p_qm"] = gb.predict_proba(qm[te.TIER_A].fillna(med).values)[:, 1]
+        rows += te.summarise(zs, "p_qm", 0.5, source, "zeroshot_qm", "GB_nar", thr_name)
         for mn in ("GB", "LR"):
             oof, t = te.rolling_refit(d, mn)
             if oof is None: print(f"  [{thr_name}] refit {mn}: not enough years"); continue
-            rows += te.summarise(oof, "p", t, source, "refit_cv", mn, thr_name)
+            rows += te.summarise(oof, "p", "t_fold", source, "refit_cv", mn, thr_name)
         oof = te.climatology_baseline(d)
         if oof is None: print(f"  [{thr_name}] climatology: not enough years")
         else: rows += te.summarise(oof, "p", 0.5, source, "baseline", "climatology", thr_name)

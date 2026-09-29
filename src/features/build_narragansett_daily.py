@@ -13,12 +13,18 @@ Tier B (sonde-native): + within-day structure the LIS boat data can never see:
 Output: data/narragansett_daily_features.csv
 Run from repo root, BASE conda env.
 """
+import importlib.util
+
 import numpy as np
 import pandas as pd
 
 HORIZON = 7
 BLOOM = 10.0
 MIN_READINGS = 48
+MIN_OBS_DAYS = 4       # a negative label needs >= this many observed days in the 7-day window
+
+_spec = importlib.util.spec_from_file_location("pa", "predict_anywhere.py")
+pa = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(pa)
 
 df = pd.read_csv("data/narragansett_surface_15min.csv")
 df["datetime"] = pd.to_datetime(df["datetime"], errors="coerce", format="mixed")
@@ -67,11 +73,10 @@ day["chl_accel"] = g["chl_rate_1d"].diff(1)
 day["month"] = day["date"].dt.month
 day["doy"] = day["date"].dt.dayofyear
 
-# station x DOY-bin climatology (train-safe enough for feature use; 24 bins)
-day["doy_bin"] = (day["doy"] - 1) // 15
-clim = day.groupby(["station", "doy_bin"])["chl"].transform("mean")
-day["chl_climatology"] = clim
-day["chl_anomaly"] = day["chl"] - clim
+# station x DOY-bin climatology from PRIOR years only (2026-09-28; the old version averaged every
+# year, 2023 test year included). Same function the deployed tool uses.
+day["chl_climatology"] = pa.prior_years_climatology(day)
+day["chl_anomaly"] = day["chl"] - day["chl_climatology"]
 
 # forward label, LIS convention (right-censored NaN)
 day["bloom_fwd"] = np.nan
@@ -84,11 +89,11 @@ for st, grp in day.groupby("station"):
         m = (dates > dates[i]) & (dates <= end)
         if m.any() and (chl[m] > BLOOM).any():
             lab[i] = 1
-        elif end <= last:
-            lab[i] = 0
+        elif m.sum() >= MIN_OBS_DAYS and end <= last:
+            lab[i] = 0          # a verified negative needs enough observed days (2026-09-28)
     day.loc[idx, "bloom_fwd"] = lab
 
-day.drop(columns=["doy_bin"]).to_csv("data/narragansett_daily_features.csv", index=False)
+day.to_csv("data/narragansett_daily_features.csv", index=False)
 lab = day["bloom_fwd"]
 print(f"station-days={len(day)}  labeled={lab.notna().sum()}  "
       f"positive rate={lab.mean():.3f}  years={sorted(day.date.dt.year.unique())}")
