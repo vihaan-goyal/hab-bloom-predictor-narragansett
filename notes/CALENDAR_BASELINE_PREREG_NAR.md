@@ -38,4 +38,4 @@ seeing it.
 - **Most recent fold, 2023:** 0.835 vs 0.768, **+0.066 [+0.018, +0.128]**, p = 0.0005.
 - **Lift at the top 10% of each fold:** model 3.05 vs calendar 2.61 (2023: 2.40 vs 1.83).
 
-**Reading.** With daily sensor data, the model forecasts bloom starts clearly better than the season alone, every year, including the most recent. Contrast with Long Island Sound, whose 3-weekly boat data ties the calendar in 2023-25 (parent `notes/CALENDAR_BASELINE_PREREG.md`).
+**Reading.** With daily sensor data, the model forecasts bloom starts clearly better than the season alone, every year, including the most recent. Contrast with Long Island Sound, whose 3-weekly boat data is no better than the calendar in 2023-25 (parent `notes/CALENDAR_BASELINE_PREREG.md`; after the 2026-10-02 lab-scale fix the calendar is ahead there, not significantly).
