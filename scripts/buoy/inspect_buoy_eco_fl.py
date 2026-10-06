@@ -9,7 +9,7 @@ Quick QC of the pulled buoy ECO FL data before calibration:
     down-weighted or dropped before calibrating against DEEP extracted chl-a.
 
 Run:
-  python inspect_buoy_eco_fl.py
+  python scripts/buoy/inspect_buoy_eco_fl.py
 """
 
 from pathlib import Path

@@ -31,7 +31,7 @@ Outputs:
   data/buoy_calibration_fits.csv   fitted coefficients per buoy per model
 
 Run from repo root:
-  python calibrate_buoy_chl.py
+  python scripts/buoy/calibrate_buoy_chl.py
 """
 
 import numpy as np

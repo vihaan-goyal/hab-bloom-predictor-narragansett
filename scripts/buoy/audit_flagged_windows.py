@@ -30,7 +30,7 @@ Buoy <-> station pairing (co-located, from the diagnostic):
   EXRX buoy  <-> DEEP station A4  (0.90 km)
 
 Run from repo root:
-  python audit_flagged_windows.py
+  python scripts/buoy/audit_flagged_windows.py
 """
 
 import math

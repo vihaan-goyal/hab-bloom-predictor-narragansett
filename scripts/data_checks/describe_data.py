@@ -2,7 +2,7 @@
 Inventory data/ so we can pick the right DEEP chlorophyll table and get its schema.
 
 Run from the repo root:
-  python describe_data.py
+  python scripts/data_checks/describe_data.py
 """
 
 from pathlib import Path

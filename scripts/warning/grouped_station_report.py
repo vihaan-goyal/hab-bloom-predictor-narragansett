@@ -8,7 +8,7 @@ the gate experiment. Used here for REPORTING only -- the alert policy
 remains ungated.
 
 Usage:
-    python grouped_station_report.py --t-star 0.35
+    python scripts/warning/grouped_station_report.py --t-star 0.35
 """
 
 import argparse

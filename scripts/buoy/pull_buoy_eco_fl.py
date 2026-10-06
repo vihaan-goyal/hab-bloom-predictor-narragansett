@@ -29,7 +29,7 @@ Datasets:
   ARTG_ECO_FL  eastern buoy
 
 Run locally (needs network to merlin.dms.uconn.edu:8080):
-  python pull_buoy_eco_fl.py
+  python scripts/buoy/pull_buoy_eco_fl.py
 """
 
 import io

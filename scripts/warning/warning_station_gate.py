@@ -14,8 +14,8 @@ misses (FN) for the gated system -- silence at a station does not delete its
 blooms from the scorecard.
 
 Usage:
-    python warning_station_gate.py --t-star 0.35
-    python warning_station_gate.py --t-star 0.35 --min-events 2
+    python scripts/warning/warning_station_gate.py --t-star 0.35
+    python scripts/warning/warning_station_gate.py --t-star 0.35 --min-events 2
 """
 
 import argparse

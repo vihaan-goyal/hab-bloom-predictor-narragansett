@@ -25,7 +25,7 @@ switched -- three of the test years have no corrected values. Any change would
 have to be argued, not just applied. This script tells you how big the issue is.
 
 Run from repo root:
-  python compare_chl_columns.py
+  python scripts/data_checks/compare_chl_columns.py
 """
 
 import numpy as np

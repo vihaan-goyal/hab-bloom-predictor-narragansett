@@ -17,7 +17,7 @@ Features produced:
 
 Usage:
     conda activate hab
-    python build_astro_features.py --start 1993-01-01 --end 2025-12-31 \
+    python scripts/exploration/build_astro_features.py --start 1993-01-01 --end 2025-12-31 \
         --out data/astro_features_daily.csv
 
 Then merge on your date column, e.g.:

@@ -13,7 +13,7 @@ warning_operating_point.py), without touching the selection years.
   3. PER-STATION: POD / FAR / event counts by station on the test years.
 
 Usage:
-    python warning_robustness.py --t-star 0.35
+    python scripts/warning/warning_robustness.py --t-star 0.35
 """
 
 import argparse

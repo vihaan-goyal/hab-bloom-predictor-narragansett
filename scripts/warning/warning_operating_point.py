@@ -21,8 +21,8 @@ Metrics reported in both vocabularies:
                NOT the false positive rate), CSI = TP/(TP+FP+FN)
 
 Usage:
-    python warning_operating_point.py
-    python warning_operating_point.py --target-pod 0.8
+    python scripts/warning/warning_operating_point.py
+    python scripts/warning/warning_operating_point.py --target-pod 0.8
 """
 
 import argparse

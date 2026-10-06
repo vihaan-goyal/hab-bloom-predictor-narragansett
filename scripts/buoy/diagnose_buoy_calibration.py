@@ -19,7 +19,7 @@ Then it asks the questions that decide whether this data is usable at all:
   - Are extreme FL outliers wrecking it?
 
 Run from repo root:
-  python diagnose_buoy_calibration.py
+  python scripts/buoy/diagnose_buoy_calibration.py
 """
 
 import numpy as np

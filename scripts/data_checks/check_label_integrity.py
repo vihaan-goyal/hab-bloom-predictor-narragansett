@@ -16,7 +16,7 @@ This script answers, without speculating:
      where the raw file does not?
 
 Run from repo root:
-  python check_label_integrity.py
+  python scripts/data_checks/check_label_integrity.py
 """
 
 import polars as pl

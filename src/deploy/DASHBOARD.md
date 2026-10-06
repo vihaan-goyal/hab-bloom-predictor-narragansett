@@ -72,7 +72,7 @@ Output columns: `station_name`, `date` (latest visit used), `days_old`,
 ## Provenance
 
 Model spec, feature list, data loading, and label definition live in
-`src/models/locked_pipeline.py`. Threshold selection: `warning_operating_point.py`
+`src/models/locked_pipeline.py`. Threshold selection: `scripts/warning/warning_operating_point.py`
 (sweep in `data/warning_operating_point_locked.csv`). Robustness and CIs:
-`warning_robustness.py`. Headline reproduction:
+`scripts/warning/warning_robustness.py`. Headline reproduction:
 `python src/models/rolling_origin_cv.py --horizon 21` (pooled AUC 0.852).

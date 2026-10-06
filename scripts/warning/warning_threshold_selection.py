@@ -25,8 +25,8 @@ IMPORTANT - before running:
   training here is a refit of that spec on train years.
 
 Usage:
-    python warning_threshold_selection.py
-    python warning_threshold_selection.py --data data/hab_features_final.csv --target-pod 0.8
+    python scripts/warning/warning_threshold_selection.py
+    python scripts/warning/warning_threshold_selection.py --data data/hab_features_final.csv --target-pod 0.8
 """
 
 import argparse

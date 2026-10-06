@@ -22,7 +22,7 @@ Three independent lines of evidence, no guessing, no waiting on email:
      attribute on every variable, set by the data provider. Go read it.
 
 Run from repo root:
-  python identify_chl_units.py
+  python scripts/data_checks/identify_chl_units.py
 """
 
 import json
