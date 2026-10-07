@@ -10,3 +10,8 @@ __pycache__/
 !figures/
 # Jupyter autosaves
 .ipynb_checkpoints/
+
+# predict_anywhere default output
+bloom_predictions.csv
+# editor settings
+.vscode/
