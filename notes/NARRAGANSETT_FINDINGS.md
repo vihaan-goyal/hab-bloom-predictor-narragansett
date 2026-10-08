@@ -1383,6 +1383,39 @@ from field data and discounted by this measured 0.025 AUC.
 - **Lift at the top 10%:** 3.05 vs 2.61.
 - **Contrast:** the LIS model on 3-weekly boat data beats its calendar over 2016-2025 (+0.077) but ties it in 2023-25. Daily sensors are what make forecasting beyond the season reliable.
 
+## 31. Pre-registered: harbor early warning, scored by events (2026-10-08) — FAILS rule 3 of 3
+
+At harbor scale the device cannot treat the water, so the product is the warning. `notes/HARBOR_WARNING_PREREG.md`
+(written and hashed before running, sha256 d7226e2c...); `src/deploy/harbor_warning_eval.py`;
+`data/harbor_warning_events.csv`, `data/harbor_warning_summary.csv`.
+- **Setup:** walk-forward GB tier A, test years 2015-2023, threshold = each fold's validation choice. 419 bloom
+  onsets (chl > 10 after 5 observed quiet days); 99 station-seasons (May-Oct). Station-year bootstrap, 2,000.
+- **Model (fold t*):** **85.4% of onsets warned 1-7 days ahead** [81.1, 89.4]; median lead 7 days; 71.8% warned
+  >= 3 days ahead; **median 1 false-alarm episode per station-season** (mean 1.41).
+- **Device threshold 0.45:** 86.2% [82.0, 90.0], median 1 false alarm (mean 1.47).
+- **Chlorophyll rule** (alert when today's chl >= X, X chosen on val = 6.5-7.5): 95.2% [93.1, 97.1], median
+  **3** false alarms (mean 2.82).
+- **Pass rule:** (1) >= 60% warned: PASS. (2) <= 3 false alarms per season: PASS. (3) warned >= the chlorophyll
+  rule: **FAIL**. Overall **FAIL**, reported as is: the val-chosen rule sits at a looser operating point
+  (more warnings, ~2x the false alarms).
+- **Exploratory, not pre-registered (operating curves on the test folds):** at matched false-alarm rates the model
+  is ahead. Model p >= 0.35: 92.4% warned, 1.81 false/season, 80% >= 3 days ahead; rule chl >= 8.5: 77.6%,
+  1.68 false, 51% >= 3 days ahead. Model 0.45: 86.2% at 1.46; rule 9.0: 65.4% at 1.18. A future pre-registered
+  test should compare at matched false-alarm rate.
+- **Caveat:** "lead 7" also counts alerts that were already on for weeks; lead time is capped by the 7-day window.
+
+## 32. Is "sonde chl > 10" a bloom? Checked against 734 same-day lab samples (2026-10-08, descriptive)
+
+`data/sonde_lab_calibration.csv` (RIDEM lab grab samples, 2006-2022, 14 stations; §10).
+- Sonde > 10: 295 days. **Lab also > 10 on 51%**; lab > 5 on 89%; lab chl on those days median 10.0 (IQR 6.8-15.2).
+- **Lab > 10 (173 days): sonde > 10 on 86%.** Sonde <= 10 but lab > 10: 5%.
+- Confirmation rises with the reading: sonde 10-15 → 33% lab > 10; 15-20 → 58%; 20-40 → 78%; > 40 → 80%.
+- **Meaning:** the label catches most lab-confirmed blooms but also counts milder "elevated algae" days (sonde reads
+  high; lab 10 ≈ sonde 12.8, §10). Say "forecasts elevated-chlorophyll events, about half of them lab-scale
+  blooms". It says nothing about species or toxins. Limits: one grab sample vs a daily mean.
+- **Not yet done:** check alerts against independent bloom records (URI long-term plankton counts, RIDEM HAB
+  shellfish closures, sonde hypoxia events); a stricter label at sonde 12.8 (= lab 10).
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting sits near precision 0.12 (0.117 at the 21-day operating point, AUC 0.825,
