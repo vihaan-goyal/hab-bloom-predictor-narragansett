@@ -324,7 +324,7 @@ def render_html(atlas, template_path, out_path):
     return out_path
 
 
-FIG_DIR = "figures"
+FIG_DIR = "figures/precursors"
 
 
 def write_figures(atlas, out_dir=FIG_DIR, dpi=150):

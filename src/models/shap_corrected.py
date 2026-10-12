@@ -150,9 +150,9 @@ ax.grid(True, alpha=0.3, axis='x')
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 plt.tight_layout()
-plt.savefig("figures/fig7_rf_importances.png", dpi=150, bbox_inches='tight')
+plt.savefig("figures/model/fig7_rf_importances.png", dpi=150, bbox_inches='tight')
 plt.close()
-print("Saved figures/fig7_rf_importances.png")
+print("Saved figures/model/fig7_rf_importances.png")
 
 # ── Figure 8: SHAP Beeswarm (XGBoost) ────────────────────────────────────────
 print("\nComputing SHAP values for XGBoost...")
@@ -177,9 +177,9 @@ plt.title(
 )
 plt.xlabel("SHAP value (impact on log-odds of bloom)", fontsize=10)
 plt.tight_layout()
-plt.savefig("figures/fig8_shap_beeswarm.png", dpi=150, bbox_inches='tight')
+plt.savefig("figures/model/fig8_shap_beeswarm.png", dpi=150, bbox_inches='tight')
 plt.close()
-print("Saved figures/fig8_shap_beeswarm.png")
+print("Saved figures/model/fig8_shap_beeswarm.png")
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 print("\n" + "="*50)

@@ -216,6 +216,6 @@ fig.suptitle(
     fontsize=13, fontweight='bold',
 )
 plt.tight_layout()
-plt.savefig('figures/fig9_lstm_training.png', dpi=150, bbox_inches='tight')
+plt.savefig('figures/model/fig9_lstm_training.png', dpi=150, bbox_inches='tight')
 plt.close()
-print("Saved figures/fig9_lstm_training.png")
+print("Saved figures/model/fig9_lstm_training.png")

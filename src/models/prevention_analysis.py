@@ -227,9 +227,9 @@ ax.set_title("Bloom Prevention Curve: Impact of Nitrogen Reduction\n(Long Island
 ax.legend()
 ax.grid(alpha=0.3)
 plt.tight_layout()
-plt.savefig("figures/bloom_prevention_curve.png", dpi=150)
+plt.savefig("figures/intervention/bloom_prevention_curve.png", dpi=150)
 plt.close()
-print("\nSaved figures/bloom_prevention_curve.png")
+print("\nSaved figures/intervention/bloom_prevention_curve.png")
 
 # Figure 2: Station sensitivity map
 fig, ax = plt.subplots(figsize=(12, 6))
@@ -252,9 +252,9 @@ for _, row in df_stations.head(5).iterrows():
                 (row['longitude'], row['latitude']),
                 textcoords="offset points", xytext=(5, 5), fontsize=7)
 plt.tight_layout()
-plt.savefig("figures/station_sensitivity_map.png", dpi=150)
+plt.savefig("figures/intervention/station_sensitivity_map.png", dpi=150)
 plt.close()
-print("Saved figures/station_sensitivity_map.png")
+print("Saved figures/intervention/station_sensitivity_map.png")
 
 # Figure 3: Reduction needed per station (bar chart, top 15)
 top15 = df_thresholds.head(15)
@@ -268,9 +268,9 @@ ax.set_xlabel("Minimum Nitrogen Reduction Needed (%)")
 ax.set_title("Nitrogen Reduction Required to Prevent >50% of High-Risk Bloom Days\nby Station")
 ax.legend()
 plt.tight_layout()
-plt.savefig("figures/station_reduction_needed.png", dpi=150)
+plt.savefig("figures/intervention/station_reduction_needed.png", dpi=150)
 plt.close()
-print("Saved figures/station_reduction_needed.png")
+print("Saved figures/intervention/station_reduction_needed.png")
 
 print("\nPrevention analysis complete.")
 print("Outputs saved to data/ and figures/")

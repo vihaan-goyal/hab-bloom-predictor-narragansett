@@ -47,7 +47,7 @@ def parse_args():
                    help="lower edge of the 'almost bloomed' subthreshold band")
     p.add_argument("--outside-days", type=int, default=7,
                    help="days past the window end still counted as just-outside")
-    p.add_argument("--out-csv", default="figures/fp_audit_detail.csv")
+    p.add_argument("--out-csv", default="figures/model/fp_audit_detail.csv")
     return p.parse_args()
 
 

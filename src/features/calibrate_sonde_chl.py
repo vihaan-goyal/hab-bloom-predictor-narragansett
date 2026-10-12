@@ -36,7 +36,7 @@ has no value that day).
 OUTPUTS
   data/sonde_lab_calibration.csv           matched pairs
   data/sonde_lab_calibration_summary.csv   fit numbers + calibrated threshold
-  figures/nar_fig6_calibration.png
+  figures/narragansett/nar_fig6_calibration.png
 
 Run from repo root with the base anaconda python:
   ~/anaconda3/python.exe src/features/calibrate_sonde_chl.py
@@ -55,7 +55,7 @@ ROOT = Path("data/raw/narragansett/extracted")
 FEATURES = Path("data/narragansett_daily_features.csv")
 OUT_PAIRS = Path("data/sonde_lab_calibration.csv")
 OUT_SUMMARY = Path("data/sonde_lab_calibration_summary.csv")
-OUT_FIG = Path("figures/nar_fig6_calibration.png")
+OUT_FIG = Path("figures/narragansett/nar_fig6_calibration.png")
 
 LAB_THRESHOLD = 10.0
 MIN_N = 20

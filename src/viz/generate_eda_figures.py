@@ -5,7 +5,7 @@ Regenerates all EDA figures on corrected daily data (hab_labels_daily.csv).
 Run from repo root:
     python generate_eda_figures.py
 
-Outputs to figures/ :
+Outputs to figures/eda/ :
     fig2_station_bloom_rates.png
     fig3_annual_monthly_bloom_freq.png
     fig4_seasonal_chl_boxplot.png
@@ -26,7 +26,7 @@ from scipy import stats
 # ---- config ----------------------------------------------------------------
 
 DATA_PATH = "data/hab_features_daily.csv"
-OUT_DIR   = "figures"
+OUT_DIR   = "figures/eda"
 
 BLOOM_COL   = "bloom_28d"
 CHL_COL     = "Chlorophyll"

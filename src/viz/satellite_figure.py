@@ -4,7 +4,7 @@ Reads data/transfer/satellite_{coverage,observability,agreement,skill}.csv
 (from src/transfer/satellite_eval.py). Panels: A coverage and observability by
 product; B satellite vs sonde agreement (Spearman) by product and source;
 C onset lift by product and model (obs representation) with 95% CIs.
-Writes figures/nar_fig10_satellite.png. Run from fork root, BASE env.
+Writes figures/narragansett/nar_fig10_satellite.png. Run from fork root, BASE env.
 """
 import matplotlib
 matplotlib.use("Agg")
@@ -52,5 +52,5 @@ ax[2].axhline(1.0, ls="--", color="k", lw=0.8); ax[2].axhline(1.3, ls=":", color
 ax[2].set_xticks(x); ax[2].set_xticklabels([label[p] for p in order], rotation=20, ha="right")
 ax[2].set_ylabel("onset lift (sonde truth)"); ax[2].set_title("C. Skill from satellite input"); ax[2].legend(fontsize=8)
 fig.suptitle("Fig 10. Can satellite chlorophyll drive the 7-day bloom model? (stations with sonde truth)", y=1.02)
-fig.tight_layout(); fig.savefig("figures/nar_fig10_satellite.png", dpi=150, bbox_inches="tight")
-print("wrote figures/nar_fig10_satellite.png")
+fig.tight_layout(); fig.savefig("figures/narragansett/nar_fig10_satellite.png", dpi=150, bbox_inches="tight")
+print("wrote figures/narragansett/nar_fig10_satellite.png")

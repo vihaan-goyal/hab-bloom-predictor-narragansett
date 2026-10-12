@@ -143,7 +143,7 @@ a picture of correlation between readings separated by months to years. The
 non-monotonic bounce at lag 35 -> 42 (0.091 -> 0.132) is unsurprising at ~2 years'
 separation, where between-station differences dominate over temporal persistence.
 
-**`figures/fig6_lag_correlation_decay.png` and `figures/lag_correlation_decay.png`
+**`figures/eda/fig6_lag_correlation_decay.png` and `figures/eda/lag_correlation_decay.png`
 carry the same mislabelled axis and should be regenerated before use in the paper.**
 
 #### True calendar-day lags (computed 2026-08-29)

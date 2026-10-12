@@ -73,7 +73,7 @@ def parse_args():
                    help="Base bloom column; the h-day-ahead label is derived from it.")
     p.add_argument("--target-pod", type=float, default=0.8)
     p.add_argument("--out-csv", default="data/warning_operating_point.csv")
-    p.add_argument("--out-fig", default="figures/warning_threshold_selection.png")
+    p.add_argument("--out-fig", default="figures/warning/warning_threshold_selection.png")
     return p.parse_args()
 
 

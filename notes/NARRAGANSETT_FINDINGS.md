@@ -21,29 +21,29 @@ docstring says where its raw input comes from. Rows marked *parent* live in
 
 | § | Script(s) | Inputs | Output / figure |
 |---|---|---|---|
-| 1–5 | `src/models/narragansett_lis_analyses.py`, `src/models/bootstrap_narragansett.py`, `src/models/train_narragansett.py`, `src/viz/narragansett_figures.py` | `data/narragansett_daily_features.csv` | `data/narragansett_epoch_composite.csv`, `data/narragansett_bootstrap_cis.csv`, `data/narragansett_model_results.csv`, `figures/nar_fig1–4` |
+| 1–5 | `src/models/narragansett_lis_analyses.py`, `src/models/bootstrap_narragansett.py`, `src/models/train_narragansett.py`, `src/viz/narragansett_figures.py` | `data/narragansett_daily_features.csv` | `data/narragansett_epoch_composite.csv`, `data/narragansett_bootstrap_cis.csv`, `data/narragansett_model_results.csv`, `figures/narragansett/nar_fig1–4` |
 | 6 | `src/features/build_narragansett.py`, `src/features/build_narragansett_daily.py`, `src/models/ablation_narragansett.py` | raw NBFSMN zips (README) | `data/narragansett_daily_features.csv`, `data/narragansett_ablation.csv` |
 | 7 | `src/models/rolling_origin_cv_nar.py` | daily features | `data/rolling_origin_cv_nar.csv`, `_pooled.csv` |
 | 8 | `src/models/experiments/onset_rule_baselines.py` (2023), `onset_rule_baselines_cv.py` (9 folds) | daily features | `data/onset_rule_baselines.csv`, `_cv.csv` |
-| 9 | `src/models/experiments/horizon_sweep_nar.py` | daily features | `data/horizon_sweep_nar.csv`, `figures/nar_fig5` |
-| 10 | `src/features/calibrate_sonde_chl.py` | NBFSMN lab chlorophyll sheets (docstring lists them) | `data/sonde_lab_calibration*.csv`, `figures/nar_fig6` |
+| 9 | `src/models/experiments/horizon_sweep_nar.py` | daily features | `data/horizon_sweep_nar.csv`, `figures/narragansett/nar_fig5` |
+| 10 | `src/features/calibrate_sonde_chl.py` | NBFSMN lab chlorophyll sheets (docstring lists them) | `data/sonde_lab_calibration*.csv`, `figures/narragansett/nar_fig6` |
 | 11 | `src/models/experiments/cadence_thinning.py` | daily features | `data/cadence_thinning.csv` |
 | 12 | *parent* `src/models/experiments/lis_buoy_recipe.py`; buoy pull `src/data/lisicos_buoy_pull.py` | UConn LISICOS ERDDAP | *parent* `data/lis_buoy_recipe.csv` |
 | 13 | `src/models/experiments/cadence_thinning_matched.py` | daily features | `data/cadence_thinning_matched.csv` |
 | 14 | `src/models/experiments/tuning_search_nar.py` | daily features | `data/tuning_search_nar_{grid,null,selected}.csv` |
 | 15 | `src/models/experiments/bloom_rate_by_period.py` | daily features + *parent* `data/hab_features_tidal.csv` | `data/bloom_rate_by_period.csv` |
 | 16 | `src/models/experiments/lift_at_rarity_cv.py` | daily features | `data/lift_at_rarity_cv.csv` |
-| 17 | `src/models/experiments/prob_before_onset.py`, `fig_prob_21d_before.py`; *parent* `src/models/experiments/prob_before_onset_lis.py` | daily features; *parent* `data/cv_predictions.csv` | `data/prob_before_onset_nar*.csv`, `figures/nar_fig8` |
+| 17 | `src/models/experiments/prob_before_onset.py`, `fig_prob_21d_before.py`; *parent* `src/models/experiments/prob_before_onset_lis.py` | daily features; *parent* `data/cv_predictions.csv` | `data/prob_before_onset_nar*.csv`, `figures/narragansett/nar_fig8` |
 | 18 | `src/deploy/daily_inference_nar.py --date YYYY-MM-DD` | daily features | `data/narragansett_daily_predictions.csv` |
 | 19 | `src/transfer/fetch_{chesapeake,nerrs,cefas_portal,imos,lake_erie,sfbay}.py` then `python -m src.transfer.transfer_eval --source <name>` | public feeds (each docstring); **Cefas is a manual portal export**, see §19 | `data/transfer/<name>_{15min,daily,results}.csv` |
 | 20 | `src/transfer/pooled_model_test.py` | §19 daily files | `data/transfer/pooled_to_narragansett.csv` |
 | 21 | `src/deploy/export_model.py`, `predict_anywhere.py` | daily features | `release/narragansett_bloom_model_v2.joblib` (2026-09-28, causal features, threshold 0.45 = median rolling-CV fold t*); `release/narragansett_bloom_model.joblib` = v1, frozen for §25 |
-| 22 | `src/transfer/regime_models.py`, `src/viz/regime_figure.py` | §19 daily files | `data/transfer/regime_loso*.csv`, `figures/nar_fig9` |
-| 23 | `src/transfer/satellite_fetch.py`, `satellite_eval.py`, `src/viz/satellite_figure.py` | NOAA CoastWatch ERDDAP (docstring) | `data/transfer/satellite_*.csv`, `figures/nar_fig10` |
-| 24 | `src/registry/erddap_crawl.py`, `run_catalog.py` (`--rescore --model v2|v1` for the leak-free scores), `refit_top_sites.py --model v2|v1`, `src/viz/registry_map.py` | 60 public ERDDAP servers (`data/registry/erddaps.json`) | `data/registry/*.csv` (committed; `site_skill.csv` frozen as the §25 site-list input, leak-free scores in `site_skill_causal_{v2,v1}.csv`), `figures/nar_fig11` (drawn from the old scores) |
-| 26 | `python -m src.nn.build_windows`, `python -m src.nn.seq_vs_daily` (env `hab-nn`, `environment-nn.yml`) | `data/narragansett_surface_15min.csv` + daily features | `data/nn/index.csv`, `windows_f32.npy`, `seq_vs_daily_{results,predictions}.csv`, `figures/nar_fig12` |
-| 27 | `python -m src.nn.pooled_site_nn` (env `hab-nn`) | §19 daily files + daily features | `data/nn/pooled_site_nn_{results,predictions}.csv`, `figures/nar_fig13` |
-| 28 | *parent* `src/models/lr_geometry.py --nar-root ..` (base env, from the parent root) | daily features (fork) + *parent* `data/hab_features_tidal.csv` | *parent* `data/lr_geometry_{summary,rows_nar,rows_lis}.csv`, `figures/fig_lr_geometry.png` = `figures/nar_fig14` |
+| 22 | `src/transfer/regime_models.py`, `src/viz/regime_figure.py` | §19 daily files | `data/transfer/regime_loso*.csv`, `figures/narragansett/nar_fig9` |
+| 23 | `src/transfer/satellite_fetch.py`, `satellite_eval.py`, `src/viz/satellite_figure.py` | NOAA CoastWatch ERDDAP (docstring) | `data/transfer/satellite_*.csv`, `figures/narragansett/nar_fig10` |
+| 24 | `src/registry/erddap_crawl.py`, `run_catalog.py` (`--rescore --model v2|v1` for the leak-free scores), `refit_top_sites.py --model v2|v1`, `src/viz/registry_map.py` | 60 public ERDDAP servers (`data/registry/erddaps.json`) | `data/registry/*.csv` (committed; `site_skill.csv` frozen as the §25 site-list input, leak-free scores in `site_skill_causal_{v2,v1}.csv`), `figures/narragansett/nar_fig11` (drawn from the old scores) |
+| 26 | `python -m src.nn.build_windows`, `python -m src.nn.seq_vs_daily` (env `hab-nn`, `environment-nn.yml`) | `data/narragansett_surface_15min.csv` + daily features | `data/nn/index.csv`, `windows_f32.npy`, `seq_vs_daily_{results,predictions}.csv`, `figures/narragansett/nar_fig12` |
+| 27 | `python -m src.nn.pooled_site_nn` (env `hab-nn`) | §19 daily files + daily features | `data/nn/pooled_site_nn_{results,predictions}.csv`, `figures/narragansett/nar_fig13` |
+| 28 | *parent* `src/models/lr_geometry.py --nar-root ..` (base env, from the parent root) | daily features (fork) + *parent* `data/hab_features_tidal.csv` | *parent* `data/lr_geometry_{summary,rows_nar,rows_lis}.csv`, `figures/model/fig_lr_geometry.png` = `figures/narragansett/nar_fig14` |
 | 29 | `src/models/tank_feature_check.py` | daily features + `data/narragansett_surface_15min.csv` | `data/tank_feature_check.csv` |
 
 Seeds: model `random_state=42`; bootstrap `seed=42`, n=2000. Environment:
@@ -51,7 +51,7 @@ Seeds: model `random_state=42`; bootstrap `seed=42`, n=2000. Environment:
 
 ## 1. DO conditioning replicates (cross-system result)
 
-*Figure: figures/nar_fig1_do_temp_conditioning.png*
+*Figure: figures/narragansett/nar_fig1_do_temp_conditioning.png*
 
 At elevated-but-subbloom chlorophyll (5–10 µg/L, n=7,047), the bloom
 probability by dissolved-oxygen tercile:
@@ -82,7 +82,7 @@ station-biased.
 
 ## 3. The bloom run-up is ~3 days (newly measurable)
 
-*Figure: figures/nar_fig2_epoch_composite.png*
+*Figure: figures/narragansett/nar_fig2_epoch_composite.png*
 
 Superposed-epoch composite over 419 clean onsets (≥5 quiet days before
 first >10 day):
@@ -104,7 +104,7 @@ day −21 reflects prior bloom waves — blooms recur in trains.)
 
 ## 4. No point of no return (replicates)
 
-*Figure: figures/nar_fig3_escape_probability.png*
+*Figure: figures/narragansett/nar_fig3_escape_probability.png*
 
 P(reach >10 µg/L within 7 d) as a function of today's daily-mean chl:
 
@@ -124,7 +124,7 @@ not proceed to bloom. Two systems, two sampling regimes, same shape.
 
 ## 5. Model results with clustered CIs (context)
 
-*Figure: figures/nar_fig4_precision_comparison.png*
+*Figure: figures/narragansett/nar_fig4_precision_comparison.png*
 
 Station-clustered bootstrap (13 test clusters, n_boot=2000, seed=42),
 test 2023:
@@ -233,7 +233,7 @@ lift is the honest axis:
 | onset lift | 6.6 | 4.1 | 3.2 | 2.3 | 2.0 | 1.8 | 1.5 | 1.4 |
 
 At 14–21 days the model is barely above climatology — the regime LIS
-operates in. Figure `figures/nar_fig5_skill_vs_horizon.png`;
+operates in. Figure `figures/narragansett/nar_fig5_skill_vs_horizon.png`;
 `data/horizon_sweep_nar.csv`.
 
 ## 10. Sonde fluorescence vs lab chlorophyll: the two "10 µg/L" differ
@@ -245,7 +245,7 @@ but reads high and noisy: lab ≈ 0.76 + 0.72·sonde (r² 0.23; log-log r² 0.55
 above 10 (sonde): 34.9%; above the calibrated 12.8: 24.3%. The Narragansett
 label at sonde-10 is therefore looser than LIS's lab-10, and even at the
 calibrated threshold Narragansett exceeds ~5× more often than LIS (~5%).
-Figure `figures/nar_fig6_calibration.png`; `data/sonde_lab_calibration*.csv`.
+Figure `figures/narragansett/nar_fig6_calibration.png`; `data/sonde_lab_calibration*.csv`.
 
 ## 11. Cadence thinning within Narragansett: thesis FAILS its pre-registered test
 
@@ -437,7 +437,7 @@ question~~ (answered 2026-09-23, see the current reading at the top of §15). Li
 MODIS chlor_a is biased in estuarine water and is a 20 km mean, and only 24 %
 of station-days are satellite-valid; it is a coarse witness, but a 5–8× drop
 would show in it. Outputs: parent `data/cliff_satellite_check.csv`,
-`figures/fig_cliff_satellite.png`.
+`figures/model/fig_cliff_satellite.png`.
 Superseded 2026-09-23: the LIS label was rebuilt on the lab scale (the CTD fluorometer read 2-3x high before 2016); current LIS numbers in the parent's notes/S1_NUMBERS_SHEET.md, rationale in the parent's notes/LABEL_REBUILD_PREREG.md.
 
 ## 16. Lift at LIS rarity, nine test years: dense sampling triples the lift
@@ -477,7 +477,7 @@ because t* transfers poorly year to year; 768 positives at 52.5.
 
 ## 17. Model probability 21 days before each bloom, both bays
 
-*Figure: figures/nar_fig8_prob_21d_before.png.* Out-of-sample: LIS locked LR
+*Figure: figures/narragansett/nar_fig8_prob_21d_before.png.* Out-of-sample: LIS locked LR
 (h21, train ≤2019, onsets 2020–25); Narragansett GB tier A trained on a
 21-day label (train ≤2020, onsets 2021–23). Null = non-bloom days at the
 same stations/years.
@@ -762,7 +762,7 @@ if you have years of local data, refit.
 Hypothesis (user's): the two transfer failures (Chesapeake, SF Delta) are
 tidal-fresh, so a library of models trained per water regime, with a new site
 self-routed by its own salinity, should close the gap. `src/transfer/regime_models.py`,
-fig 9 `figures/nar_fig9_regime_loso.png`.
+fig 9 `figures/narragansett/nar_fig9_regime_loso.png`.
 
 **Design, fixed before running.** Regime per station from its median salinity:
 fresh < 0.5 PSU (Chesapeake 9, NERRS 4, SF Delta 6 stations; 46k station-days),
@@ -839,7 +839,7 @@ satellite-refit onset lift >= 1.3 with CI excluding 1.0, beating the satellite
 chl>c rule, with >= 60% of sonde bloom onsets having >= 1 satellite observation
 in the prior 7 days. Scripts: `src/transfer/satellite_fetch.py`,
 `satellite_eval.py`, `src/viz/satellite_figure.py`; fig 10
-`figures/nar_fig10_satellite.png`.
+`figures/narragansett/nar_fig10_satellite.png`.
 
 **Coverage and observability.** Raw valid-day fraction at the stations: 300 m
 16-38% by source (median ~24%), 4 km 25-35%, gap-filled 2 km 55-100% (it is
@@ -991,7 +991,7 @@ each station's whole record, so the label threshold itself carries information f
 label definition, not a feature leak; noted 2026-09-28);
 13 sites had predictions but too little history to score; datasets with
 blank start dates on some servers were excluded by the years >= 1 rule. Fig 11
-`figures/nar_fig11_coverage_map.png` maps every site by onset lift.
+`figures/narragansett/nar_fig11_coverage_map.png` maps every site by onset lift.
 
 **Addendum: does training on the best sites' own data beat the exported model? Slightly, on lift;
 not on ranking (corrected 2026-09-28).**
@@ -1083,7 +1083,7 @@ within-day ramps, tidal-phase signal) carries forecast skill for bloom onset wit
 every neural and tree alternative lost to logistic regression on 11k station-days / 74 test
 blooms; this is the first test on a dataset large enough to give a network a fair chance.
 Scripts `src/nn/build_windows.py`, `src/nn/seq_vs_daily.py`; fig 12
-`figures/nar_fig12_seq_vs_daily.png`. Environment `hab-nn` (`environment-nn.yml`, CPU torch;
+`figures/narragansett/nar_fig12_seq_vs_daily.png`. Environment `hab-nn` (`environment-nn.yml`, CPU torch;
 version recorded with the results). The frozen release model and the prospective protocol are
 not touched by this section.
 
@@ -1186,7 +1186,7 @@ reliably negative ~0.02 rather than a null.
 [1.31, 2.10], AUC 0.76 vs local 2.00 / 0.839) treats every site as one distribution. A network
 with a learned site embedding and an UNK token can separate site offset from bloom shape and
 should transfer better to an unseen site. `src/nn/pooled_site_nn.py`; fig 13
-`figures/nar_fig13_pooled_site_nn.png`. Runs only after §26 completes.
+`figures/narragansett/nar_fig13_pooled_site_nn.png`. Runs only after §26 completes.
 
 **Design, fixed before running.** Training rows exactly as §20: the six foreign daily files
 (Chesapeake, NERRS, Cefas, IMOS, Lake Erie, SF Bay), own-station p75 label within 7 d, chl
@@ -1262,7 +1262,7 @@ picture in which the two classes are overlapping clouds. The overlap along the L
 precision ceiling drawn as geometry: rows inside it cannot be separated by any model on these
 features. The thesis claim as stated before the run (§13, §16) was that the LIS-vs-Narragansett
 precision gap is base rate, not separability; this section tests that with one number per bay.
-*Parent* `src/models/lr_geometry.py`; parent `figures/fig_lr_geometry.png` = fig 14 here.
+*Parent* `src/models/lr_geometry.py`; parent `figures/model/fig_lr_geometry.png` = fig 14 here.
 
 **Design, fixed before running.** Test-period onset rows only (today's chl ≤ 10), scored out of
 sample. Narragansett: the LR of `train_narragansett.py` (tier-A, train ≤ 2020 medians and
@@ -1297,7 +1297,7 @@ the probability, so nothing about ranking is lost by drawing it). `t*` sits at l
 | LIS, original sensor label (historical) | 1,866 | 68 | 0.036 | 0.855 | 0.35 | 0.112 | 0.868 | **0.44** | 0.71 |
 
 Parent `data/lr_geometry_summary.csv`, `data/lr_geometry_rows_{nar,lis}.csv`; fig 14
-(= parent `figures/fig_lr_geometry.png`).
+(= parent `figures/model/fig_lr_geometry.png`).
 
 **Reading, against the rule fixed above (current, lab-scale label).** LIS OVL is 0.62 against
 Narragansett's 0.52, just over the pre-stated 0.10 margin, and LIS AUC is 0.770 vs 0.810: the

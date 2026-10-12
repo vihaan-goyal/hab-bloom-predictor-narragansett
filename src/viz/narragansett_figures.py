@@ -1,5 +1,5 @@
 """Figures for notes/NARRAGANSETT_FINDINGS.md. Agg backend, dpi=150.
-Outputs to figures/:
+Outputs to figures/narragansett/:
   nar_fig1_do_temp_conditioning.png
   nar_fig2_epoch_composite.png
   nar_fig3_escape_probability.png
@@ -41,7 +41,7 @@ axes[0].set_ylabel("P(bloom within 7 d)")
 axes[0].text(2.45, band.bloom_fwd.mean() + 0.015, "base rate", color=GRAY, fontsize=8)
 fig.suptitle("Bloom odds at elevated chlorophyll: low DO and warm water both raise risk", y=1.0)
 fig.tight_layout()
-fig.savefig("figures/nar_fig1_do_temp_conditioning.png", dpi=DPI, bbox_inches="tight")
+fig.savefig("figures/narragansett/nar_fig1_do_temp_conditioning.png", dpi=DPI, bbox_inches="tight")
 plt.close(fig)
 
 # ---- fig 2: superposed epoch composite -------------------------------------
@@ -61,7 +61,7 @@ a2.axvline(0, color=GRAY, lw=1, ls="--")
 a2.set_ylabel("DO (mg/L)")
 a2.set_xlabel("days relative to onset (day 0 = first daily mean > 10 µg/L)")
 fig.tight_layout()
-fig.savefig("figures/nar_fig2_epoch_composite.png", dpi=DPI, bbox_inches="tight")
+fig.savefig("figures/narragansett/nar_fig2_epoch_composite.png", dpi=DPI, bbox_inches="tight")
 plt.close(fig)
 
 # ---- fig 3: escape probability / no PONR -----------------------------------
@@ -84,7 +84,7 @@ ax.set_ylim(0, 0.85)
 ax.set_title("No point of no return: risk climbs smoothly, no cliff\n"
              "(even at chl 9–10, 29% of days do not proceed to bloom)")
 fig.tight_layout()
-fig.savefig("figures/nar_fig3_escape_probability.png", dpi=DPI, bbox_inches="tight")
+fig.savefig("figures/narragansett/nar_fig3_escape_probability.png", dpi=DPI, bbox_inches="tight")
 plt.close(fig)
 
 # ---- fig 4: LIS vs Narragansett onset precision ----------------------------
@@ -104,6 +104,6 @@ ax.set_ylim(0, 0.95)
 ax.set_title("Same model recipe, two monitoring cadences\n"
              "(95% clustered-bootstrap CIs; LIS h21 station-day, Narragansett h7 onset-only)")
 fig.tight_layout()
-fig.savefig("figures/nar_fig4_precision_comparison.png", dpi=DPI, bbox_inches="tight")
+fig.savefig("figures/narragansett/nar_fig4_precision_comparison.png", dpi=DPI, bbox_inches="tight")
 plt.close(fig)
-print("wrote 4 figures to figures/")
+print("wrote 4 figures to figures/narragansett/")

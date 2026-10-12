@@ -305,5 +305,5 @@ for _, row in stats_df[stats_df['station'].isin(['A4','B3','C1','A2','02','01'])
                 textcoords='offset points', xytext=(5, 3), fontsize=9)
 
 plt.tight_layout()
-plt.savefig("figures/station_thresholds.png", dpi=150, bbox_inches='tight')
-print("Saved figures/station_thresholds.png")
+plt.savefig("figures/model/station_thresholds.png", dpi=150, bbox_inches='tight')
+print("Saved figures/model/station_thresholds.png")

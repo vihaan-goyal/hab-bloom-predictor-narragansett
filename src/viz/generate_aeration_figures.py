@@ -6,7 +6,7 @@ generates figures 10 and 11.
 Run from repo root:
     python generate_aeration_figures.py
 
-Outputs to figures/:
+Outputs to figures/intervention/:
     fig10_aeration_priority_map.png    -- bubble chart by station
     fig11_seasonal_intervention.png    -- monthly bars + aeration score line
 """
@@ -20,7 +20,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-OUT_DIR      = "figures"
+OUT_DIR      = "figures/intervention"
 FEATURES_CSV = "data/hab_features_daily.csv"
 LABELS_CSV   = "data/hab_labels_daily.csv"
 

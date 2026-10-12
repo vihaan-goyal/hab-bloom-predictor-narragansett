@@ -6,7 +6,7 @@ the LIS repo, assumed to sit next to this fork as ../hab-bloom-predictor):
   data/prob_before_onset_nar_trajectory.csv,
   ../hab-bloom-predictor/data/prob_before_onset_lis.csv,
   ../hab-bloom-predictor/data/prob_before_onset_lis_null.csv
-Output: figures/nar_fig8_prob_21d_before.png
+Output: figures/narragansett/nar_fig8_prob_21d_before.png
 Run from the fork root with the BASE conda python.
 """
 import os
@@ -78,8 +78,8 @@ for x, y in zip(traj.offset, traj.null_median_p21):
 for a, lab in zip(axes, "abc"):
     a.text(-0.08, 1.08, f"({lab})", transform=a.transAxes, fontsize=11, fontweight="bold")
 fig.tight_layout(w_pad=1.5)
-os.makedirs("figures", exist_ok=True)
-fig.savefig("figures/nar_fig8_prob_21d_before.png", dpi=150)
-print("wrote figures/nar_fig8_prob_21d_before.png")
+os.makedirs("figures/narragansett", exist_ok=True)
+fig.savefig("figures/narragansett/nar_fig8_prob_21d_before.png", dpi=150)
+print("wrote figures/narragansett/nar_fig8_prob_21d_before.png")
 for k, (mo, mn, no, nn) in meds.items():
     print(f"{k}: onsets n={no} median {mo:.3f} | null n={nn} median {mn:.3f}")

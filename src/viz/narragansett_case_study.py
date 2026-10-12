@@ -2,7 +2,7 @@
 Fits GB tier A (train <= 2020), scores 2023, picks 3 stations/events where an
 alert (P >= 0.50 on a day with chl <= 10) preceded a bloom onset, plus one
 false alarm, and draws chlorophyll + probability panels for each.
-Output: figures/nar_fig7_case_study.png. Agg, dpi 150.
+Output: figures/narragansett/nar_fig7_case_study.png. Agg, dpi 150.
 """
 import matplotlib
 matplotlib.use("Agg")
@@ -88,5 +88,5 @@ for ax, (st, d0, label) in zip(np.atleast_1d(axes), picks):
 axes[-1].set_xlabel("days relative to bloom onset (chl > 10 µg/L)")
 fig.suptitle("Narragansett 2023: the model's bloom probability ahead of real blooms", y=1.0)
 fig.tight_layout()
-fig.savefig("figures/nar_fig7_case_study.png", dpi=150, bbox_inches="tight")
-print("wrote figures/nar_fig7_case_study.png")
+fig.savefig("figures/narragansett/nar_fig7_case_study.png", dpi=150, bbox_inches="tight")
+print("wrote figures/narragansett/nar_fig7_case_study.png")

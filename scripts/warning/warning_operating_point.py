@@ -47,7 +47,7 @@ def parse_args():
                         "built at a different horizon)")
     p.add_argument("--target-pod", type=float, default=0.8)
     p.add_argument("--out-csv", default="data/warning_operating_point_locked.csv")
-    p.add_argument("--out-fig", default="figures/warning_operating_point_locked.png")
+    p.add_argument("--out-fig", default="figures/warning/warning_operating_point_locked.png")
     return p.parse_args()
 
 

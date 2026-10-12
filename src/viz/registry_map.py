@@ -3,7 +3,7 @@ registry_map.py -- fig 11: where the exported model has been run, coloured by on
 Inputs: data/registry/site_skill.csv + data/registry/insitu_catalog.csv (new ERDDAP sites),
         data/transfer/stations_latlon.csv + data/transfer/<source>_results.csv (the seven
         known networks, zeroshot_qm onset lift from findings 19).
-Output: figures/nar_fig11_coverage_map.png (plain lat/lon scatter, no basemap dependency).
+Output: figures/narragansett/nar_fig11_coverage_map.png (plain lat/lon scatter, no basemap dependency).
 Run from fork root, BASE env.
 """
 import os
@@ -77,5 +77,5 @@ cb.set_label("onset lift of the exported model (precision / base rate)")
 ax.set_title(f"Fig 11. Every site the exported Narragansett model has been run on: "
              f"{st.station.nunique()} known-network stations + {len(new)} new ERDDAP datasets ({n_sc} scored)")
 ax.legend(loc="lower left", fontsize=8)
-fig.tight_layout(); fig.savefig("figures/nar_fig11_coverage_map.png", dpi=150, bbox_inches="tight")
-print("wrote figures/nar_fig11_coverage_map.png")
+fig.tight_layout(); fig.savefig("figures/narragansett/nar_fig11_coverage_map.png", dpi=150, bbox_inches="tight")
+print("wrote figures/narragansett/nar_fig11_coverage_map.png")

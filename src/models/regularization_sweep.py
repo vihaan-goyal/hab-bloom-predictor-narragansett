@@ -16,7 +16,7 @@ Pipeline matches src/models/ablation_study.py so results line up with the lock.
 Run from repo root:
     python src/models/regularization_sweep.py
 Outputs:
-    figures/regularization_path.png
+    figures/model/regularization_path.png
 """
 
 import glob
@@ -176,6 +176,6 @@ plt.ylabel('Standardized coefficient')
 plt.title('L2 regularization path: chlorophyll features (gold) fan out together')
 plt.legend(fontsize=7, loc='best', ncol=2)
 plt.tight_layout()
-plt.savefig('figures/regularization_path.png', dpi=150)
-print("\nSaved figures/regularization_path.png")
+plt.savefig('figures/model/regularization_path.png', dpi=150)
+print("\nSaved figures/model/regularization_path.png")
 print("Gold lines = chlorophyll group, gray = other features, bold = traced.")

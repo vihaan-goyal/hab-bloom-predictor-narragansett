@@ -34,7 +34,7 @@ Usage (from repo root):
 Outputs:
     data/cadence_thinning_results.csv       (per cadence x seed)
     data/cadence_thinning_summary.csv       (per cadence, seed-aggregated)
-    figures/cadence_thinning_curve.png
+    figures/model/cadence_thinning_curve.png
 """
 
 import os
@@ -60,7 +60,7 @@ KEEP_FRACS = [1.0, 0.9, 0.75, 0.5, 0.35, 0.25]   # 1.0 = native density
 N_SEEDS = 20
 RESULTS_CSV = "data/cadence_thinning_results.csv"
 SUMMARY_CSV = "data/cadence_thinning_summary.csv"
-FIGURE_PNG = "figures/cadence_thinning_curve.png"
+FIGURE_PNG = "figures/model/cadence_thinning_curve.png"
 
 
 def thin_frame(df, keep_frac, rng):
@@ -177,7 +177,7 @@ def main():
     print(summary.to_string(index=False))
 
     # Figure: metrics vs realized median gap.
-    os.makedirs("figures", exist_ok=True)
+    os.makedirs("figures/model", exist_ok=True)
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.2))
     x = summary["median_gap"]
     for m, c in [("pod", "tab:blue"), ("csi", "tab:green"),

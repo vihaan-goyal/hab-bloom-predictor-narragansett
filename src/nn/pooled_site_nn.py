@@ -28,7 +28,7 @@ from src.transfer.transfer_eval import GB_KW, TIER_A, metrics, pick_t
 DAILY = "data/narragansett_daily_features.csv"
 RESULTS = os.path.join(NN_DIR, "pooled_site_nn_results.csv")
 PREDS_OUT = os.path.join(NN_DIR, "pooled_site_nn_predictions.csv")
-FIG = "figures/nar_fig13_pooled_site_nn.png"
+FIG = "figures/narragansett/nar_fig13_pooled_site_nn.png"
 BATCH = 256
 P_UNK = 0.3
 EMB_DIM = 4

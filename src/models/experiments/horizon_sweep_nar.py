@@ -8,7 +8,7 @@ all days and onset-only (chl <= 10) days.
 
 Outputs:
   data/horizon_sweep_nar.csv
-  figures/nar_fig5_skill_vs_horizon.png
+  figures/narragansett/nar_fig5_skill_vs_horizon.png
 Run from repo root, BASE conda env (not `hab`).
 """
 import os
@@ -137,7 +137,7 @@ def main():
 
     out = pd.DataFrame(rows)[["horizon", "subset", "auc", "precision", "pod",
                               "base_rate", "lift", "t_star", "n_test", "n_pos"]]
-    os.makedirs("data", exist_ok=True); os.makedirs("figures", exist_ok=True)
+    os.makedirs("data", exist_ok=True); os.makedirs("figures/narragansett", exist_ok=True)
     out.to_csv("data/horizon_sweep_nar.csv", index=False)
 
     # sanity check vs data/narragansett_model_results.csv GB_onset
@@ -214,8 +214,8 @@ def plot(out):
     ax2.text(lis_h[-1], lis_prec[-1] + 0.05, "LIS", color=C_LIS, ha="center",
              va="bottom", fontsize=8.5, fontweight="bold")
 
-    fig.savefig("figures/nar_fig5_skill_vs_horizon.png", dpi=150, bbox_inches="tight")
-    print("wrote figures/nar_fig5_skill_vs_horizon.png")
+    fig.savefig("figures/narragansett/nar_fig5_skill_vs_horizon.png", dpi=150, bbox_inches="tight")
+    print("wrote figures/narragansett/nar_fig5_skill_vs_horizon.png")
 
 
 if __name__ == "__main__":

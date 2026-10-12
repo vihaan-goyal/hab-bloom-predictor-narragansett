@@ -288,6 +288,6 @@ if __name__ == "__main__":
     ax2.legend()
 
     plt.tight_layout()
-    plt.savefig("figures/convlstm_training_curve.png", dpi=150)
-    print("\nTraining curve saved to figures/convlstm_training_curve.png")
+    plt.savefig("figures/model/convlstm_training_curve.png", dpi=150)
+    print("\nTraining curve saved to figures/model/convlstm_training_curve.png")
     plt.show()

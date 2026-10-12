@@ -289,5 +289,5 @@ else:
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     plt.tight_layout()
-    plt.savefig("figures/two_stage_pr_curve.png", dpi=150, bbox_inches='tight')
-    print("\nSaved figures/two_stage_pr_curve.png")
+    plt.savefig("figures/model/two_stage_pr_curve.png", dpi=150, bbox_inches='tight')
+    print("\nSaved figures/model/two_stage_pr_curve.png")

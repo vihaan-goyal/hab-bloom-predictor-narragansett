@@ -30,7 +30,7 @@ from src.transfer.transfer_eval import GB_KW, TIER_A, pick_t
 DAILY = "data/narragansett_daily_features.csv"
 RESULTS = os.path.join(NN_DIR, "seq_vs_daily_results.csv")
 PREDS_OUT = os.path.join(NN_DIR, "seq_vs_daily_predictions.csv")
-FIG = "figures/nar_fig12_seq_vs_daily.png"
+FIG = "figures/narragansett/nar_fig12_seq_vs_daily.png"
 NN_CELLS = {"mlp": "MLP-daily", "cnn": "CNN-15min", "hyb": "Hybrid"}
 LABEL = {"gb": "GB-daily", "gb_fulltrain": "GB-daily (full train, sanity)", **NN_CELLS}
 BATCH = 256
@@ -268,7 +268,7 @@ def make_figure(y, P, res):
     a2.legend(frameon=False, fontsize=8, loc="lower right")
     fig.suptitle("Findings 26: 15-min sequence model vs daily-feature GB, paired on identical rows",
                  fontsize=10)
-    fig.tight_layout(); os.makedirs("figures", exist_ok=True); fig.savefig(FIG, dpi=160)
+    fig.tight_layout(); os.makedirs("figures/narragansett", exist_ok=True); fig.savefig(FIG, dpi=160)
 
 
 # ------------------------------------------------------------------ main

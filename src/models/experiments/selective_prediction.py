@@ -54,7 +54,7 @@ def parse_args():
                         "reliability; below this we COVER (never abstain for free)")
     p.add_argument("--n-boot", type=int, default=3000)
     p.add_argument("--seed", type=int, default=42)
-    p.add_argument("--out-fig", default="figures/selective_prediction.png")
+    p.add_argument("--out-fig", default="figures/model/selective_prediction.png")
     return p.parse_args()
 
 

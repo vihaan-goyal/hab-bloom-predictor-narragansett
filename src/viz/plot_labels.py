@@ -35,5 +35,5 @@ ax2.set_xticks(range(1,13))
 ax2.set_xticklabels(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'])
 
 plt.tight_layout()
-plt.savefig('figures/bloom_frequency.png', dpi=150)
+plt.savefig('figures/eda/bloom_frequency.png', dpi=150)
 plt.show()

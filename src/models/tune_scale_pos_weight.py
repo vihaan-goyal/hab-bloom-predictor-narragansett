@@ -238,8 +238,8 @@ ax.legend()
 ax.grid(True, alpha=0.3)
 ax.set_ylim(0, 1)
 plt.tight_layout()
-plt.savefig("figures/spw_sweep.png", dpi=150, bbox_inches='tight')
-print("\nSaved figures/spw_sweep.png")
+plt.savefig("figures/model/spw_sweep.png", dpi=150, bbox_inches='tight')
+print("\nSaved figures/model/spw_sweep.png")
 
 res_df.drop(columns=['ens_val_probs'], errors='ignore').to_csv(
     "data/spw_sweep_results.csv", index=False)

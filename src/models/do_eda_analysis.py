@@ -2,12 +2,12 @@
 Dissolved Oxygen (DO) EDA — mirrors the chlorophyll temporal analysis.
 
 Generates:
-  figures/do_lag_correlation_decay.png   — r vs. lag (0,3,7,14,21 prior VISITS,
+  figures/eda/do_lag_correlation_decay.png   — r vs. lag (0,3,7,14,21 prior VISITS,
                                            median 21 d apart, NOT days)
-  figures/do_distribution_by_bloom.png   — DO distribution: bloom vs. non-bloom
-  figures/do_seasonal_pattern.png        — monthly median DO vs. bloom frequency
-  figures/do_station_gradient.png        — mean DO by station (west→east)
-  figures/do_temporal_trend.png          — annual mean DO trend (1993–2025)
+  figures/eda/do_distribution_by_bloom.png   — DO distribution: bloom vs. non-bloom
+  figures/eda/do_seasonal_pattern.png        — monthly median DO vs. bloom frequency
+  figures/eda/do_station_gradient.png        — mean DO by station (west→east)
+  figures/eda/do_temporal_trend.png          — annual mean DO trend (1993–2025)
 
 Run from project root:
     conda activate hab
@@ -23,7 +23,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 DATA_PATH = "data/hab_features_final.csv"
-FIGURES_DIR = "figures"
+FIGURES_DIR = "figures/eda"
 
 # ── Load ──────────────────────────────────────────────────────────────────────
 print("Loading data...")
@@ -268,4 +268,4 @@ print(f"    During non-blooms:  {pct_hypoxic_no_bloom:.1%}")
 
 print(f"\nMann-Whitney U test (bloom vs no-bloom DO): p = {p:.2e}")
 print(f"\nLinear DO trend: {slope:+.4f} mg/L/year (r = {r:.2f}, p = {p_val:.3f})")
-print("\nAll figures saved to figures/")
+print("\nAll figures saved to figures/eda/")

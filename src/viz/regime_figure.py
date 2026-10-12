@@ -3,7 +3,7 @@ regime_figure.py -- fig 9: leave-one-site-out lift by regime and model
 Reads data/transfer/regime_loso.csv (from src/transfer/regime_models.py).
 One panel per regime; x = held-out site; bars with 95% CI for regime model,
 Narragansett zero-shot, all-sites pooled, local refit; dashed line at lift 1.
-Writes figures/nar_fig9_regime_loso.png.  Run from fork root, BASE env.
+Writes figures/narragansett/nar_fig9_regime_loso.png.  Run from fork root, BASE env.
 """
 import matplotlib
 matplotlib.use("Agg")
@@ -36,5 +36,5 @@ axes[0].set_ylabel("onset lift = precision / base rate")
 axes[0].legend(fontsize=8, loc="upper left")
 fig.suptitle("Fig 9. Leave-one-site-out: does a water-type model beat the single Narragansett model?", y=1.01)
 fig.tight_layout()
-fig.savefig("figures/nar_fig9_regime_loso.png", dpi=150, bbox_inches="tight")
-print("wrote figures/nar_fig9_regime_loso.png")
+fig.savefig("figures/narragansett/nar_fig9_regime_loso.png", dpi=150, bbox_inches="tight")
+print("wrote figures/narragansett/nar_fig9_regime_loso.png")

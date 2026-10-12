@@ -30,7 +30,7 @@ Usage (from repo root):
     python src/models/seasonal_severity.py
 Outputs:
     data/seasonal_severity.csv
-    figures/seasonal_severity.png
+    figures/eda/seasonal_severity.png
 """
 
 import os
@@ -159,7 +159,7 @@ def main():
     out.to_csv("data/seasonal_severity.csv", index=False)
 
     # ---- figure ----
-    os.makedirs("figures", exist_ok=True)
+    os.makedirs("figures/eda", exist_ok=True)
     fig, axes = plt.subplots(1, 3, figsize=(14, 4.2))
 
     ax = axes[0]
@@ -192,9 +192,9 @@ def main():
     ax.set_title("Time-varying relationship (TMDL-weakening test)")
 
     fig.tight_layout()
-    fig.savefig("figures/seasonal_severity.png", dpi=200)
+    fig.savefig("figures/eda/seasonal_severity.png", dpi=200)
     print("\nSaved data/seasonal_severity.csv, "
-          "figures/seasonal_severity.png")
+          "figures/eda/seasonal_severity.png")
 
 
 if __name__ == "__main__":

@@ -257,8 +257,8 @@ ax2.set_xlim(0, 1)
 ax2.set_ylim(0, 1)
 
 plt.tight_layout()
-plt.savefig("figures/calibration.png", dpi=150, bbox_inches='tight')
-print("\nSaved figures/calibration.png")
+plt.savefig("figures/model/calibration.png", dpi=150, bbox_inches='tight')
+print("\nSaved figures/model/calibration.png")
 
 # ---------------------------------------------------------------------------
 # Save calibrated test probabilities

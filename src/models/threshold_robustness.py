@@ -110,7 +110,7 @@ def paired_auc_bootstrap(m, n_boot=N_BOOT, seed=SEED):
 
 def main():
     # Run label=12 first, then label=10 last so the shared side-effect artifacts
-    # (data/threshold_sweep_results.csv, figures/threshold_sweep.png) are left in
+    # (data/threshold_sweep_results.csv, figures/model/threshold_sweep.png) are left in
     # their canonical locked-label=10 state after this driver finishes.
     run_eval(12, PREDS_12)
     run_eval(10, PREDS_10)

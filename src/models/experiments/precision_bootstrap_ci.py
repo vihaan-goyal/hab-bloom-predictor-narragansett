@@ -80,8 +80,8 @@ def parse_args():
     p.add_argument("--alpha", type=float, default=0.05,
                    help="Two-sided alpha. 0.05 -> 95%% CI.")
     p.add_argument("--seed", type=int, default=42)
-    p.add_argument("--out-fig", default="figures/precision_bootstrap_ci.png")
-    p.add_argument("--out-csv", default="figures/threshold_ci_table.csv")
+    p.add_argument("--out-fig", default="figures/model/precision_bootstrap_ci.png")
+    p.add_argument("--out-csv", default="figures/model/threshold_ci_table.csv")
     return p.parse_args()
 
 

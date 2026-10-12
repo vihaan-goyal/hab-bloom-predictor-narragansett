@@ -155,7 +155,7 @@ ax2.set_title('Validation AUC-ROC')
 ax2.set_xlabel('Epoch')
 ax2.legend()
 plt.tight_layout()
-plt.savefig('figures/lstm_training.png', dpi=150)
+plt.savefig('figures/model/lstm_training.png', dpi=150)
 plt.show()
 
 torch.save(model.state_dict(), 'data/lstm_model.pt')

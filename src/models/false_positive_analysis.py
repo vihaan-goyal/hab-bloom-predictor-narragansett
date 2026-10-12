@@ -212,8 +212,8 @@ for i, feat in enumerate(top_feats):
 plt.suptitle('Feature distributions: FP vs TP vs FN (test set, threshold=0.60)',
              fontsize=12)
 plt.tight_layout()
-plt.savefig("figures/fp_feature_distributions.png", dpi=150, bbox_inches='tight')
-print("\nSaved figures/fp_feature_distributions.png")
-print("\nOpen figures/fp_feature_distributions.png to see which features")
+plt.savefig("figures/model/fp_feature_distributions.png", dpi=150, bbox_inches='tight')
+print("\nSaved figures/model/fp_feature_distributions.png")
+print("\nOpen figures/model/fp_feature_distributions.png to see which features")
 print("most clearly separate FPs from TPs -- those are your best candidates")
 print("for a new engineered feature.")

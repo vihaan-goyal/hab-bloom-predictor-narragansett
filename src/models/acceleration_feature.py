@@ -273,8 +273,8 @@ ax.grid(True, alpha=0.3)
 ax.set_xlim(0, 1)
 ax.set_ylim(0, 1)
 plt.tight_layout()
-plt.savefig("figures/acceleration_pr_curve.png", dpi=150, bbox_inches='tight')
-print("\nSaved figures/acceleration_pr_curve.png")
+plt.savefig("figures/model/acceleration_pr_curve.png", dpi=150, bbox_inches='tight')
+print("\nSaved figures/model/acceleration_pr_curve.png")
 
 # Check at fixed threshold 0.60 to compare apples to apples
 m_b_60 = eval_at_thresh(y_test_b, ens_test_b, 0.60)

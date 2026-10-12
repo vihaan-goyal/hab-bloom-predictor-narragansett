@@ -8,7 +8,7 @@ OR will refit from hab_features_daily.csv if models not found.
 Run from repo root:
     python generate_model_figures.py
 
-Outputs to figures/:
+Outputs to figures/model/:
     fig_precision_recall.png      -- PR curves for all models
     fig_station_specific.png      -- station-specific model results (A4, B3, C1)
 """
@@ -30,7 +30,7 @@ from sklearn.metrics import (
 from sklearn.preprocessing import StandardScaler
 import xgboost as xgb
 
-OUT_DIR      = "figures"
+OUT_DIR      = "figures/model"
 FEATURES_CSV = "data/hab_features_daily.csv"
 LABELS_CSV   = "data/hab_labels_daily.csv"
 
