@@ -1416,6 +1416,48 @@ At harbor scale the device cannot treat the water, so the product is the warning
 - **Not yet done:** check alerts against independent bloom records (URI long-term plankton counts, RIDEM HAB
   shellfish closures, sonde hypoxia events); a stricter label at sonde 12.8 (= lab 10).
 
+## 33. Per-station GIS package for QGIS (2026-10-20, descriptive)
+
+`src/viz/nar_station_gis.py` → `data/gis/nar_stations.{csv,geojson}` (18 station codes, EPSG:4326),
+`data/gis/nar_nitrogen_sources.geojson` (Fields Point and Bucklin Point WWTFs, reference only), fig 15
+(`nar_fig15_station_map.png`). Built for a GIS-trained teacher; nothing refit. Metrics come from the headline
+out-of-fold onset rows (`calendar_baseline_nar.csv`, 14,703 rows, pooled AUC 0.877 reproduced) at the device
+threshold 0.45, plus `harbor_warning_events.csv` (`model_0.45`, 419 onsets).
+- Bloom days follow the expected gradient: Greenwich Bay F5 0.63, Bullock Reach B4 0.57, Sally Rock B14 0.56,
+  Conimicut B3 0.50 down to Quonset B7 0.11 and GSO Dock F7 0.05.
+- Per-station AUC 0.76 (B7) to 0.94 (B4); the model beats the calendar at every main site except B4 (-0.005).
+  The weakest sites are the low-bloom lower bay: B7 (AUC 0.76, 74% of onsets warned) and F7 (0.79, **36%** warned).
+  Station-level numbers carry their counts in the CSV; none were tested.
+- **Coordinate fix:** RIDEM's 2023 metadata puts GSO Dock (F7) at 41°39.521'N, inside Greenwich Bay; the
+  2005-08 network report (Table 1) gives 41°29.535'N (URI Bay Campus). `data/transfer/stations_latlon.csv`
+  is corrected (old file kept as `stations_latlon_preF7fix_backup.csv`). §23's satellite match for F7 used the
+  wrong pixel and has not been rerun.
+- Next (needs its own pre-registration first): does distance from the upper-bay nitrogen sources explain
+  where blooms and skill are highest?
+
+## 34. Blooms vs distance from the upper-bay sewage plants (2026-10-24, EXPLORATORY: station rates already seen in §33)
+
+`src/models/nitrogen_distance_nar.py` → `data/gis/nar_station_distance.csv`, fig 16. Distance runs through the water
+along a hand-drawn channel network from the nearer of Fields Point and Bucklin Point. Mount Hope Bay (Taunton River
+and Fall River sources) and winter-only stations were excluded before computing. n = 11 sites; Spearman rho with a
+one-sided permutation p (100,000 shuffles).
+- **Bloom-day share falls with distance:** rho -0.64, p 0.017. B4 (8 km) 57%, B3 (11 km) 50%, B2/B13/B6 (16-20 km)
+  27-33%, B7/F3/F7 (26-37 km) 5-11%.
+  - Without Greenwich Bay: -0.93 (p 0.0003, n = 9).
+  - Without F3 (only 2010-11): -0.52 (p 0.06).
+- **Two departures make sense physically:**
+  - F4, in the Seekonk River 1 km from Bucklin Point, is lower (33%). That fits fresher, faster, murkier water
+    next to the source.
+  - Greenwich Bay (F5 63%, B14 56%) sits well above the line for its distance. It is enclosed and poorly flushed,
+    so blooms build there. This supports "treat only enclosed water".
+- **Forecast skill also falls with distance** (AUC rho -0.77, p 0.006, n = 10), but the share of bloom starts warned
+  does not (rho -0.15, p 0.34). Only F7 (36%) and B7 (74%) are low. Skill likely tracks how often blooms happen;
+  this is not separated here.
+- **Caveats:** a cross-section of 11 sites, seen before analysis, so it is not a test. Distance stands in for
+  nitrogen, and it is confounded with salinity, depth and flushing. Plant points are geocoded addresses, not outfalls.
+- **Testable version (not run):** a before-and-after natural experiment around the plants' nitrogen upgrades. If
+  upper-bay bloom days fell more than lower-bay ones, pre-register it first with the upgrade dates verified.
+
 ## Revised thesis (supersedes the "Presentation framing" above)
 
 1. LIS forecasting sits near precision 0.12 (0.117 at the 21-day operating point, AUC 0.825,

@@ -16,7 +16,7 @@ narragansett,B7,41.58865,-71.380017,Quonset Point,"data/raw/narragansett/extract
 narragansett,F3,41.57885,-71.32145,T-Wharf (South Prudence),"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
 narragansett,F4,41.84175,-71.3722,Phillipsdale Landing,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
 narragansett,F5,41.686067,-71.445917,Greenwich Bay,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
-narragansett,F7,41.658683,-71.419083,GSO Dock,"data/raw/narragansett/extracted/nbfsmn.2023/MetadataIntro2023.docx (RIDEM NBFSMN metadata, ""2023 GPS Coordinates"" table)"
+narragansett,F7,41.49225,-71.419083,GSO Dock,RIDEM NBFSMN final report 2005-08 Table 1 (41 29.535 N); the 2023 metadata latitude 41 39.521 N is a typo (fixed 2026-10-20)
 chesapeake,AES,39.2855,-76.608,Aquarium East Surface,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
 chesapeake,AWS,39.2854,-76.6088,Aquarium West,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
 chesapeake,BUD,39.3723,-75.8399,Budds Landing,https://www.eyesonthebay.dnr.maryland.gov/eyesonthebay/ConMonStationTable.cfm
